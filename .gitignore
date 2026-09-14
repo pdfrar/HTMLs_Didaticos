@@ -1,0 +1,8 @@
+# Windows / OneDrive artifacts
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# OS generated files
+.DS_Store
+*.tmp
