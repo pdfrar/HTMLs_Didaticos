@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fábrica de Jogos: O Segredo do EPS (Entrada, Processamento e Saída) | 6º Ano</title>
+  <meta name="description" content="Descubra a lógica fundamental que faz qualquer computador, celular e videogame funcionar através do ciclo EPS (Entrada, Processamento e Saída).">
+
+  <!-- Fontes Gamer / Educacionais do Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Fredoka:wght@400;500;600;700&family=Patrick+Hand&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- Biblioteca Canvas-Confetti via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #080c16;
+      --bg-card: rgba(16, 24, 42, 0.88);
+      --bg-card-border: rgba(0, 240, 255, 0.22);
+      
+      --neon-cyan: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.35);
+      --neon-green: #00ff9d;
+      --green-glow: rgba(0, 255, 157, 0.35);
+      --neon-purple: #b026ff;
+      --purple-glow: rgba(176, 38, 255, 0.35);
+      --neon-amber: #ffb700;
+      --amber-glow: rgba(255, 183, 0, 0.35);
+      --neon-pink: #ff007f;
+      --pink-glow: rgba(255, 0, 127, 0.35);
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      
+      --font-title: 'Fredoka', cursive, sans-serif;
+      --font-gamer: 'Chakra Petch', sans-serif;
+      --font-pixel: 'Press Start 2P', cursive;
+      --font-board: 'Patrick Hand', cursive;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(176, 38, 255, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(0, 255, 157, 0.05) 0%, transparent 50%),
+        linear-gradient(rgba(8, 12, 22, 0.96), rgba(8, 12, 22, 0.98)),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.015) 3px, rgba(0, 240, 255, 0.015) 3px);
+      color: var(--text-main);
+      font-family: var(--font-title);
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 120px;
+    }
+
+    /* BARRA FIXA DE XP NO TOPO */
+    .hud-xp-bar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 16, 30, 0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 2px solid var(--neon-cyan);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6), 0 0 15px var(--cyan-glow);
+      padding: 12px 24px;
+    }
+
+    .hud-inner {
+      max-width: 1050px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hud-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hud-avatar-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00f0ff, #b026ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      border: 2px solid #fff;
+      box-shadow: 0 0 12px var(--cyan-glow);
+      animation: floatBadge 3s ease-in-out infinite;
+    }
+
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .hud-title-wrap h1 {
+      font-family: var(--font-pixel);
+      font-size: 0.72rem;
+      color: var(--neon-cyan);
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .hud-rank-name {
+      font-family: var(--font-gamer);
+      font-size: 0.85rem;
+      color: var(--neon-green);
+      font-weight: 700;
+    }
+
+    .hud-progress-wrap {
+      flex: 1;
+      min-width: 250px;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .hud-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-gamer);
+      font-size: 0.85rem;
+    }
+
+    .hud-phase-count {
+      color: var(--text-muted);
+    }
+
+    .hud-xp-number {
+      color: var(--neon-amber);
+      font-weight: 700;
+      text-shadow: 0 0 10px var(--amber-glow);
+    }
+
+    .xp-track {
+      width: 100%;
+      height: 16px;
+      background: rgba(4, 8, 16, 0.9);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .xp-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f0ff, #00ff9d, #ffb700);
+      background-size: 200% 100%;
+      border-radius: 20px;
+      transition: width 0.7s cubic-bezier(0.34, 1.5, 0.64, 1);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .hud-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-tool-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-family: var(--font-gamer);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .hud-tool-btn:hover {
+      background: rgba(0, 240, 255, 0.2);
+      border-color: var(--neon-cyan);
+      transform: translateY(-2px);
+    }
+
+    /* CONTAINER PRINCIPAL */
+    .main-layout {
+      max-width: 960px;
+      margin: 30px auto 0;
+      padding: 0 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* HERO BANNER */
+    .hero-box {
+      background: linear-gradient(135deg, rgba(16, 26, 48, 0.95), rgba(9, 14, 26, 0.98));
+      border: 2px solid var(--neon-cyan);
+      border-radius: 22px;
+      padding: 34px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.5), 0 0 20px var(--cyan-glow);
+    }
+
+    .hero-badge-tag {
+      display: inline-block;
+      padding: 5px 16px;
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid var(--neon-cyan);
+      border-radius: 30px;
+      color: var(--neon-cyan);
+      font-family: var(--font-pixel);
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    .hero-box h1 {
+      font-size: clamp(1.9rem, 4vw, 2.7rem);
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(120deg, #ffffff 40%, var(--neon-cyan) 80%, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+
+    .hero-box p {
+      font-size: 1.1rem;
+      color: #cbd5e1;
+      max-width: 740px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+
+    .hero-pill-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 255, 157, 0.12);
+      border: 1px solid var(--neon-green);
+      padding: 6px 18px;
+      border-radius: 30px;
+      color: var(--neon-green);
+      font-family: var(--font-gamer);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    /* CARD DE MISSÃO */
+    .mission-card {
+      background: var(--bg-card);
+      border: 2px solid var(--bg-card-border);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      position: relative;
+      transition: all 0.4s ease;
+    }
+
+    /* Revelação Progressiva */
+    .mission-card.hidden {
+      display: none;
+    }
+
+    .mission-card.revealing {
+      animation: slideInCard 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideInCard {
+      from {
+        opacity: 0;
+        transform: translateY(45px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .step-pill {
+      font-family: var(--font-pixel);
+      font-size: 0.68rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .step-pill.purple { background: rgba(176, 38, 255, 0.15); border-color: var(--neon-purple); color: #d8b4fe; }
+    .step-pill.green { background: rgba(0, 255, 157, 0.15); border-color: var(--neon-green); color: #6ee7b7; }
+    .step-pill.amber { background: rgba(255, 183, 0, 0.15); border-color: var(--neon-amber); color: #fde68a; }
+    .step-pill.pink { background: rgba(255, 0, 127, 0.15); border-color: var(--neon-pink); color: #f472b6; }
+
+    .card-title-group h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .card-text {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      margin-bottom: 22px;
+      line-height: 1.65;
+    }
+
+    /* DESTAQUES DIDÁTICOS */
+    .didactic-box {
+      background: rgba(10, 18, 34, 0.9);
+      border-left: 5px solid var(--neon-cyan);
+      border-radius: 0 14px 14px 0;
+      padding: 18px 22px;
+      margin: 20px 0;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .didactic-box.purple-box { border-left-color: var(--neon-purple); }
+    .didactic-box.green-box { border-left-color: var(--neon-green); }
+    .didactic-box.amber-box { border-left-color: var(--neon-amber); }
+
+    /* ESTEIRA EPS ANIMADA (FASE 1) */
+    .factory-conveyor-stage {
+      background: rgba(6, 10, 20, 0.9);
+      border: 2px solid rgba(0, 240, 255, 0.3);
+      border-radius: 18px;
+      padding: 24px;
+      margin: 24px 0;
+      position: relative;
+    }
+
+    .conveyor-belt-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    @media (max-width: 768px) {
+      .conveyor-belt-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .conveyor-arrow {
+        transform: rotate(90deg);
+        margin: 8px auto;
+      }
+    }
+
+    .factory-node {
+      background: rgba(18, 28, 52, 0.95);
+      border: 2px solid;
+      border-radius: 16px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .node-input {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 18px rgba(0, 240, 255, 0.2);
+    }
+    .node-process {
+      border-color: var(--neon-purple);
+      box-shadow: 0 0 18px rgba(176, 38, 255, 0.2);
+    }
+    .node-output {
+      border-color: var(--neon-green);
+      box-shadow: 0 0 18px rgba(0, 255, 157, 0.2);
+    }
+
+    .node-icon {
+      font-size: 2.3rem;
+      margin-bottom: 8px;
+    }
+
+    .node-title {
+      font-family: var(--font-gamer);
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .node-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .conveyor-arrow {
+      font-size: 2rem;
+      color: var(--neon-cyan);
+      animation: bouncePulse 1.4s infinite alternate;
+    }
+
+    @keyframes bouncePulse {
+      from { transform: translateX(-4px); opacity: 0.5; }
+      to { transform: translateX(4px); opacity: 1; }
+    }
+
+    /* GRID DE EXEMPLOS FÍSICOS (FASE 2) */
+    .devices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 20px 0;
+    }
+
+    .device-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .device-card:hover {
+      border-color: var(--neon-cyan);
+      transform: translateY(-3px);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .device-icon {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    .device-name {
+      font-family: var(--font-gamer);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      margin-bottom: 4px;
+    }
+
+    .device-action {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+    }
+
+    /* SIMULADOR CONTROLE DE VIDEOGAME (FASE 2) */
+    .gamepad-stage {
+      background: #090e1a;
+      border: 2px dashed rgba(0, 240, 255, 0.3);
+      border-radius: 16px;
+      padding: 22px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .gamepad-buttons-row {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+
+    .gamepad-btn {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: 3px solid #fff;
+      font-family: var(--font-gamer);
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+      transition: all 0.15s;
+    }
+
+    .gamepad-btn:active {
+      transform: scale(0.92);
+    }
+
+    .btn-x { background: #3b82f6; color: #fff; border-color: #60a5fa; }
+    .btn-sq { background: #ec4899; color: #fff; border-color: #f472b6; }
+    .btn-tri { background: #10b981; color: #fff; border-color: #34d399; }
+    .btn-circ { background: #ef4444; color: #fff; border-color: #f87171; }
+
+    .gamepad-log-box {
+      background: #040711;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 10px;
+      padding: 12px 18px;
+      font-family: var(--font-gamer);
+      font-size: 0.95rem;
+      color: var(--neon-cyan);
+      display: inline-block;
+      min-width: 280px;
+    }
+
+    /* PROCESSAMENTO: ENGRENAGENS DE REGRAS (FASE 3) */
+    .rules-engine-stage {
+      background: rgba(14, 20, 38, 0.9);
+      border: 1px solid rgba(176, 38, 255, 0.35);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+
+    .rule-selector-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .rule-choice-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-family: var(--font-gamer);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .rule-choice-btn.active {
+      background: rgba(176, 38, 255, 0.25);
+      border-color: var(--neon-purple);
+      color: #e9d5ff;
+      box-shadow: 0 0 15px var(--purple-glow);
+    }
+
+    .rule-decision-display {
+      background: #070b16;
+      border-radius: 12px;
+      padding: 18px;
+      border-left: 4px solid var(--neon-purple);
+      font-family: var(--font-gamer);
+      font-size: 1rem;
+      color: #cbd5e1;
+    }
+
+    /* SAÍDA: OS 3 SENTIDOS (FASE 4) */
+    .senses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin: 20px 0;
+    }
+
+    .sense-card {
+      background: rgba(16, 28, 48, 0.9);
+      border: 2px solid rgba(0, 255, 157, 0.3);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .sense-card:hover {
+      border-color: var(--neon-green);
+      transform: translateY(-3px);
+      box-shadow: 0 0 20px var(--green-glow);
+    }
+
+    .sense-badge {
+      font-family: var(--font-gamer);
+      font-size: 0.8rem;
+      color: var(--neon-green);
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* VENDING MACHINE: O MUNDO REAL (FASE 5) */
+    .vending-machine-stage {
+      background: linear-gradient(135deg, rgba(20, 30, 55, 0.9), rgba(10, 15, 30, 0.95));
+      border: 2px solid var(--neon-amber);
+      border-radius: 20px;
+      padding: 26px;
+      margin: 22px 0;
+      box-shadow: 0 0 25px var(--amber-glow);
+    }
+
+    .vending-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    @media (max-width: 700px) {
+      .vending-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .vending-cabinet {
+      background: #111827;
+      border: 4px solid #374151;
+      border-radius: 18px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+      position: relative;
+    }
+
+    .vending-glass {
+      width: 100%;
+      height: 140px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 2px solid rgba(56, 189, 248, 0.4);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .soda-can-drop {
+      transition: all 0.4s cubic-bezier(0.34, 1.5, 0.64, 1);
+    }
+
+    .soda-can-drop.dropped {
+      transform: translateY(60px) scale(0.85);
+      opacity: 0;
+    }
+
+    .vending-tray {
+      width: 100%;
+      height: 48px;
+      background: #030712;
+      border: 2px solid #4b5563;
+      border-radius: 8px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-gamer);
+      font-size: 0.85rem;
+      color: var(--neon-amber);
+    }
+
+    .vending-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .step-indicator-box {
+      background: rgba(0,0,0,0.4);
+      border-radius: 10px;
+      padding: 10px 14px;
+      border-left: 3px solid var(--neon-amber);
+    }
+
+    .step-indicator-box h4 {
+      font-family: var(--font-gamer);
+      font-size: 0.9rem;
+      color: var(--neon-amber);
+      margin-bottom: 2px;
+    }
+
+    .step-indicator-box p {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+
+    .btn-buy-soda {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-family: var(--font-gamer);
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-buy-soda:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+    }
+
+    /* FASE 6: BOSS FINAL - QUADRO ESCOLAR (LOUSA) */
+    .chalkboard-stage {
+      background: #153226;
+      border: 14px solid #854d0e;
+      border-radius: 20px;
+      padding: 34px 28px;
+      box-shadow: 
+        0 15px 35px rgba(0,0,0,0.7),
+        inset 0 0 60px rgba(0,0,0,0.5),
+        0 0 0 3px #ca8a04;
+      position: relative;
+      color: #fff;
+    }
+
+    .chalkboard-stage::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .chalk-title {
+      font-family: var(--font-board);
+      font-size: 2.3rem;
+      color: #fef08a;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+      text-shadow: 2px 2px 0px rgba(0,0,0,0.4);
+    }
+
+    .chalk-subtitle {
+      font-family: var(--font-board);
+      font-size: 1.25rem;
+      color: #bbf7d0;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .chalk-task-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 2px dashed rgba(254, 240, 138, 0.5);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 22px;
+    }
+
+    .chalk-task-card h3 {
+      font-family: var(--font-board);
+      font-size: 1.5rem;
+      color: #fef08a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .chalk-task-card p {
+      font-family: var(--font-board);
+      font-size: 1.15rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+
+    /* CAIXAS DE EPS EM GIZ */
+    .chalk-boxes-diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      .chalk-boxes-diagram {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .chalk-arrow {
+        transform: rotate(90deg);
+        margin: 2px auto;
+      }
+    }
+
+    .chalk-box {
+      border: 2px solid #fef08a;
+      border-radius: 8px;
+      padding: 10px 8px;
+      background: rgba(0, 0, 0, 0.35);
+      font-family: var(--font-board);
+      font-size: 1.05rem;
+      color: #ffffff;
+      min-height: 70px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .chalk-box strong {
+      color: #fef08a;
+      font-size: 1.1rem;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .chalk-arrow {
+      font-family: var(--font-board);
+      font-size: 1.8rem;
+      color: #fef08a;
+    }
+
+    .chalk-instructions {
+      background: rgba(254, 240, 138, 0.15);
+      border: 2px solid #fef08a;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 22px;
+      font-family: var(--font-board);
+      font-size: 1.25rem;
+      color: #fef08a;
+      text-align: center;
+    }
+
+    /* BOTÃO DE AVANÇO GAMER */
+    .advance-bar {
+      margin-top: 26px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-advance-xp {
+      background: linear-gradient(135deg, var(--neon-cyan), #00b4d8);
+      color: #050b14;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 28px;
+      font-family: var(--font-pixel);
+      font-size: 0.72rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 20px var(--cyan-glow);
+      transition: all 0.3s cubic-bezier(0.34, 1.5, 0.64, 1);
+    }
+
+    .btn-advance-xp:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 30px var(--cyan-glow);
+      background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));
+    }
+
+    .btn-advance-xp.done {
+      background: rgba(0, 255, 157, 0.15);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      cursor: default;
+      pointer-events: none;
+      box-shadow: none;
+    }
+
+    /* BANNER DE VITÓRIA (100% XP) */
+    .victory-congrats-modal {
+      display: none;
+      background: linear-gradient(135deg, rgba(0, 255, 157, 0.25), rgba(0, 240, 255, 0.25));
+      border: 2px solid var(--neon-green);
+      border-radius: 18px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      animation: glowCelebrate 2s infinite alternate;
+    }
+
+    @keyframes glowCelebrate {
+      from { box-shadow: 0 0 20px rgba(0, 255, 157, 0.3); }
+      to { box-shadow: 0 0 45px rgba(0, 255, 157, 0.7); }
+    }
+
+    /* GABARITO DO PROFESSOR */
+    .teacher-solution-box {
+      display: none;
+      background: rgba(6, 12, 22, 0.95);
+      border: 2px solid var(--neon-green);
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 24px;
+      animation: slideInCard 0.4s ease;
+    }
+
+    /* TOAST DE XP */
+    .toast-xp-feedback {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(8, 14, 28, 0.95);
+      border: 2px solid var(--neon-green);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-family: var(--font-gamer);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 20px var(--green-glow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.5, 0.64, 1);
+      z-index: 2000;
+    }
+
+    .toast-xp-feedback.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA FIXA DE XP NO TOPO -->
+  <header class="hud-xp-bar">
+    <div class="hud-inner">
+      
+      <!-- Identidade da Fábrica -->
+      <div class="hud-brand">
+        <div class="hud-avatar-icon">🏭</div>
+        <div class="hud-title-wrap">
+          <h1>FÁBRICA_DE_JOGOS</h1>
+          <div class="hud-rank-name" id="hudRankLabel">NÍVEL 1: EXPLORADOR DIGITAL</div>
+        </div>
+      </div>
+
+      <!-- Barra de Progresso de XP -->
+      <div class="hud-progress-wrap">
+        <div class="hud-meta-row">
+          <span class="hud-phase-count" id="hudPhaseLabel">Missão 1 de 6</span>
+          <span class="hud-xp-number" id="hudXpDisplay">0% XP</span>
+        </div>
+        <div class="xp-track" title="Progresso da Missão">
+          <div class="xp-bar-fill" id="xpProgressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Controles de Áudio & Reinício -->
+      <div class="hud-actions">
+        <button class="hud-tool-btn" id="toggleAudioBtn" title="Ligar ou Silenciar Sons 8-Bit">
+          <span id="audioIcon">🔊</span> SOM
+        </button>
+        <button class="hud-tool-btn" id="btnRestart" title="Reiniciar do Início">
+          🔄 REINICIAR
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL DA SPA -->
+  <main class="main-layout">
+
+    <!-- HERO PANEL -->
+    <section class="hero-box">
+      <div class="hero-badge-tag">LÓGICA FUNDAMENTAL DE COMPUTADORES</div>
+      <h1>O Segredo dos Computadores: Ciclo EPS</h1>
+      <p>
+        Você já parou para pensar como o videogame sabe exatamente o que fazer quando você aperta um botão? 
+        Não é magia! É pura lógica em 3 passos: <strong>Entrada</strong>, <strong>Processamento</strong> e <strong>Saída</strong>.
+      </p>
+      <div class="hero-pill-status">
+        <span>⚡ STATUS:</span> <strong id="heroStateIndicator">Fase 1 Desbloqueada (0% XP)</strong>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         FASE 1: O CÉREBRO DA MÁQUINA
+         ========================================================================= -->
+    <article class="mission-card" id="card-phase-1">
+      <div class="card-head">
+        <div class="card-title-group">
+          <span class="step-pill">FASE 1</span>
+          <h2>🧠 O Cérebro da Máquina: Tudo Começa Aqui!</h2>
+        </div>
+        <span style="color: var(--neon-cyan); font-family: var(--font-gamer); font-weight: 700;">+20% XP</span>
+      </div>
+
+      <p class="card-text">
+        O computador, o videogame da sua sala, o celular no seu bolso e até o micro-ondas da cozinha parecem aparelhos mágicos. Mas a verdade surpreendente é que <strong>todos eles funcionam exatamente da mesma forma</strong>!
+      </p>
+
+      <p class="card-text">
+        Eles não pensam sozinhos como seres humanos. Em vez disso, eles seguem incansavelmente uma esteira de 3 etapas chamada <strong>Ciclo EPS</strong>:
+      </p>
+
+      <!-- DIAGRAMA DA ESTEIRA EPS -->
+      <div class="factory-conveyor-stage">
+        <div class="conveyor-belt-grid">
+          
+          <div class="factory-node node-input">
+            <div class="node-icon">📥</div>
+            <div class="node-title" style="color: var(--neon-cyan);">1. ENTRADA</div>
+            <div class="node-desc">Você entrega uma ordem ou dado para a máquina.</div>
+          </div>
+
+          <div class="conveyor-arrow">➔</div>
+
+          <div class="factory-node node-process">
+            <div class="node-icon">⚙️</div>
+            <div class="node-title" style="color: #d8b4fe;">2. PROCESSAMENTO</div>
+            <div class="node-desc">O cérebro da máquina pensa, calcula e toma decisões.</div>
+          </div>
+
+          <div class="conveyor-arrow">➔</div>
+
+          <div class="factory-node node-output">
+            <div class="node-icon">🖥️</div>
+            <div class="node-title" style="color: var(--neon-green);">3. SAÍDA</div>
+            <div class="node-desc">A máquina entrega o resultado pronto para você!</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="didactic-box">
+        💡 <strong>Guarde esta sigla na mente:</strong><br>
+        <strong>E</strong> = Entrada (O que você manda)<br>
+        <strong>P</strong> = Processamento (O que a máquina faz lá dentro)<br>
+        <strong>S</strong> = Saída (O que ela devolve para você)
+      </div>
+
+      <div class="advance-bar">
+        <button class="btn-advance-xp" id="btn-advance-1" onclick="advanceStep(2)">
+          <span>Entendido! +20 XP</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 2: ENTRADA (INPUT)
+         ========================================================================= -->
+    <article class="mission-card hidden" id="card-phase-2">
+      <div class="card-head">
+        <div class="card-title-group">
+          <span class="step-pill purple">FASE 2</span>
+          <h2>📥 Entrada (Input): Como Você Dá Ordens à Máquina</h2>
+        </div>
+        <span style="color: #d8b4fe; font-family: var(--font-gamer); font-weight: 700;">+20% XP</span>
+      </div>
+
+      <p class="card-text">
+        Imagine um videogame ligado sem nenhum jogador por perto. O jogo fica parado esperando por você! Isso acontece porque o computador não adivinha seus pensamentos. Ele precisa de uma <strong>Entrada</strong> (também chamada de <em>Input</em>).
+      </p>
+
+      <p class="card-text">
+        <strong>Entrada</strong> é qualquer ação física que nós, humanos, fazemos para enviar dados ou comandos para dentro do aparelho:
+      </p>
+
+      <!-- CARDS COM EXEMPLOS FÍSICOS DE ENTRADA -->
+      <div class="devices-grid">
+        <div class="device-card">
+          <div class="device-icon">🎮</div>
+          <div class="device-name">Controle</div>
+          <div class="device-action">Apertar o botão X ou empurrar o analógico.</div>
+        </div>
+
+        <div class="device-card">
+          <div class="device-icon">🎙️</div>
+          <div class="device-name">Microfone</div>
+          <div class="device-action">Falar "Ok Google" ou cantar uma música.</div>
+        </div>
+
+        <div class="device-card">
+          <div class="device-icon">⌨️</div>
+          <div class="device-name">Teclado</div>
+          <div class="device-action">Digitar seu apelido ou a tecla Espaço.</div>
+        </div>
+
+        <div class="device-card">
+          <div class="device-icon">📱</div>
+          <div class="device-name">Tela Touch</div>
+          <div class="device-action">Tocar com o dedo para arrastar um item.</div>
+        </div>
+      </div>
+
+      <!-- SIMULADOR INTERATIVO DE ENTRADA -->
+      <div class="gamepad-stage">
+        <h4 style="font-family: var(--font-gamer); color: var(--neon-cyan); margin-bottom: 8px;">
+          🎮 Teste no Controle: Aperte um botão para enviar uma Entrada!
+        </h4>
+        <div class="gamepad-buttons-row">
+          <button class="gamepad-btn btn-x" onclick="simulateInput('Botão X [Pular]')">X</button>
+          <button class="gamepad-btn btn-sq" onclick="simulateInput('Botão Quadrado [Atacar]')">■</button>
+          <button class="gamepad-btn btn-tri" onclick="simulateInput('Botão Triângulo [Inventário]')">▲</button>
+          <button class="gamepad-btn btn-circ" onclick="simulateInput('Botão Círculo [Defender]')">●</button>
+        </div>
+        <div class="gamepad-log-box" id="gamepadLog">
+          Sinal elétrico de Entrada: <strong>Aguardando clique...</strong>
+        </div>
+      </div>
+
+      <div class="didactic-box purple-box">
+        🕹️ <strong>Resumo da Entrada:</strong> Sem a Entrada, a máquina dorme! Ela precisa de um sinal físico seu para começar a trabalhar.
+      </div>
+
+      <div class="advance-bar">
+        <button class="btn-advance-xp" id="btn-advance-2" onclick="advanceStep(3)">
+          <span>Entendido! +20 XP</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 3: PROCESSAMENTO (PROCESS)
+         ========================================================================= -->
+    <article class="mission-card hidden" id="card-phase-3">
+      <div class="card-head">
+        <div class="card-title-group">
+          <span class="step-pill green">FASE 3</span>
+          <h2>⚙️ Processamento (Process): O Cérebro Invisível em Ação</h2>
+        </div>
+        <span style="color: var(--neon-green); font-family: var(--font-gamer); font-weight: 700;">+20% XP</span>
+      </div>
+
+      <p class="card-text">
+        Muito bem! Você apertou o botão <strong>X</strong> no controle. Mas o que acontece lá dentro dos chips e circuitos do videogame na velocidade da luz?
+      </p>
+
+      <p class="card-text">
+        Acontece o <strong>Processamento</strong>! O cérebro da máquina (chamado de processador ou chip) recebe a sua ordem e toma decisões lógicas usando um conjunto de regras invisíveis que o programador criou.
+      </p>
+
+      <div class="didactic-box green-box">
+        💭 <strong>Exemplo de Pensamento do Computador:</strong><br>
+        <em>"Opa! Acabo de receber o sinal de que o jogador apertou o botão X. Deixa eu consultar as regras... A regra diz: SE apertar X, ENTÃO o boneco deve pular! Deixa eu calcular: a gravidade é 10, então a altura do pulo será 3 metros."</em>
+      </div>
+
+      <!-- SIMULADOR INTERATIVO DE REGRAS DE PROCESSAMENTO -->
+      <div class="rules-engine-stage">
+        <h4 style="font-family: var(--font-gamer); color: #d8b4fe; margin-bottom: 12px;">
+          ⚙️ Laboratório de Regras: Veja o Processador Decidindo!
+        </h4>
+        <div class="rule-selector-row">
+          <button class="rule-choice-btn active" id="btnRule1" onclick="selectRuleDecision(1)">
+            Regra 1: Apertou X no chão
+          </button>
+          <button class="rule-choice-btn" id="btnRule2" onclick="selectRuleDecision(2)">
+            Regra 2: Apertou X debaixo d'água
+          </button>
+          <button class="rule-choice-btn" id="btnRule3" onclick="selectRuleDecision(3)">
+            Regra 3: Apertou X com 0 de energia
+          </button>
+        </div>
+
+        <div class="rule-decision-display" id="ruleDecisionText">
+          ⚙️ <strong>Cálculo do Processador:</strong> O boneco está em solo firme. A regra calcula a impulsão das pernas e dispara a animação de salto vertical de 3 metros!
+        </div>
+      </div>
+
+      <p class="card-text">
+        Viu só? O mesmo botão <strong>X</strong> pode gerar cálculos completamente diferentes dependendo da regra que o processador está executando naquele momento!
+      </p>
+
+      <div class="advance-bar">
+        <button class="btn-advance-xp" id="btn-advance-3" onclick="advanceStep(4)">
+          <span>Entendido! +20 XP</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 4: SAÍDA (OUTPUT)
+         ========================================================================= -->
+    <article class="mission-card hidden" id="card-phase-4">
+      <div class="card-head">
+        <div class="card-title-group">
+          <span class="step-pill amber">FASE 4</span>
+          <h2>📺 Saída (Output): O Computador Devolve o Resultado!</h2>
+        </div>
+        <span style="color: var(--neon-amber); font-family: var(--font-gamer); font-weight: 700;">+20% XP</span>
+      </div>
+
+      <p class="card-text">
+        Agora pense comigo: e se o computador recebesse sua ordem (Entrada), fizesse todos os cálculos matemáticos na memória (Processamento), mas não fizesse nada na tela nem fizesse nenhum barulho?
+      </p>
+
+      <p class="card-text">
+        Você acharia que ele estava quebrado ou travado! Por isso a terceira etapa é tão emocionante: a <strong>Saída</strong> (ou <em>Output</em>). É a maneira como a máquina entrega o resultado de volta para os nossos <strong>sentidos humanos</strong>!
+      </p>
+
+      <!-- OS 3 SENTIDOS DA SAÍDA -->
+      <div class="senses-grid">
+        <div class="sense-card">
+          <div style="font-size: 2.4rem; margin-bottom: 8px;">📺</div>
+          <div class="sense-badge">1. Visão (Tela / Monitor)</div>
+          <p style="font-size: 0.85rem; color: #cbd5e1;">
+            O personagem pulando no ar, a barra de vida mudando de cor, a pontuação subindo no cantinho da tela.
+          </p>
+        </div>
+
+        <div class="sense-card">
+          <div style="font-size: 2.4rem; margin-bottom: 8px;">🔊</div>
+          <div class="sense-badge">2. Audição (Som / Caixas)</div>
+          <p style="font-size: 0.85rem; color: #cbd5e1;">
+            O efeito sonoro "Boing!" do pulo, a voz do narrador, a música de vitória ou a buzina de perigo.
+          </p>
+        </div>
+
+        <div class="sense-card">
+          <div style="font-size: 2.4rem; margin-bottom: 8px;">📳</div>
+          <div class="sense-badge">3. Tato (Vibração Físico)</div>
+          <p style="font-size: 0.85rem; color: #cbd5e1;">
+            O controle tremendo na sua mão quando seu carro bate no muro ou quando você dispara um foguete.
+          </p>
+        </div>
+      </div>
+
+      <div class="didactic-box amber-box">
+        🎉 <strong>O Ciclo do Videogame Fechou Perfeitamente:</strong><br>
+        1. <strong>Entrada:</strong> Seu dedo aperta X no controle.<br>
+        2. <strong>Processamento:</strong> O chip calcula a altura e a gravidade do pulo.<br>
+        3. <strong>Saída:</strong> O personagem pula na TV e o alto-falante toca o som do salto!
+      </div>
+
+      <div class="advance-bar">
+        <button class="btn-advance-xp" id="btn-advance-4" onclick="advanceStep(5)">
+          <span>Entendido! +20 XP</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 5: A MÁQUINA DE REFRIGERANTE (EXEMPLO NO MUNDO REAL)
+         ========================================================================= -->
+    <article class="mission-card hidden" id="card-phase-5">
+      <div class="card-head">
+        <div class="card-title-group">
+          <span class="step-pill pink">FASE 5</span>
+          <h2>🥤 A Máquina de Refrigerante: EPS no Mundo Real!</h2>
+        </div>
+        <span style="color: #f472b6; font-family: var(--font-gamer); font-weight: 700;">+20% XP</span>
+      </div>
+
+      <p class="card-text">
+        Você sabia que o ciclo EPS não existe apenas em videogames? Ele está em máquinas do dia a dia, como nas <strong>Vending Machines</strong> (aquelas máquinas automáticas de bebidas e lanches do shopping ou do metrô)!
+      </p>
+
+      <!-- SIMULADOR DA MÁQUINA DE REFRIGERANTE -->
+      <div class="vending-machine-stage">
+        <div class="vending-grid">
+          
+          <!-- Lado da Máquina Física -->
+          <div class="vending-cabinet">
+            <div style="font-family: var(--font-pixel); font-size: 0.65rem; color: var(--neon-amber); margin-bottom: 8px;">
+              CYBER_SODA v2.0
+            </div>
+
+            <div class="vending-glass">
+              <span class="soda-can-drop" id="sodaCanVisual">🥤</span>
+            </div>
+
+            <div class="vending-tray" id="vendingTrayStatus">
+              Bandeja: Vazia
+            </div>
+          </div>
+
+          <!-- Lado dos 3 Passos do EPS -->
+          <div class="vending-controls">
+            
+            <div class="step-indicator-box" style="border-left-color: var(--neon-cyan);">
+              <h4 style="color: var(--neon-cyan);">1. ENTRADA (Você faz):</h4>
+              <p>Inserir a moeda de R$ 5,00 na fresta e apertar o botão do Refrigerante Gelado.</p>
+            </div>
+
+            <div class="step-indicator-box" style="border-left-color: var(--neon-purple);">
+              <h4 style="color: #d8b4fe;">2. PROCESSAMENTO (A máquina faz):</h4>
+              <p>O sensor mede o peso da moeda (confere se não é falsa) e o sistema calcula que a trava mecânica da prateleira deve ser liberada.</p>
+            </div>
+
+            <div class="step-indicator-box" style="border-left-color: var(--neon-green);">
+              <h4 style="color: var(--neon-green);">3. SAÍDA (O que você recebe):</h4>
+              <p>A trava abre, a lata de refrigerante cai com um "TOC!" na gaveta e o troco sai na caixinha de moedas!</p>
+            </div>
+
+            <button class="btn-buy-soda" id="btnTestSoda" onclick="testVendingMachine()">
+              🪙 Inserir Moeda & Apertar Botão!
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div class="didactic-box">
+        💡 <strong>Percebeu a genialidade?</strong> Moeda e botão (<strong>Entrada</strong>) -> Verificação de sensor e trava (<strong>Processamento</strong>) -> Lata e troco caindo (<strong>Saída</strong>)!
+      </div>
+
+      <div class="advance-bar">
+        <button class="btn-advance-xp" id="btn-advance-5" onclick="advanceStep(6)" style="background: linear-gradient(135deg, #00ff9d, #ffb700); box-shadow: 0 0 25px var(--green-glow);">
+          <span>🏆 Atingir 100% XP & Desafiar o Boss Final!</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 6: BOSS FINAL (MISSÃO OFFLINE: COPIE NO CADERNO!)
+         ========================================================================= -->
+    <article class="mission-card hidden" id="card-phase-6">
+      
+      <!-- MODAL/BANNER DE CELEBRAÇÃO 100% XP -->
+      <div class="victory-congrats-modal" id="victoryModalCongrats">
+        <div style="font-size: 3.2rem; margin-bottom: 6px;">🎓🏆🎉</div>
+        <h2 style="font-family: var(--font-pixel); font-size: 1.1rem; color: var(--neon-green); margin-bottom: 8px;">
+          NÍVEL MÁXIMO ALCANÇADO: 100% DE XP!
+        </h2>
+        <p style="color: #f1f5f9; max-width: 620px; margin: 0 auto; font-size: 1rem;">
+          Você provou que é um verdadeiro Mestre da Lógica! Agora você compreende a linguagem secreta que comanda o mundo dos computadores. Prepare-se para a sua missão final!
+        </p>
+      </div>
+
+      <!-- QUADRO ESCOLAR (LOUSA DE GIZ) -->
+      <div class="chalkboard-stage">
+        
+        <div class="chalk-title">📝 MISSÃO OFFLINE: HORA DO CADERNO!</div>
+        <div class="chalk-subtitle">Atividade Prática de Lógica para o 6º Ano</div>
+
+        <div class="chalk-instructions">
+          📌 <strong>Instrução da Atividade:</strong> Pegue seu lápis, caneta e régua. Desenhe no seu caderno o modelo de <strong>3 caixas ligadas por setas</strong> para cada uma das 3 situações reais da vida cotidiana abaixo:
+        </div>
+
+        <!-- SITUAÇÃO 1: SUCO NO LIQUIDIFICADOR -->
+        <div class="chalk-task-card">
+          <h3>🍹 Situação 1: Fazer um Suco no Liquidificador</h3>
+          <p>
+            Pense em como você prepara um suco de laranja natural na sua cozinha. Complete mentalmente e copie as 3 caixas no seu caderno:
+          </p>
+
+          <div class="chalk-boxes-diagram">
+            <div class="chalk-box">
+              <strong>[ ENTRADA ]</strong>
+              Colocar laranjas cortadas, água, gelo e girar o botão de ligar.
+            </div>
+            <div class="chalk-arrow">➔</div>
+            <div class="chalk-box">
+              <strong>[ PROCESSAMENTO ]</strong>
+              As lâminas de metal giram em alta rotação, triturando e misturando tudo.
+            </div>
+            <div class="chalk-arrow">➔</div>
+            <div class="chalk-box">
+              <strong>[ SAÍDA ]</strong>
+              O suco delicioso e geladinho pronto para despejar no copo!
+            </div>
+          </div>
+        </div>
+
+        <!-- SITUAÇÃO 2: SACAR DINHEIRO NO CAIXA ELETRÔNICO -->
+        <div class="chalk-task-card">
+          <h3>🏧 Situação 2: Sacar Dinheiro no Caixa Eletrônico (Banco)</h3>
+          <p>
+            Quando uma pessoa vai ao banco retirar cédulas de dinheiro para fazer compras. Desenhe as 3 caixas no caderno:
+          </p>
+
+          <div class="chalk-boxes-diagram">
+            <div class="chalk-box">
+              <strong>[ ENTRADA ]</strong>
+              Inserir o cartão bancário, digitar a senha e o valor de R$ 50.
+            </div>
+            <div class="chalk-arrow">➔</div>
+            <div class="chalk-box">
+              <strong>[ PROCESSAMENTO ]</strong>
+              O sistema do banco confere a senha, verifica se há saldo e conta as notas no cofre.
+            </div>
+            <div class="chalk-arrow">➔</div>
+            <div class="chalk-box">
+              <strong>[ SAÍDA ]</strong>
+              As notas de R$ 50 saem pela gaveta e o comprovante é impresso!
+            </div>
+          </div>
+        </div>
+
+        <!-- SITUAÇÃO 3: MANDAR UM ÁUDIO NO WHATSAPP -->
+        <div class="chalk-task-card">
+          <h3>💬 Situação 3: Mandar uma Mensagem de Áudio no WhatsApp</h3>
+          <p>
+            Você pega o smartphone para mandar uma mensagem de voz para um colega de turma. Desenhe as 3 caixas no caderno:
+          </p>
+
+          <div class="chalk-boxes-diagram">
+            <div class="chalk-box">
+              <strong>[ ENTRADA ]</strong>
+              Segurar o ícone de microfone com o dedo e falar sua mensagem.
+            </div>
+            <div class="chalk-arrow">➔</div>
+            <div class="chalk-box">
+              <strong>[ PROCESSAMENTO ]</strong>
+              O celular converte sua voz em código digital e envia pela internet até o seu amigo.
+            </div>
+            <div class="chalk-arrow">➔</div>
+            <div class="chalk-box">
+              <strong>[ SAÍDA ]</strong>
+              O celular do seu amigo toca "Bip!" e a voz sai no alto-falante dele!
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTÃO PARA EXIBIR GABARITO DO PROFESSOR -->
+        <div style="text-align: center; margin-top: 24px;">
+          <button class="btn-advance-xp" id="btnToggleTeacher" onclick="toggleTeacherSolution()" style="background: #fef08a; color: #1e293b; box-shadow: 0 0 20px rgba(254, 240, 138, 0.5);">
+            <span>🔓 REVELAR GABARITO DO PROFESSOR</span>
+          </button>
+        </div>
+
+        <!-- PAINEL DO GABARITO -->
+        <div class="teacher-solution-box" id="teacherSolutionPanel">
+          <h3 style="color: var(--neon-green); font-family: var(--font-gamer); font-size: 1.25rem; margin-bottom: 12px;">
+            ✅ GABARITO OFICIAL DO PROFESSOR (CONFERÊNCIA):
+          </h3>
+          <ul style="margin-left: 20px; line-height: 1.8; font-size: 0.95rem; color: #cbd5e1;">
+            <li><strong>Liquidificador:</strong> Entrada (Frutas + Botão) ➔ Processamento (Giro das lâminas triturando) ➔ Saída (Suco pronto).</li>
+            <li><strong>Caixa Eletrônico:</strong> Entrada (Cartão + Senha + Valor) ➔ Processamento (Checagem de saldo e contagem) ➔ Saída (Dinheiro entregue + Papel impresso).</li>
+            <li><strong>WhatsApp:</strong> Entrada (Voz no microfone) ➔ Processamento (Conversão em dados e envio na rede) ➔ Saída (Áudio tocando na caixa de som do amigo).</li>
+          </ul>
+          <div style="margin-top: 14px; color: var(--neon-green); font-weight: 700;">
+            🌟 Excelente trabalho! Apresente seu caderno ao professor para carimbar sua conquista!
+          </div>
+        </div>
+
+      </div>
+
+    </article>
+
+  </main>
+
+  <!-- TOAST DE XP FLUTUANTE -->
+  <div class="toast-xp-feedback" id="xpToast">
+    <span style="font-size: 1.5rem;">⚡</span>
+    <div>
+      <div style="font-weight: 700; color: var(--neon-cyan);" id="toastTitle">+20% XP DESBLOQUEADO!</div>
+      <div style="font-size: 0.8rem; color: #94a3b8;" id="toastDesc">Você avançou na fábrica de jogos.</div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT DO SISTEMA & GAMIFICAÇÃO -->
+  <script>
+    /* ==========================================================================
+       SINTETIZADOR DE ÁUDIO 8-BIT NATIVO (SEM ARQUIVOS MP3 EXTERNOS)
+       ========================================================================== */
+    let audioContext = null;
+    let audioEnabled = true;
+
+    function getAudioCtx() {
+      if (!audioContext) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) {
+          audioContext = new AudioClass();
+        }
+      }
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      return audioContext;
+    }
+
+    function playTone(type) {
+      if (!audioEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      try {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const t = ctx.currentTime;
+
+        if (type === 'step') {
+          // Bip amigável de avanço
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, t);
+          osc.frequency.exponentialRampToValueAtTime(880, t + 0.15);
+          gain.gain.setValueAtTime(0.12, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+          osc.start(t);
+          osc.stop(t + 0.15);
+        } 
+        else if (type === 'button') {
+          // Clique metálico/mecânico
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(520, t);
+          osc.frequency.setValueAtTime(260, t + 0.06);
+          gain.gain.setValueAtTime(0.08, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.08);
+          osc.start(t);
+          osc.stop(t + 0.08);
+        }
+        else if (type === 'soda') {
+          // Som de queda e destravar mecânico
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, t);
+          osc.frequency.exponentialRampToValueAtTime(100, t + 0.25);
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.linearRampToValueAtTime(0.01, t + 0.25);
+          osc.start(t);
+          osc.stop(t + 0.25);
+        }
+        else if (type === 'victory') {
+          // Fanfarra clássica de vitória
+          const freqs = [523.25, 659.25, 783.99, 1046.50];
+          freqs.forEach((freq, i) => {
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.connect(g);
+            g.connect(ctx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(freq, t + (i * 0.1));
+            g.gain.setValueAtTime(0.12, t + (i * 0.1));
+            g.gain.linearRampToValueAtTime(0.01, t + (i * 0.1) + 0.25);
+            o.start(t + (i * 0.1));
+            o.stop(t + (i * 0.1) + 0.25);
+          });
+        }
+      } catch (err) {
+        console.warn("Áudio não disponível no navegador:", err);
+      }
+    }
+
+    /* ==========================================================================
+       ESTADO DA GAMIFICAÇÃO & NÍVEIS
+       ========================================================================== */
+    const EPS_GAME = {
+      phase: 1,
+      maxPhases: 6,
+      xp: 0,
+      ranks: [
+        'NÍVEL 1: EXPLORADOR DIGITAL',
+        'NÍVEL 2: OPERADOR DE ENTRADA',
+        'NÍVEL 3: ENGENHEIRO DE PROCESSAMENTO',
+        'NÍVEL 4: MESTRE DA SAÍDA',
+        'NÍVEL 5: ANALISTA DO MUNDO REAL',
+        'NÍVEL 6: MESTRE SUPREMO DA LÓGICA EPS'
+      ]
+    };
+
+    function updateHudState() {
+      const progressBar = document.getElementById('xpProgressBar');
+      const xpText = document.getElementById('hudXpDisplay');
+      const rankLabel = document.getElementById('hudRankLabel');
+      const phaseLabel = document.getElementById('hudPhaseLabel');
+      const heroIndicator = document.getElementById('heroStateIndicator');
+
+      progressBar.style.width = `${EPS_GAME.xp}%`;
+      xpText.textContent = `${EPS_GAME.xp}% XP`;
+      rankLabel.textContent = EPS_GAME.ranks[EPS_GAME.phase - 1] || 'MESTRE DA LÓGICA';
+      phaseLabel.textContent = `Missão ${Math.min(EPS_GAME.phase, 6)} de 6`;
+
+      if (heroIndicator) {
+        heroIndicator.textContent = EPS_GAME.xp === 100 
+          ? 'Missão Cumprida! Boss Final Revelado (100% XP)' 
+          : `Fase ${EPS_GAME.phase} Desbloqueada (${EPS_GAME.xp}% XP)`;
+      }
+    }
+
+    function showNotification(title, message) {
+      const toast = document.getElementById('xpToast');
+      const tTitle = document.getElementById('toastTitle');
+      const tDesc = document.getElementById('toastDesc');
+
+      tTitle.textContent = title;
+      tDesc.textContent = message;
+
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3400);
+    }
+
+    /* ==========================================================================
+       AVANÇO PROGRESSIVO DAS MISSÕES (+20% XP POR FASE)
+       ========================================================================== */
+    function advanceStep(nextStep) {
+      playTone('step');
+
+      // Marca o botão anterior como feito
+      const currentBtn = document.getElementById(`btn-advance-${nextStep - 1}`);
+      if (currentBtn) {
+        currentBtn.classList.add('done');
+        currentBtn.innerHTML = `<span>✅ MISSÃO ${nextStep - 1} CONCLUÍDA</span>`;
+      }
+
+      // Calcula novo XP: 0 -> 20 -> 40 -> 60 -> 80 -> 100
+      EPS_GAME.phase = nextStep;
+      EPS_GAME.xp = (nextStep - 1) * 20;
+      if (EPS_GAME.xp > 100) EPS_GAME.xp = 100;
+
+      updateHudState();
+
+      // Revela o próximo card com animação suave
+      const nextCard = document.getElementById(`card-phase-${nextStep}`);
+      if (nextCard) {
+        nextCard.classList.remove('hidden');
+        nextCard.classList.add('revealing');
+
+        setTimeout(() => {
+          nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 120);
+      }
+
+      // Se atingiu o Boss Final (Fase 6 = 100% XP)
+      if (nextStep === 6) {
+        triggerBossCelebration();
+      } else {
+        showNotification(`+20% XP DESBLOQUEADO!`, `Fase ${nextStep} liberada na Fábrica de Jogos!`);
+      }
+    }
+
+    /* ==========================================================================
+       CHUVAS DE CONFETE COM CANVAS-CONFETTI (FASE 6 - 100% XP)
+       ========================================================================== */
+    function triggerBossCelebration() {
+      playTone('victory');
+      showNotification("🏆 100% XP ALCANÇADO!", "Parabéns! Você desbloqueou o Boss Final e a Missão para o Caderno!");
+
+      const victoryBanner = document.getElementById('victoryModalCongrats');
+      if (victoryBanner) {
+        victoryBanner.style.display = 'block';
+      }
+
+      // Dispara confetes coloridos neon
+      if (typeof confetti === 'function') {
+        const count = 220;
+        const opts = {
+          origin: { y: 0.65 },
+          colors: ['#00f0ff', '#00ff9d', '#b026ff', '#ffb700', '#ff007f']
+        };
+
+        function shootConfetti(ratio, options) {
+          confetti(Object.assign({}, opts, options, {
+            particleCount: Math.floor(count * ratio)
+          }));
+        }
+
+        shootConfetti(0.25, { spread: 26, startVelocity: 55 });
+        shootConfetti(0.2, { spread: 60 });
+        shootConfetti(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        shootConfetti(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        shootConfetti(0.1, { spread: 120, startVelocity: 45 });
+      }
+    }
+
+    /* ==========================================================================
+       INTERATIVIDADES DA FASE 2: SIMULADOR DE CONTROLE
+       ========================================================================== */
+    function simulateInput(btnName) {
+      playTone('button');
+      const log = document.getElementById('gamepadLog');
+      log.innerHTML = `Sinal elétrico de Entrada: <strong style="color: var(--neon-green);">${btnName}</strong> enviado!`;
+      log.style.transform = 'scale(1.05)';
+      setTimeout(() => {
+        log.style.transform = 'scale(1)';
+      }, 150);
+    }
+
+    /* ==========================================================================
+       INTERATIVIDADES DA FASE 3: DECISÕES DE PROCESSAMENTO
+       ========================================================================== */
+    function selectRuleDecision(ruleNumber) {
+      playTone('button');
+      const b1 = document.getElementById('btnRule1');
+      const b2 = document.getElementById('btnRule2');
+      const b3 = document.getElementById('btnRule3');
+      const text = document.getElementById('ruleDecisionText');
+
+      b1.classList.remove('active');
+      b2.classList.remove('active');
+      b3.classList.remove('active');
+
+      if (ruleNumber === 1) {
+        b1.classList.add('active');
+        text.innerHTML = `⚙️ <strong>Cálculo do Processador:</strong> O herói está no chão. A regra calcula o impulso das pernas e aciona um salto de 3 metros de altura!`;
+      } else if (ruleNumber === 2) {
+        b2.classList.add('active');
+        text.innerHTML = `⚙️ <strong>Cálculo do Processador:</strong> O herói está na água. A regra calcula a resistência do líquido e aciona uma braçada de nado para cima!`;
+      } else if (ruleNumber === 3) {
+        b3.classList.add('active');
+        text.innerHTML = `⚙️ <strong>Cálculo do Processador:</strong> O herói está exausto (0 de energia). A regra impede o salto e faz o personagem apenas tropeçar cansado!`;
+      }
+    }
+
+    /* ==========================================================================
+       INTERATIVIDADES DA FASE 5: VENDING MACHINE
+       ========================================================================== */
+    function testVendingMachine() {
+      playTone('soda');
+      const can = document.getElementById('sodaCanVisual');
+      const tray = document.getElementById('vendingTrayStatus');
+      const btn = document.getElementById('btnTestSoda');
+
+      btn.disabled = true;
+      tray.textContent = "Processando moeda... Soltando trava...";
+      tray.style.color = "var(--neon-cyan)";
+
+      can.classList.add('dropped');
+
+      setTimeout(() => {
+        tray.textContent = "🥤 Lata liberada na gaveta! Troco de R$ 1,00 devolvido!";
+        tray.style.color = "var(--neon-green)";
+        playTone('button');
+
+        setTimeout(() => {
+          can.classList.remove('dropped');
+          btn.disabled = false;
+        }, 1200);
+      }, 600);
+    }
+
+    /* ==========================================================================
+       INTERATIVIDADES DA FASE 6: GABARITO DO PROFESSOR
+       ========================================================================== */
+    function toggleTeacherSolution() {
+      playTone('button');
+      const panel = document.getElementById('teacherSolutionPanel');
+      const btn = document.getElementById('btnToggleTeacher');
+
+      if (panel.style.display === 'block') {
+        panel.style.display = 'none';
+        btn.innerHTML = `<span>🔓 REVELAR GABARITO DO PROFESSOR</span>`;
+      } else {
+        panel.style.display = 'block';
+        btn.innerHTML = `<span>🔒 OCULTAR GABARITO DO PROFESSOR</span>`;
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    /* ==========================================================================
+       CONTROLES GLOBAIS: SOM & REINICIAR
+       ========================================================================== */
+    document.getElementById('toggleAudioBtn').addEventListener('click', () => {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audioIcon').textContent = audioEnabled ? '🔊' : '🔇';
+      showNotification(audioEnabled ? 'Sons 8-Bit Ativados!' : 'Sons Silenciados!', 'Configuração atualizada.');
+    });
+
+    document.getElementById('btnRestart').addEventListener('click', () => {
+      if (confirm('Deseja reiniciar a Fábrica de Jogos desde a Fase 1 com 0% de XP?')) {
+        playTone('button');
+        EPS_GAME.phase = 1;
+        EPS_GAME.xp = 0;
+        updateHudState();
+
+        for (let i = 2; i <= 6; i++) {
+          const c = document.getElementById(`card-phase-${i}`);
+          if (c) {
+            c.classList.add('hidden');
+            c.classList.remove('revealing');
+          }
+          const b = document.getElementById(`btn-advance-${i - 1}`);
+          if (b) {
+            b.classList.remove('done');
+            if (i === 6) {
+              b.innerHTML = `<span>🏆 Atingir 100% XP & Desafiar o Boss Final!</span> ➔`;
+            } else {
+              b.innerHTML = `<span>Entendido! +20 XP</span> ➔`;
+            }
+          }
+        }
+
+        const victoryModal = document.getElementById('victoryModalCongrats');
+        if (victoryModal) victoryModal.style.display = 'none';
+
+        const teacherPanel = document.getElementById('teacherSolutionPanel');
+        if (teacherPanel) teacherPanel.style.display = 'none';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        showNotification("Missão Reiniciada!", "Seu XP voltou a 0%. Bom treinamento!");
+      }
+    });
+
+    // Boot inicial
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHudState();
+    });
+  </script>
+</body>
+</html>
