@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Júri da IA · Preparação</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #111833;
+    --surface: #161f3d;
+    --surface-2: #1d2850;
+    --line: #2c3a6b;
+    --text: #f4f6ff;
+    --muted: #b3bddb;
+    --yellow: #ffd23f;
+    --cyan: #22d3ee;
+    --coral: #ff8a65;
+    --green: #8fdc9a;
+    --red: #ff5d6c;
+    --stage-w: 1920px;
+    --stage-h: 1080px;
+    --nav-h: 110px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Palco fixo 1920x1080 escalado para caber na tela, sempre em 16:9 */
+  .viewport {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(34, 211, 238, 0.10), transparent 45%),
+      radial-gradient(circle at 90% 90%, rgba(255, 210, 63, 0.08), transparent 45%),
+      var(--bg);
+  }
+
+  .stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--stage-w);
+    height: var(--stage-h);
+    transform-origin: center center;
+    background: linear-gradient(160deg, var(--bg-2) 0%, var(--bg) 70%);
+    overflow: hidden;
+  }
+
+  .slides {
+    position: absolute;
+    inset: 0 0 var(--nav-h) 0;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 70px 110px 30px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(40px);
+    transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .slide.before { transform: translateX(-40px); }
+
+  .slide .note { display: none; }
+
+  .no-anim .slide, .no-anim .progress-bar span { transition: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.2s linear; transform: none; }
+    .slide.before { transform: none; }
+  }
+
+  /* Tipografia */
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 14px;
+  }
+
+  .kicker::before {
+    content: "";
+    width: 44px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--cyan);
+  }
+
+  h1, h2 {
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-size: 72px;
+    margin-bottom: 40px;
+  }
+
+  .hl { color: var(--yellow); }
+
+  p, li { font-size: 36px; line-height: 1.4; }
+
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .arrow {
+    width: 90px;
+    height: 60px;
+    color: var(--yellow);
+  }
+
+  .footline {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 34px;
+    padding: 18px 36px;
+    border-radius: 999px;
+    border: 3px solid var(--cyan);
+    color: var(--text);
+    font-size: 36px;
+    font-weight: 600;
+  }
+
+  .banner {
+    padding: 30px 44px;
+    border-radius: 28px;
+    background: rgba(255, 210, 63, 0.12);
+    border: 4px solid var(--yellow);
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .banner strong { color: var(--yellow); }
+
+  .punch {
+    padding: 30px 48px;
+    border-radius: 28px;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.25;
+    box-shadow: 0 20px 60px rgba(255, 210, 63, 0.2);
+  }
+
+  .source {
+    margin-top: 22px;
+    font-size: 26px;
+    color: var(--muted);
+  }
+
+  .source span { color: var(--cyan); }
+
+  /* Cabeçalho com cronômetro */
+  .head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 36px;
+  }
+
+  .head-row h2 { margin-bottom: 0; }
+
+  .timer-box {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .timer {
+    font: inherit;
+    font-size: 64px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    min-width: 290px;
+    padding: 6px 30px;
+    border-radius: 24px;
+    border: 4px solid var(--yellow);
+    background: rgba(255, 210, 63, 0.10);
+    color: var(--yellow);
+    cursor: pointer;
+    line-height: 1.2;
+  }
+
+  .timer.running { background: var(--yellow); color: var(--bg); }
+  .timer.warn { border-color: var(--coral); background: var(--coral); color: var(--bg); }
+  .timer.done { border-color: var(--red); background: var(--red); color: var(--bg); animation: pulse 1s ease-in-out infinite; }
+
+  @keyframes pulse { 50% { opacity: 0.55; } }
+
+  .timer-reset {
+    font: inherit;
+    font-size: 34px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid var(--line);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .timer:focus-visible, .timer-reset:focus-visible { outline: 4px solid var(--text); outline-offset: 4px; }
+
+  /* 1. Capa */
+  .cover {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .cover h1 {
+    font-size: 150px;
+    color: var(--yellow);
+    margin-bottom: 30px;
+  }
+
+  .cover .subtitle {
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1.25;
+    max-width: 1050px;
+  }
+
+  .cover .subtitle strong { color: var(--cyan); font-weight: 700; }
+
+  .part {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 12px 32px;
+    border-radius: 999px;
+    border: 3px solid var(--cyan);
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+
+  .face {
+    width: 520px;
+    height: 520px;
+    filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.25));
+  }
+
+  /* 2. Abertura */
+  .big-q {
+    font-size: 84px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 60px;
+  }
+
+  .big-q .hl { display: block; }
+
+  .recall {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+    padding: 34px 44px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-left: 12px solid var(--cyan);
+  }
+
+  .recall .emoji { font-size: 84px; line-height: 1; }
+  .recall p { font-size: 38px; font-weight: 600; }
+  .recall strong { color: var(--cyan); }
+
+  /* 3. Como funciona */
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: stretch;
+    gap: 22px;
+    margin-bottom: 50px;
+  }
+
+  .pipeline .arrow { align-self: center; width: 60px; height: 44px; }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    padding: 34px 22px;
+    text-align: center;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--cyan);
+  }
+
+  .step .n {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--cyan);
+    color: var(--bg);
+    font-size: 30px;
+    font-weight: 800;
+  }
+
+  .step .emoji { font-size: 72px; line-height: 1; }
+  .step .label { font-size: 36px; font-weight: 800; line-height: 1.15; }
+  .step .sub { font-size: 26px; color: var(--muted); line-height: 1.3; }
+
+  .step.last { border-color: var(--yellow); }
+  .step.last .n { background: var(--yellow); }
+
+  /* 4. Gender Shades */
+  .study {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 60px;
+    min-height: 0;
+  }
+
+  .bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 48px;
+  }
+
+  .bar-row .who {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .bar-track {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 84px;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 0 16px 16px 0;
+    background: var(--cyan);
+  }
+
+  .bar-row.high .bar-fill { background: var(--yellow); }
+
+  .bar-val {
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--cyan);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bar-row.high .bar-val { color: var(--yellow); }
+
+  .bars .caption { font-size: 28px; color: var(--muted); }
+
+  .study-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+  }
+
+  .study-side .who-did {
+    padding: 30px 40px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    font-size: 32px;
+    line-height: 1.4;
+  }
+
+  .study-side .who-did strong { color: var(--cyan); }
+
+  .ask-box {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding: 30px 40px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 4px solid var(--yellow);
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .ask-box .q { font-size: 72px; color: var(--yellow); line-height: 1; }
+
+  /* 5. No Brasil */
+  .cards3 {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px;
+    min-height: 0;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 34px 34px 36px;
+    border-radius: 26px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-top: 8px solid var(--yellow);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card .emoji { font-size: 60px; line-height: 1; }
+
+  .card .year {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--yellow);
+    border: 3px solid var(--yellow);
+    border-radius: 999px;
+    padding: 2px 18px;
+  }
+
+  .card .stat {
+    font-size: 96px;
+    font-weight: 800;
+    color: var(--yellow);
+    line-height: 1;
+  }
+
+  .card h3 { font-size: 36px; line-height: 1.2; font-weight: 800; }
+  .card p { font-size: 29px; line-height: 1.4; color: var(--muted); }
+
+  .where {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .chip {
+    padding: 8px 26px;
+    border-radius: 999px;
+    border: 3px solid var(--cyan);
+    color: var(--cyan);
+    font-size: 30px;
+    font-weight: 700;
+  }
+
+  /* 6. A pergunta do júri */
+  .gavel { font-size: 130px; line-height: 1; margin-bottom: 30px; }
+
+  .motion {
+    font-size: 88px;
+    font-weight: 800;
+    line-height: 1.15;
+    padding: 50px 64px;
+    border-radius: 36px;
+    border: 5px solid var(--yellow);
+    background: rgba(255, 210, 63, 0.10);
+  }
+
+  .verdicts {
+    display: flex;
+    gap: 30px;
+    margin-top: 44px;
+  }
+
+  .verdicts span {
+    padding: 14px 40px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    font-size: 38px;
+    font-weight: 800;
+  }
+
+  /* 7. Equipes */
+  .teams {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 26px;
+    min-height: 0;
+  }
+
+  .team {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 36px 24px 30px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-top: 12px solid var(--cyan);
+    text-align: center;
+    justify-content: center;
+  }
+
+  .team .emoji { font-size: 96px; line-height: 1; }
+  .team h3 { font-size: 36px; font-weight: 800; line-height: 1.15; }
+
+  .side {
+    padding: 6px 24px;
+    border-radius: 999px;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--bg);
+    background: var(--cyan);
+  }
+
+  .team p { font-size: 27px; line-height: 1.35; color: var(--muted); }
+
+  .team.pro { border-top-color: var(--cyan); }
+  .team.con { border-top-color: var(--coral); }
+  .team.con .side { background: var(--coral); }
+  .team.jury { border-top-color: var(--green); }
+  .team.jury .side { background: var(--green); }
+
+  .legend {
+    display: flex;
+    gap: 40px;
+    margin-top: 30px;
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .legend span::before {
+    content: "";
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    margin-right: 12px;
+    vertical-align: -2px;
+    background: var(--cyan);
+  }
+
+  .legend .l-con::before { background: var(--coral); }
+  .legend .l-jury::before { background: var(--green); }
+
+  /* 8. Funções */
+  .roles {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    min-height: 0;
+  }
+
+  .role {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    padding: 30px 36px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+  }
+
+  .role .emoji { font-size: 76px; line-height: 1; flex: none; }
+  .role h3 { font-size: 38px; font-weight: 800; margin-bottom: 8px; }
+  .role p { font-size: 28px; line-height: 1.35; color: var(--muted); }
+
+  .role.jury-role { border-color: var(--green); }
+  .role.jury-role h3 { color: var(--green); }
+
+  /* 9. Como vai ser o júri */
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 14px;
+    margin-bottom: 40px;
+  }
+
+  .tl {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 18px;
+    border-radius: 22px;
+    background: var(--surface);
+    border: 3px solid var(--cyan);
+  }
+
+  .tl .n { font-size: 28px; font-weight: 800; color: var(--cyan); }
+  .tl .what { font-size: 29px; font-weight: 800; line-height: 1.15; flex: 1; }
+  .tl .min { font-size: 26px; font-weight: 700; color: var(--muted); }
+
+  .tl.alt { border-color: var(--green); }
+  .tl.alt .n { color: var(--green); }
+
+  .rules {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px 30px;
+  }
+
+  .rules li {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 32px;
+    border-radius: 24px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    font-size: 34px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .rules .emoji { font-size: 54px; line-height: 1; flex: none; }
+
+  /* 10-13. Rodadas de pesquisa */
+  .round-tag {
+    display: inline-block;
+    padding: 4px 22px;
+    margin-right: 18px;
+    border-radius: 14px;
+    background: var(--cyan);
+    color: var(--bg);
+    font-size: 48px;
+    vertical-align: middle;
+  }
+
+  .mission {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-bottom: 34px;
+  }
+
+  .mission li {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    font-size: 40px;
+    font-weight: 600;
+  }
+
+  .mission .n {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    background: var(--cyan);
+    color: var(--bg);
+    font-size: 40px;
+    font-weight: 800;
+  }
+
+  .mission strong { color: var(--yellow); }
+
+  .search {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-items: start;
+    gap: 20px;
+  }
+
+  .search > div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 24px 22px;
+    border-radius: 24px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-top: 8px solid var(--cyan);
+  }
+
+  .search .con { border-top-color: var(--coral); }
+  .search .jury { border-top-color: var(--green); }
+
+  .search h3 { font-size: 30px; font-weight: 800; line-height: 1.15; }
+
+  .search code {
+    display: block;
+    font-family: inherit;
+    font-size: 24px;
+    line-height: 1.3;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--muted);
+  }
+
+  .search code::before { content: "🔎 "; }
+
+  .model {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 30px;
+    align-items: stretch;
+    margin-bottom: 34px;
+  }
+
+  .model .arrow { align-self: center; }
+
+  .model > div {
+    padding: 34px 40px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--coral);
+  }
+
+  .model > div:last-child { border-color: var(--cyan); }
+
+  .model .lbl {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 12px;
+  }
+
+  .model > div:last-child .lbl { color: var(--cyan); }
+  .model .ex { font-size: 34px; font-weight: 600; line-height: 1.35; }
+
+  .good-bad {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 34px;
+  }
+
+  .good-bad > div {
+    padding: 30px 38px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-left: 12px solid var(--red);
+  }
+
+  .good-bad > div:last-child { border-left-color: var(--green); }
+
+  .good-bad .lbl { font-size: 30px; font-weight: 800; margin-bottom: 10px; color: var(--red); }
+  .good-bad > div:last-child .lbl { color: var(--green); }
+  .good-bad .ex { font-size: 34px; font-weight: 600; line-height: 1.35; }
+
+  .sheet {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    align-content: center;
+    gap: 18px;
+    min-height: 0;
+    margin-bottom: 30px;
+  }
+
+  .sheet > div { min-height: 340px; }
+
+  .sheet > div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px 24px;
+    border-radius: 24px;
+    background: var(--surface);
+    border: 3px dashed var(--line);
+  }
+
+  .sheet .n {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 30px;
+    font-weight: 800;
+  }
+
+  .sheet h3 { font-size: 32px; font-weight: 800; line-height: 1.15; }
+  .sheet p { font-size: 28px; line-height: 1.35; color: var(--muted); }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .actions .footline { margin-top: 0; }
+
+  /* 14. Fechamento */
+  .next-box {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 50px;
+    align-items: center;
+    padding: 50px 60px;
+    border-radius: 32px;
+    background: var(--surface);
+    border: 4px dashed var(--yellow);
+    margin-bottom: 36px;
+  }
+
+  .next-box .emoji { font-size: 150px; line-height: 1; }
+  .next-box h3 { font-size: 60px; font-weight: 800; margin-bottom: 16px; }
+  .next-box h3 span { color: var(--yellow); }
+  .next-box p { font-size: 36px; font-weight: 600; color: var(--muted); }
+  .next-box p strong { color: var(--text); }
+
+  .reference {
+    font-size: 26px;
+    line-height: 1.5;
+    color: var(--muted);
+    padding-top: 24px;
+    border-top: 3px solid var(--line);
+    overflow-wrap: anywhere;
+  }
+
+  .reference .label {
+    display: block;
+    color: var(--cyan);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  /* Painel de notas do professor */
+  .notes {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--nav-h);
+    z-index: 5;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    padding: 30px 110px 34px;
+    background: #0e1531;
+    border-top: 5px solid var(--yellow);
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(24px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  }
+
+  .notes.open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .notes .tag {
+    flex: none;
+    padding: 6px 20px;
+    border-radius: 999px;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 26px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .notes p {
+    font-size: 32px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  /* Barra de navegação */
+  .nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 110px;
+    border-top: 3px solid var(--line);
+    background: #0b1020;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .progress-bar {
+    width: 360px;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+
+  .progress-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--cyan), var(--yellow));
+    transition: width 0.4s ease;
+  }
+
+  .progress-count strong { color: var(--text); }
+
+  .hint {
+    margin-left: 12px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #6f7ba3;
+  }
+
+  .hint kbd {
+    font: inherit;
+    font-weight: 800;
+    padding: 1px 10px;
+    border: 2px solid #3a4777;
+    border-radius: 6px;
+    color: var(--muted);
+  }
+
+  .buttons { display: flex; gap: 20px; }
+
+  .btn {
+    font: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    padding: 14px 36px;
+    border-radius: 16px;
+    cursor: pointer;
+    border: 3px solid var(--cyan);
+    background: transparent;
+    color: var(--cyan);
+    transition: background 0.2s, color 0.2s, opacity 0.2s;
+  }
+
+  .btn.primary {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--bg);
+  }
+
+  .btn:hover:not(:disabled) { filter: brightness(1.12); }
+  .btn:focus-visible { outline: 4px solid var(--text); outline-offset: 4px; }
+  .btn:disabled { opacity: 0.3; cursor: default; }
+
+  /* Fichas para impressão (só aparecem ao imprimir) */
+  #print-area { display: none; }
+
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    html, body { overflow: visible; height: auto; background: #fff; color: #000; }
+    .viewport { display: none; }
+    #print-area { display: block; }
+    .ficha { page-break-after: always; break-after: page; font-family: "Segoe UI", Arial, sans-serif; color: #000; }
+    .ficha:last-child { page-break-after: auto; break-after: auto; }
+    .ficha header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 10px; }
+    .ficha h1 { font-size: 20pt; }
+    .ficha .lado { font-size: 12pt; font-weight: 700; border: 1.5px solid #000; border-radius: 99px; padding: 2px 12px; }
+    .ficha .meta { font-size: 11pt; margin-bottom: 10px; }
+    .ficha h2 { font-size: 12.5pt; margin: 12px 0 4px; }
+    .ficha .tip { font-size: 9.5pt; color: #444; margin-bottom: 4px; }
+    .ficha table { width: 100%; border-collapse: collapse; }
+    .ficha td, .ficha th { border: 1px solid #555; padding: 4px 6px; font-size: 10pt; vertical-align: top; text-align: left; }
+    .ficha th { background: #eee; }
+    .ficha td.lines { height: 15mm; }
+    .ficha td.short { height: 9mm; }
+    .ficha .box { border: 1px solid #555; height: 16mm; }
+  }
+</style>
+</head>
+<body class="no-anim">
+<div class="viewport">
+  <div class="stage" id="stage">
+    <main class="slides">
+
+      <!-- 1. Capa -->
+      <section class="slide" aria-label="Capa">
+        <div class="cover">
+          <div>
+            <div class="kicker">Aula de Inteligência Artificial</div>
+            <h1>Júri da IA</h1>
+            <p class="subtitle">Uma câmera pode <strong>errar quem você é</strong>?</p>
+            <span class="part">Parte 1 de 2 · Preparação</span>
+          </div>
+          <svg class="face" viewBox="0 0 200 200" aria-hidden="true">
+            <path d="M20 55 V20 H55 M145 20 H180 V55 M180 145 V180 H145 M55 180 H20 V145" fill="none" stroke="#22d3ee" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <ellipse cx="100" cy="102" rx="46" ry="58" fill="rgba(34,211,238,0.10)" stroke="#f4f6ff" stroke-width="5" opacity="0.85"/>
+            <g stroke="#ffd23f" stroke-width="2.5" opacity="0.8" fill="none">
+              <path d="M80 88 L120 88 L100 112 Z"/>
+              <path d="M80 88 L86 132 L100 112 L114 132 L120 88"/>
+              <path d="M86 132 L114 132"/>
+            </g>
+            <g fill="#ffd23f">
+              <circle cx="80" cy="88" r="6"/>
+              <circle cx="120" cy="88" r="6"/>
+              <circle cx="100" cy="112" r="6"/>
+              <circle cx="86" cy="132" r="6"/>
+              <circle cx="114" cy="132" r="6"/>
+            </g>
+            <line x1="24" y1="70" x2="176" y2="70" stroke="#22d3ee" stroke-width="3" opacity="0.6"/>
+          </svg>
+        </div>
+        <aside class="note">Aula 1 de 2 (90 min): 10 de abertura, 15 de contexto, 10 explicando o júri, 5 para formar as equipes, 40 de pesquisa em 3 rodadas e 10 para montar a ficha-roteiro. Imprima as fichas antes (botão no slide 13).</aside>
+      </section>
+
+      <!-- 2. Abertura -->
+      <section class="slide" aria-label="Abertura">
+        <div class="kicker">Para começar</div>
+        <div class="center">
+          <p class="big-q">Se uma câmera disser que você é um procurado… <span class="hl">o que acontece com você?</span></p>
+          <div class="recall">
+            <span class="emoji" aria-hidden="true">🛵</span>
+            <p>Lembram do <strong>entregador do iFood</strong> da Caça ao Viés? Ele foi bloqueado por um sistema de <strong>reconhecimento facial</strong>. Hoje vamos entender essa tecnologia e decidir se ela deve ser usada.</p>
+          </div>
+        </div>
+        <aside class="note">10 min. Ouça 2 ou 3 respostas antes de mostrar a retomada. Não defenda nenhum lado: a turma vai decidir no júri.</aside>
+      </section>
+
+      <!-- 3. Como funciona -->
+      <section class="slide" aria-label="Como funciona">
+        <div class="kicker">Conceito</div>
+        <h2>Como a câmera <span class="hl">reconhece</span> um rosto?</h2>
+        <div class="pipeline">
+          <div class="step">
+            <span class="n">1</span>
+            <span class="emoji" aria-hidden="true">📷</span>
+            <span class="label">Detecta o rosto</span>
+            <span class="sub">acha onde há um rosto na imagem</span>
+          </div>
+          <svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step">
+            <span class="n">2</span>
+            <span class="emoji" aria-hidden="true">📐</span>
+            <span class="label">Mede pontos</span>
+            <span class="sub">olhos, nariz, boca, queixo e distâncias</span>
+          </div>
+          <svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step">
+            <span class="n">3</span>
+            <span class="emoji" aria-hidden="true">🔢</span>
+            <span class="label">Vira um código</span>
+            <span class="sub">uma "impressão digital" do rosto, feita de números</span>
+          </div>
+          <svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step last">
+            <span class="n">4</span>
+            <span class="emoji" aria-hidden="true">🚨</span>
+            <span class="label">Compara e alerta</span>
+            <span class="sub">se a semelhança com uma foto do banco passa de um limite</span>
+          </div>
+        </div>
+        <p class="punch">A IA nunca tem certeza: ela calcula uma probabilidade, como a barrinha de % do Teachable Machine.</p>
+        <aside class="note">5 min. Ligue com a aula do Teachable Machine: lá a IA também dava uma porcentagem, e às vezes errava. A pergunta é: quem decide a partir de quantos % a polícia age?</aside>
+      </section>
+
+      <!-- 4. Gender Shades -->
+      <section class="slide" aria-label="O estudo Gender Shades">
+        <div class="kicker">Pesquisa</div>
+        <h2>A IA erra igual com <span class="hl">todo mundo</span>?</h2>
+        <div class="study">
+          <div class="bars">
+            <div class="bar-row">
+              <p class="who">👨🏻 Homens de pele mais clara</p>
+              <div class="bar-track"><div class="bar-fill" style="width: 2%"></div><span class="bar-val">0,8%</span></div>
+            </div>
+            <div class="bar-row high">
+              <p class="who">👩🏿 Mulheres de pele mais escura</p>
+              <div class="bar-track"><div class="bar-fill" style="width: 68%"></div><span class="bar-val">34,7%</span></div>
+            </div>
+            <p class="caption">Maior taxa de erro encontrada para cada grupo, ao identificar gênero pela foto.</p>
+          </div>
+          <div class="study-side">
+            <p class="who-did">Estudo <strong>Gender Shades</strong> (2018), de <strong>Joy Buolamwini</strong> e <strong>Timnit Gebru</strong> (MIT). Testaram sistemas da IBM, Microsoft e Face++.</p>
+            <p class="ask-box"><span class="q" aria-hidden="true">?</span>Por que vocês acham que isso aconteceu?</p>
+          </div>
+        </div>
+        <aside class="note">5 min. Deixe a turma chegar sozinha à resposta: os dados de treino tinham muito mais rostos de homens brancos. É o mesmo mecanismo da Caça ao Viés. Depois do estudo, as empresas melhoraram os sistemas: esse é um argumento que a equipe da empresa vai poder usar.</aside>
+      </section>
+
+      <!-- 5. No Brasil -->
+      <section class="slide" aria-label="No Brasil">
+        <div class="kicker">Do laboratório para a rua</div>
+        <h2 style="margin-bottom: 30px;">E no <span class="hl">Brasil</span>?</h2>
+        <div class="cards3">
+          <article class="card">
+            <div class="card-head"><span class="emoji" aria-hidden="true">📊</span><span class="year">2019</span></div>
+            <span class="stat">90,5%</span>
+            <h3>das pessoas presas com reconhecimento facial eram negras</h3>
+            <p>Levantamento da Rede de Observatórios da Segurança em 5 estados.</p>
+          </article>
+          <article class="card">
+            <div class="card-head"><span class="emoji" aria-hidden="true">🏖️</span><span class="year">2019</span></div>
+            <h3>Mulher detida por engano em Copacabana (RJ)</h3>
+            <p>No início dos testes do sistema, ela foi confundida com uma procurada. A mulher procurada já estava presa.</p>
+          </article>
+          <article class="card">
+            <div class="card-head"><span class="emoji" aria-hidden="true">⚽</span><span class="year">2024</span></div>
+            <h3>Torcedor abordado por engano num estádio em Sergipe</h3>
+            <p>Durante a final do campeonato estadual, foi retirado da arquibancada pela polícia. Depois, o estado suspendeu o uso do sistema.</p>
+          </article>
+        </div>
+        <div class="where"><span>Onde já é usado:</span><span class="chip">ruas</span><span class="chip">estádios</span><span class="chip">metrô</span><span class="chip">aeroportos</span><span class="chip">aplicativos</span><span class="chip">escolas</span></div>
+        <aside class="note">5 min. Confira os detalhes dos casos antes da aula, se quiser citar nomes ou datas exatas. Os casos voltam na pesquisa: a equipe dos cidadãos e a dos pesquisadores vão aprofundar.</aside>
+      </section>
+
+      <!-- 6. A pergunta do júri -->
+      <section class="slide" aria-label="A pergunta do júri">
+        <div class="kicker">O desafio</div>
+        <div class="center">
+          <div class="gavel" aria-hidden="true">⚖️</div>
+          <p class="motion">A nossa cidade deve usar <span class="hl">reconhecimento facial</span> nas ruas e nas escolas?</p>
+          <div class="verdicts"><span>✅ Sim</span><span>❌ Não</span><span>📜 Sim, com regras</span></div>
+        </div>
+        <aside class="note">Explique: na próxima aula, a turma vira um tribunal. Hoje é o dia de preparar os argumentos.</aside>
+      </section>
+
+      <!-- 7. Equipes -->
+      <section class="slide" aria-label="As equipes">
+        <div class="kicker">As equipes</div>
+        <h2 style="margin-bottom: 30px;">Cinco <span class="hl">equipes</span>, três lados</h2>
+        <div class="teams">
+          <div class="team pro">
+            <span class="emoji" aria-hidden="true">🚔</span>
+            <h3>Segurança pública</h3>
+            <span class="side">A FAVOR</span>
+            <p>Encontrar foragidos e pessoas desaparecidas.</p>
+          </div>
+          <div class="team pro">
+            <span class="emoji" aria-hidden="true">💻</span>
+            <h3>Empresa de tecnologia</h3>
+            <span class="side">A FAVOR</span>
+            <p>A tecnologia melhorou e os erros podem ser reduzidos.</p>
+          </div>
+          <div class="team con">
+            <span class="emoji" aria-hidden="true">🙋</span>
+            <h3>Cidadãos abordados por engano</h3>
+            <span class="side">CONTRA</span>
+            <p>Quem sofreu o erro na pele.</p>
+          </div>
+          <div class="team con">
+            <span class="emoji" aria-hidden="true">🔬</span>
+            <h3>Pesquisadores de direitos</h3>
+            <span class="side">CONTRA</span>
+            <p>Os dados mostram viés, e os direitos precisam vir primeiro.</p>
+          </div>
+          <div class="team jury">
+            <span class="emoji" aria-hidden="true">⚖️</span>
+            <h3>Comissão de legisladores</h3>
+            <span class="side">JURADOS</span>
+            <p>Estudam as leis, questionam os dois lados e decidem.</p>
+          </div>
+        </div>
+        <div class="legend"><span>A favor</span><span class="l-con">Contra</span><span class="l-jury">Jurados</span></div>
+        <aside class="note">5 min. Sorteie as equipes (cerca de 6 alunos cada, trabalhando em duplas dentro da equipe). Avise: ninguém está defendendo a própria opinião, é um exercício de argumentação. Quem pensa diferente do seu lado vai argumentar ainda melhor.</aside>
+      </section>
+
+      <!-- 8. Funções -->
+      <section class="slide" aria-label="Funções na equipe">
+        <div class="kicker">Todo mundo participa</div>
+        <h2>Funções dentro da <span class="hl">equipe</span></h2>
+        <div class="roles">
+          <div class="role">
+            <span class="emoji" aria-hidden="true">🎤</span>
+            <div><h3>Abertura</h3><p>Faz a fala principal (4 min).</p></div>
+          </div>
+          <div class="role">
+            <span class="emoji" aria-hidden="true">🔁</span>
+            <div><h3>Réplica</h3><p>Responde aos ataques do outro lado.</p></div>
+          </div>
+          <div class="role">
+            <span class="emoji" aria-hidden="true">❓</span>
+            <div><h3>Perguntador</h3><p>Faz a pergunta difícil ao lado oposto.</p></div>
+          </div>
+          <div class="role">
+            <span class="emoji" aria-hidden="true">📌</span>
+            <div><h3>Considerações finais</h3><p>Fecha a defesa da equipe.</p></div>
+          </div>
+          <div class="role">
+            <span class="emoji" aria-hidden="true">📚</span>
+            <div><h3>Fontes (2 alunos)</h3><p>Ficam com o Chromebook e passam dados durante o júri.</p></div>
+          </div>
+          <div class="role jury-role">
+            <span class="emoji" aria-hidden="true">⚖️</span>
+            <div><h3>Legisladores</h3><p>Presidente, cronometrista, relatores e perguntadores.</p></div>
+          </div>
+        </div>
+        <aside class="note">As funções são definidas no fim da aula, na ficha-roteiro. Na comissão: o presidente anuncia o veredito, o cronometrista controla o tempo, os relatores anotam e os perguntadores questionam.</aside>
+      </section>
+
+      <!-- 9. Como vai ser o júri -->
+      <section class="slide" aria-label="Como vai ser o júri">
+        <div class="kicker">Próxima aula</div>
+        <h2 style="margin-bottom: 30px;">Como vai ser o <span class="hl">júri</span></h2>
+        <div class="timeline">
+          <div class="tl"><span class="n">1</span><span class="what">Falas de abertura</span><span class="min">4 min por equipe</span></div>
+          <div class="tl"><span class="n">2</span><span class="what">Perguntas cruzadas</span><span class="min">1 pergunta + 2 min de resposta</span></div>
+          <div class="tl"><span class="n">3</span><span class="what">Pausa estratégica</span><span class="min">5 min</span></div>
+          <div class="tl"><span class="n">4</span><span class="what">Réplicas</span><span class="min">2 min por equipe</span></div>
+          <div class="tl alt"><span class="n">5</span><span class="what">Perguntas dos legisladores</span><span class="min">8 min</span></div>
+          <div class="tl"><span class="n">6</span><span class="what">Considerações finais</span><span class="min">2 min por equipe</span></div>
+          <div class="tl alt"><span class="n">7</span><span class="what">Deliberação</span><span class="min">8 min, em voz alta</span></div>
+          <div class="tl alt"><span class="n">8</span><span class="what">Veredito e Lei da turma</span><span class="min">7 min</span></div>
+        </div>
+        <ul class="rules">
+          <li><span class="emoji" aria-hidden="true">🤝</span>Ataque a ideia, nunca a pessoa.</li>
+          <li><span class="emoji" aria-hidden="true">📚</span>Todo argumento precisa de uma fonte.</li>
+          <li><span class="emoji" aria-hidden="true">⏱️</span>Acabou o tempo, acabou a fala.</li>
+          <li><span class="emoji" aria-hidden="true">✋</span>Só fala quem está com a vez.</li>
+        </ul>
+        <aside class="note">10 min neste slide. Avaliação: ficha-roteiro da equipe (hoje), desempenho no júri (os legisladores também pontuam) e frase de saída individual.</aside>
+      </section>
+
+      <!-- 10. Rodada 1 -->
+      <section class="slide" aria-label="Rodada 1: nossos argumentos">
+        <div class="kicker">Pesquisa em duplas</div>
+        <div class="head-row">
+          <h2><span class="round-tag">1</span>Nossos <span class="hl">argumentos</span></h2>
+          <div class="timer-box"><button class="timer" type="button" data-min="15">15:00</button><button class="timer-reset" type="button" aria-label="Reiniciar cronômetro">↺</button></div>
+        </div>
+        <ol class="mission">
+          <li><span class="n">1</span><span>Cada dupla encontra <strong>1 ou 2 argumentos</strong> para o lado da equipe.</span></li>
+          <li><span class="n">2</span><span>Todo argumento vem com uma <strong>fonte</strong>: notícia, estudo ou lei.</span></li>
+        </ol>
+        <div class="search">
+          <div><h3>🚔 Segurança</h3><code>reconhecimento facial prende foragido</code><code>carnaval Salvador reconhecimento facial</code></div>
+          <div><h3>💻 Empresa</h3><code>precisão reconhecimento facial NIST</code><code>como reduzir viés reconhecimento facial</code></div>
+          <div class="con"><h3>🙋 Cidadãos</h3><code>abordado por engano reconhecimento facial</code><code>torcedor Sergipe reconhecimento facial</code></div>
+          <div class="con"><h3>🔬 Pesquisadores</h3><code>Gender Shades Joy Buolamwini</code><code>Rede de Observatórios reconhecimento facial</code></div>
+          <div class="jury"><h3>⚖️ Legisladores</h3><code>LGPD dado biométrico sensível</code><code>cidades que proibiram reconhecimento facial</code></div>
+        </div>
+        <p class="footline"><span aria-hidden="true">✍️</span>Anotem argumento + fonte no caderno ou num doc da equipe.</p>
+        <aside class="note">15 min. Clique no cronômetro (ou tecla T) para iniciar. Circule entre as duplas e cobre a fonte de cada argumento. Os termos de busca são só ponto de partida.</aside>
+      </section>
+
+      <!-- 11. Rodada 2 -->
+      <section class="slide" aria-label="Rodada 2: o que o outro lado vai dizer">
+        <div class="kicker">Pesquisa em duplas</div>
+        <div class="head-row">
+          <h2><span class="round-tag">2</span>O que o <span class="hl">outro lado</span> vai dizer?</h2>
+          <div class="timer-box"><button class="timer" type="button" data-min="15">15:00</button><button class="timer-reset" type="button" aria-label="Reiniciar cronômetro">↺</button></div>
+        </div>
+        <p style="font-size: 40px; font-weight: 600; margin-bottom: 30px;">Pense como o adversário: qual é o <span class="hl">melhor argumento</span> dele? Prepare a resposta.</p>
+        <div class="model">
+          <div>
+            <p class="lbl">Eles vão dizer…</p>
+            <p class="ex">"O sistema já ajudou a prender foragidos perigosos."</p>
+          </div>
+          <svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <p class="lbl">Nós respondemos…</p>
+            <p class="ex">"E quantos inocentes foram abordados para isso? Quem paga pelo erro?"</p>
+          </div>
+        </div>
+        <p class="banner">⚖️ <strong>Legisladores:</strong> pesquisem o que os dois lados vão dizer e anotem o que ainda não ficou claro.</p>
+        <aside class="note">15 min. É a rodada mais difícil. Se uma equipe travar, pergunte: "Se você fosse do outro lado, o que diria?"</aside>
+      </section>
+
+      <!-- 12. Rodada 3 -->
+      <section class="slide" aria-label="Rodada 3: perguntas difíceis">
+        <div class="kicker">Pesquisa em duplas</div>
+        <div class="head-row">
+          <h2><span class="round-tag">3</span>Perguntas <span class="hl">difíceis</span></h2>
+          <div class="timer-box"><button class="timer" type="button" data-min="10">10:00</button><button class="timer-reset" type="button" aria-label="Reiniciar cronômetro">↺</button></div>
+        </div>
+        <p style="font-size: 40px; font-weight: 600; margin-bottom: 30px;">Cada equipe cria <span class="hl">2 perguntas</span> para o lado oposto. Os legisladores criam 2 para cada lado.</p>
+        <div class="good-bad">
+          <div>
+            <p class="lbl">❌ Pergunta fraca</p>
+            <p class="ex">"Vocês não acham que isso é errado?"</p>
+          </div>
+          <div>
+            <p class="lbl">✅ Pergunta difícil</p>
+            <p class="ex">"Se o sistema erra mais com pessoas negras, quem vocês acham que vai ser abordado por engano?"</p>
+          </div>
+        </div>
+        <p class="footline"><span aria-hidden="true">💡</span>Boa pergunta usa um dado e obriga o outro lado a se posicionar.</p>
+        <aside class="note">10 min. A pergunta difícil é usada na etapa de perguntas cruzadas. Cada equipe escolhe a melhor das duas para o júri.</aside>
+      </section>
+
+      <!-- 13. Ficha-roteiro -->
+      <section class="slide" aria-label="Montagem da ficha-roteiro">
+        <div class="kicker">Montagem</div>
+        <div class="head-row">
+          <h2>A <span class="hl">ficha-roteiro</span> da equipe</h2>
+          <div class="timer-box"><button class="timer" type="button" data-min="10">10:00</button><button class="timer-reset" type="button" aria-label="Reiniciar cronômetro">↺</button></div>
+        </div>
+        <div class="sheet">
+          <div><span class="n">1</span><h3>3 argumentos</h3><p>Os melhores das duplas, cada um com fonte.</p></div>
+          <div><span class="n">2</span><h3>Respostas</h3><p>O que o outro lado vai dizer e como respondemos.</p></div>
+          <div><span class="n">3</span><h3>Pergunta difícil</h3><p>A melhor das duas, para o júri.</p></div>
+          <div><span class="n">4</span><h3>Frase final</h3><p>Uma frase forte para fechar a defesa.</p></div>
+          <div><span class="n">5</span><h3>Quem faz o quê</h3><p>Abertura, réplica, perguntador, considerações e fontes.</p></div>
+        </div>
+        <div class="actions">
+          <p class="footline"><span aria-hidden="true">📥</span>A ficha fica com o professor até o júri.</p>
+          <button class="btn" type="button" id="print-btn">🖨️ Imprimir fichas (5 equipes)</button>
+        </div>
+        <aside class="note">10 min. Recolha as fichas no fim da aula e devolva no início do júri: assim nenhuma equipe esquece. O botão imprime 5 páginas A4, uma por equipe (a dos legisladores é diferente).</aside>
+      </section>
+
+      <!-- 14. Fechamento -->
+      <section class="slide" aria-label="Até o júri">
+        <div class="kicker">Fechamento</div>
+        <div class="center">
+          <div class="next-box">
+            <span class="emoji" aria-hidden="true">⚖️</span>
+            <div>
+              <h3>Próxima aula: <span>o júri começa</span></h3>
+              <p>Tragam a cabeça pronta. <strong>A ficha volta para vocês no início da aula</strong>, e cada um já sabe a sua função.</p>
+            </div>
+          </div>
+          <p class="reference">
+            <span class="label">Referências</span>
+            BUOLAMWINI, J.; GEBRU, T. Gender Shades: Intersectional Accuracy Disparities in Commercial Gender Classification. <em>Proceedings of Machine Learning Research</em>, v. 81, 2018.<br>
+            REDE DE OBSERVATÓRIOS DA SEGURANÇA. <em>Retratos da Violência</em>. CESeC, 2019.<br>
+            BRASIL. Lei nº 13.709/2018 (LGPD), art. 5º, II: dado biométrico é dado pessoal sensível.<br>
+            DESVELAR. <em>Mapeamento de Danos e Discriminação Algorítmica</em>. Disponível em: https://desvelar.org/casos-de-discriminacao-algoritmica/.
+          </p>
+        </div>
+        <aside class="note">Lembre a turma da regra mais importante: no júri, ataque a ideia, nunca a pessoa.</aside>
+      </section>
+
+    </main>
+
+    <aside class="notes" id="notes" aria-hidden="true" aria-live="polite">
+      <span class="tag" id="notes-tag">Nota · slide 1</span>
+      <p id="notes-text"></p>
+    </aside>
+
+    <nav class="nav" aria-label="Navegação dos slides">
+      <div class="progress">
+        <div class="progress-bar" aria-hidden="true"><span id="bar"></span></div>
+        <div class="progress-count" id="count" aria-live="polite"><strong>1</strong> / 14</div>
+        <span class="hint"><kbd>N</kbd> = notas · <kbd>T</kbd> = cronômetro · <kbd>F</kbd> = tela cheia</span>
+      </div>
+      <div class="buttons">
+        <button class="btn" id="prev" type="button">← Anterior</button>
+        <button class="btn primary" id="next" type="button">Próximo →</button>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<div id="print-area"></div>
+
+<script>
+  (function () {
+    var stage = document.getElementById('stage');
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var prev = document.getElementById('prev');
+    var next = document.getElementById('next');
+    var count = document.getElementById('count');
+    var bar = document.getElementById('bar');
+    var notes = document.getElementById('notes');
+    var notesTag = document.getElementById('notes-tag');
+    var notesText = document.getElementById('notes-text');
+    var total = slides.length;
+    var current = 0;
+
+    function fit() {
+      var scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      stage.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+    }
+
+    function show(n) {
+      current = Math.max(0, Math.min(total - 1, n));
+      slides.forEach(function (s, i) {
+        s.classList.toggle('active', i === current);
+        s.classList.toggle('before', i < current);
+        s.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+      });
+      count.innerHTML = '<strong>' + (current + 1) + '</strong> / ' + total;
+      bar.style.width = ((current + 1) / total * 100) + '%';
+      prev.disabled = current === 0;
+      next.disabled = current === total - 1;
+
+      var note = slides[current].querySelector('.note');
+      notesTag.textContent = 'Nota · slide ' + (current + 1);
+      notesText.textContent = note ? note.textContent.trim() : '';
+
+      if (history.replaceState) history.replaceState(null, '', '#' + (current + 1));
+    }
+
+    function toggleNotes() {
+      var open = notes.classList.toggle('open');
+      notes.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+
+    // Cronômetros: clique inicia/pausa, ↺ reinicia, apita ao acabar
+    var audio = null;
+
+    function beep() {
+      try {
+        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.35, 0.7].forEach(function (t) {
+          var o = audio.createOscillator();
+          var g = audio.createGain();
+          o.frequency.value = 880;
+          g.gain.setValueAtTime(0.25, audio.currentTime + t);
+          g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + t + 0.3);
+          o.connect(g);
+          g.connect(audio.destination);
+          o.start(audio.currentTime + t);
+          o.stop(audio.currentTime + t + 0.3);
+        });
+      } catch (err) {}
+    }
+
+    function fmt(s) {
+      var m = Math.floor(s / 60);
+      var r = s % 60;
+      return m + ':' + (r < 10 ? '0' : '') + r;
+    }
+
+    var timers = Array.prototype.slice.call(document.querySelectorAll('.timer')).map(function (el) {
+      var t = { el: el, full: parseInt(el.getAttribute('data-min'), 10) * 60, id: null };
+      t.left = t.full;
+
+      t.render = function () {
+        el.textContent = fmt(t.left);
+        el.classList.toggle('running', !!t.id);
+        el.classList.toggle('warn', t.left > 0 && t.left <= 60);
+        el.classList.toggle('done', t.left === 0);
+      };
+
+      t.toggle = function () {
+        if (t.id) { clearInterval(t.id); t.id = null; t.render(); return; }
+        if (t.left === 0) return;
+        t.id = setInterval(function () {
+          t.left -= 1;
+          if (t.left <= 0) { t.left = 0; clearInterval(t.id); t.id = null; beep(); }
+          t.render();
+        }, 1000);
+        t.render();
+      };
+
+      t.reset = function () {
+        if (t.id) clearInterval(t.id);
+        t.id = null;
+        t.left = t.full;
+        t.render();
+      };
+
+      el.addEventListener('click', t.toggle);
+      el.nextElementSibling.addEventListener('click', t.reset);
+      return t;
+    });
+
+    function slideTimer() {
+      var el = slides[current].querySelector('.timer');
+      for (var i = 0; i < timers.length; i++) if (timers[i].el === el) return timers[i];
+      return null;
+    }
+
+    prev.addEventListener('click', function () { show(current - 1); });
+    next.addEventListener('click', function () { show(current + 1); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      var t = e.target;
+      if (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(current + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(current - 1); }
+      else if (e.key === 'Home') { show(0); }
+      else if (e.key === 'End') { show(total - 1); }
+      else if (e.key === 'n' || e.key === 'N') { toggleNotes(); }
+      else if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
+      else if (e.key === 't' || e.key === 'T') { var tm = slideTimer(); if (tm) tm.toggle(); }
+      else if (e.key === 'r' || e.key === 'R') { var tr = slideTimer(); if (tr) tr.reset(); }
+    });
+
+    // Fichas-roteiro para imprimir: uma página por equipe
+    var TEAMS = [
+      { name: '🚔 Segurança pública', side: 'A FAVOR' },
+      { name: '💻 Empresa de tecnologia', side: 'A FAVOR' },
+      { name: '🙋 Cidadãos abordados por engano', side: 'CONTRA' },
+      { name: '🔬 Pesquisadores de direitos', side: 'CONTRA' }
+    ];
+
+    function rows(n, cls, cols) {
+      var html = '';
+      for (var i = 0; i < n; i++) {
+        html += '<tr>';
+        for (var c = 0; c < cols; c++) html += '<td class="' + cls + '"></td>';
+        html += '</tr>';
+      }
+      return html;
+    }
+
+    function head(name, side) {
+      return '<header><h1>Júri da IA · ' + name + '</h1><span class="lado">' + side + '</span></header>' +
+        '<p class="meta"><strong>Pergunta do júri:</strong> A nossa cidade deve usar reconhecimento facial nas ruas e nas escolas?<br>' +
+        '<strong>Integrantes:</strong> ______________________________________________________________________</p>';
+    }
+
+    var html = TEAMS.map(function (tm) {
+      return '<section class="ficha">' + head(tm.name, tm.side) +
+        '<h2>1. Nossos 3 argumentos</h2><table><tr><th style="width:62%">Argumento</th><th>Fonte (site, estudo ou lei)</th></tr>' + rows(3, 'lines', 2) + '</table>' +
+        '<h2>2. O que o outro lado vai dizer, e como respondemos</h2><table><tr><th style="width:50%">Eles vão dizer…</th><th>Nós respondemos…</th></tr>' + rows(2, 'lines', 2) + '</table>' +
+        '<h2>3. Perguntas difíceis para o lado oposto</h2><p class="tip">Marque com ★ a que será usada no júri.</p><table>' + rows(2, 'short', 1) + '</table>' +
+        '<h2>4. Frase final (considerações finais)</h2><div class="box"></div>' +
+        '<h2>5. Quem faz o quê</h2><table>' +
+        '<tr><th style="width:30%">🎤 Abertura</th><td></td></tr><tr><th>🔁 Réplica</th><td></td></tr><tr><th>❓ Perguntador</th><td></td></tr>' +
+        '<tr><th>📌 Considerações finais</th><td></td></tr><tr><th>📚 Fontes (2 alunos)</th><td></td></tr></table></section>';
+    }).join('');
+
+    html += '<section class="ficha">' + head('⚖️ Comissão de legisladores', 'JURADOS') +
+      '<h2>1. O que a lei já diz</h2><table><tr><th style="width:62%">O que descobrimos</th><th>Fonte</th></tr>' + rows(2, 'lines', 2) + '</table>' +
+      '<h2>2. Como outros lugares decidiram</h2><table><tr><th style="width:30%">Lugar</th><th>Decisão (proibiu, limitou ou liberou)</th></tr>' + rows(2, 'short', 2) + '</table>' +
+      '<h2>3. Perguntas para os dois lados</h2><table><tr><th style="width:50%">Para o lado A FAVOR</th><th>Para o lado CONTRA</th></tr>' + rows(2, 'lines', 2) + '</table>' +
+      '<h2>4. Nossos critérios para decidir</h2><p class="tip">O que vai pesar mais na decisão? Ex.: segurança, erros com inocentes, privacidade, custo.</p><div class="box"></div>' +
+      '<h2>5. Rascunho da "Lei da turma" (caso a decisão seja "sim, com regras")</h2><table>' + rows(3, 'short', 1) + '</table>' +
+      '<h2>6. Quem faz o quê</h2><table>' +
+      '<tr><th style="width:30%">🔨 Presidente (anuncia o veredito)</th><td></td></tr><tr><th>⏱️ Cronometrista</th><td></td></tr>' +
+      '<tr><th>📝 Relatores (anotam)</th><td></td></tr><tr><th>❓ Perguntadores</th><td></td></tr></table></section>';
+
+    document.getElementById('print-area').innerHTML = html;
+    document.getElementById('print-btn').addEventListener('click', function () { window.print(); });
+
+    window.addEventListener('resize', fit);
+    fit();
+
+    var start = parseInt(location.hash.slice(1), 10);
+    show(isNaN(start) ? 0 : start - 1);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { document.body.classList.remove('no-anim'); });
+    });
+  })();
+</script>
+</body>
+</html>
