@@ -1,0 +1,3218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrada, Processamento e Saída — O Segredo da Computação | 6º Ano</title>
+  <meta name="description"
+    content="Slide de apoio didático e interativo em tema claro para o 6º ano do Ensino Fundamental. Habilidade BNCC EF06CO05: Entrada, Processamento e Saída na resolução de problemas.">
+
+  <!-- Fontes Google com excelente legibilidade e visual amigável -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       RESET & DESIGN SYSTEM TOKENS (TEMA CLARO DIDÁTICO PARA SALA DE AULA)
+       ========================================================================== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      /* Tipografia */
+      --font-display: 'Fredoka', cursive, system-ui, sans-serif;
+      --font-body: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+      /* Cores de Fundo (Tema Claro Suave, sem cansar os olhos) */
+      --bg-page: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-subtle: #f1f5f9;
+      --bg-surface-hover: #e2e8f0;
+
+      /* Cores Didáticas dos Conceitos EPS */
+      --color-input: #0284c7;
+      /* 📥 Entrada (Azul Celeste) */
+      --color-input-light: #e0f2fe;
+      --color-input-border: #bae6fd;
+      --color-input-dark: #0369a1;
+
+      --color-proc: #ea580c;
+      /* ⚙️ Processamento (Laranja Energético) */
+      --color-proc-light: #ffedd5;
+      --color-proc-border: #fed7aa;
+      --color-proc-dark: #c2410c;
+
+      --color-output: #059669;
+      /* 📤 Saída (Verde Esmeralda) */
+      --color-output-light: #dcfce7;
+      --color-output-border: #bbf7d0;
+      --color-output-dark: #047857;
+
+      /* Destaques e Tipos de Dados */
+      --color-num: #2563eb;
+      /* 🔢 Números */
+      --color-num-light: #dbeafe;
+      --color-txt: #9333ea;
+      /* 🔤 Texto / Palavras */
+      --color-txt-light: #f3e8ff;
+      --color-accent: #f59e0b;
+      /* Amarelo Estrela / Atenção */
+      --color-accent-light: #fef3c7;
+
+      /* Textos com Alto Contraste para Projetores */
+      --text-main: #0f172a;
+      /* Slate 900 */
+      --text-secondary: #334155;
+      /* Slate 700 */
+      --text-muted: #64748b;
+      /* Slate 500 */
+      --text-white: #ffffff;
+
+      /* Bordas e Sombras */
+      --border-subtle: #e2e8f0;
+      --border-card: #cbd5e1;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+      --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --shadow-float: 0 20px 35px -8px rgba(15, 23, 42, 0.12), 0 10px 15px -5px rgba(15, 23, 42, 0.06);
+      --radius-sm: 12px;
+      --radius-md: 18px;
+      --radius-lg: 24px;
+      --radius-full: 9999px;
+
+      --tr-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --tr-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      background-image:
+        radial-gradient(#cbd5e1 1.2px, transparent 1.2px),
+        radial-gradient(#e2e8f0 1.2px, #f8fafc 1.2px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
+    }
+
+    /* ==========================================================================
+       BARRA SUPERIOR (HEADER HUD)
+       ========================================================================== */
+    .deck-header {
+      height: 64px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+      position: relative;
+    }
+
+    .progress-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: #e2e8f0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 11.11%;
+      background: linear-gradient(90deg, var(--color-input), var(--color-proc), var(--color-output));
+      transition: width var(--tr-normal);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--color-input-light), #bae6fd);
+      border: 2px solid var(--color-input);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 700;
+      background: var(--color-proc-light);
+      color: var(--color-proc-dark);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-proc-border);
+      letter-spacing: 0.5px;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .slide-counter {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-surface-subtle);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-tool {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-card);
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--tr-fast);
+    }
+
+    .btn-tool:hover {
+      background: var(--bg-surface-subtle);
+      border-color: var(--color-input);
+      color: var(--color-input-dark);
+      transform: translateY(-1px);
+    }
+
+    /* ==========================================================================
+       CONTAINER PRINCIPAL DO DECK DE SLIDES (ROBUSTO E FLEXÍVEL)
+       ========================================================================== */
+    .deck-stage {
+      flex: 1;
+      min-height: 0;
+      /* CRÍTICO: Permite que os slides ocupem a altura exata sem colapsar */
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 16px 24px;
+    }
+
+    .slide-canvas {
+      width: 100%;
+      max-width: 1360px;
+      height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      /* Ocupa 100% da área do canvas */
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.98) translateY(12px);
+      transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      border: 2px solid rgba(203, 213, 225, 0.85);
+      box-shadow: var(--shadow-card);
+      padding: 28px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+      z-index: 10;
+    }
+
+    /* Cabeçalho de cada Slide */
+    .slide-header-wrap {
+      flex-shrink: 0;
+      margin-bottom: 12px;
+    }
+
+    .slide-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      padding: 3px 12px;
+      border-radius: var(--radius-full);
+      width: fit-content;
+    }
+
+    .eyebrow-blue {
+      background: var(--color-input-light);
+      color: var(--color-input-dark);
+      border: 1px solid var(--color-input-border);
+    }
+
+    .eyebrow-orange {
+      background: var(--color-proc-light);
+      color: var(--color-proc-dark);
+      border: 1px solid var(--color-proc-border);
+    }
+
+    .eyebrow-green {
+      background: var(--color-output-light);
+      color: var(--color-output-dark);
+      border: 1px solid var(--color-output-border);
+    }
+
+    .eyebrow-purple {
+      background: var(--color-txt-light);
+      color: var(--color-txt);
+      border: 1px solid #e9d5ff;
+    }
+
+    .slide-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2.5vw, 2.3rem);
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.18;
+      margin-bottom: 6px;
+    }
+
+    .slide-desc {
+      font-size: clamp(1rem, 1.3vw, 1.2rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      line-height: 1.4;
+      max-width: 950px;
+    }
+
+    .slide-content-area {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    /* ==========================================================================
+       SLIDE 1: CAPA
+       ========================================================================== */
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: center;
+      gap: 36px;
+      height: 100%;
+    }
+
+    .hero-text-side {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 3.8vw, 3.3rem);
+      line-height: 1.12;
+      color: var(--text-main);
+    }
+
+    .hero-title .highlight-input {
+      color: var(--color-input);
+      text-decoration: underline wavy var(--color-input-border);
+      text-underline-offset: 6px;
+    }
+
+    .hero-title .highlight-proc {
+      color: var(--color-proc);
+    }
+
+    .hero-title .highlight-output {
+      color: var(--color-output);
+      text-decoration: underline wavy var(--color-output-border);
+      text-underline-offset: 6px;
+    }
+
+    .hero-lead {
+      font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .hero-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 6px 0;
+    }
+
+    .feature-tag {
+      background: var(--bg-surface-subtle);
+      border: 1.5px solid var(--border-subtle);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-hero-cta {
+      background: linear-gradient(135deg, var(--color-input), #0369a1);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      box-shadow: 0 10px 20px rgba(2, 132, 199, 0.3);
+      transition: all var(--tr-fast);
+    }
+
+    .btn-hero-cta:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 14px 26px rgba(2, 132, 199, 0.4);
+    }
+
+    .hero-visual-side {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-svg-wrap {
+      width: 100%;
+      max-width: 400px;
+      animation: gentleFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes gentleFloat {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    /* ==========================================================================
+       SLIDE 2: GANCHO INICIAL (CAFÉ DA MANHÃ)
+       ========================================================================== */
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .story-card {
+      background: var(--bg-surface);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+      text-align: center;
+      transition: all var(--tr-fast);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .story-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-float);
+    }
+
+    .story-card.card-before {
+      border-color: var(--color-input-border);
+      background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+    }
+
+    .story-card.card-during {
+      border-color: var(--color-proc-border);
+      background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+    }
+
+    .story-card.card-after {
+      border-color: var(--color-output-border);
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    }
+
+    .story-card-tag {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+    }
+
+    .card-before .story-card-tag {
+      background: var(--color-input-light);
+      color: var(--color-input-dark);
+    }
+
+    .card-during .story-card-tag {
+      background: var(--color-proc-light);
+      color: var(--color-proc-dark);
+    }
+
+    .card-after .story-card-tag {
+      background: var(--color-output-light);
+      color: var(--color-output-dark);
+    }
+
+    .story-icon-box {
+      width: 76px;
+      height: 76px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2px auto;
+    }
+
+    .story-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      color: var(--text-main);
+    }
+
+    .story-card p {
+      font-size: 0.98rem;
+      color: var(--text-secondary);
+      line-height: 1.38;
+    }
+
+    .story-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--color-proc);
+    }
+
+    .story-connector svg {
+      width: 32px;
+      height: 32px;
+      stroke-width: 2.5;
+    }
+
+    .takeaway-box {
+      background: #eff6ff;
+      border-left: 6px solid var(--color-input);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 18px;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    /* ==========================================================================
+       SLIDE 3: O PADRÃO DE OURO (EPS + SIMULADOR DO LIQUIDIFICADOR)
+       ========================================================================== */
+    .eps-hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .eps-column {
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      position: relative;
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .eps-input {
+      background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 100%);
+      border-color: var(--color-input-border);
+    }
+
+    .eps-proc {
+      background: linear-gradient(180deg, #fff7ed 0%, #ffffff 100%);
+      border-color: var(--color-proc-border);
+    }
+
+    .eps-output {
+      background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+      border-color: var(--color-output-border);
+    }
+
+    .eps-badge {
+      align-self: flex-start;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: var(--radius-full);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .eps-input .eps-badge {
+      background: var(--color-input);
+      color: #fff;
+    }
+
+    .eps-proc .eps-badge {
+      background: var(--color-proc);
+      color: #fff;
+    }
+
+    .eps-output .eps-badge {
+      background: var(--color-output);
+      color: #fff;
+    }
+
+    .eps-subtitle {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .eps-input .eps-subtitle {
+      color: var(--color-input-dark);
+    }
+
+    .eps-proc .eps-subtitle {
+      color: var(--color-proc-dark);
+    }
+
+    .eps-output .eps-subtitle {
+      color: var(--color-output-dark);
+    }
+
+    .eps-column p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Simulador de Liquidificador */
+    .blender-sim-box {
+      background: #ffffff;
+      border: 2px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .blender-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-ingredient {
+      background: var(--bg-surface-subtle);
+      border: 1.5px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 6px 12px;
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--tr-fast);
+    }
+
+    .btn-ingredient.selected {
+      background: var(--color-input-light);
+      border-color: var(--color-input);
+      color: var(--color-input-dark);
+      box-shadow: 0 0 0 2px var(--color-input);
+    }
+
+    .blender-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .blender-graphic {
+      width: 90px;
+      height: 105px;
+      position: relative;
+    }
+
+    .blender-graphic.spinning svg .blender-blades {
+      animation: bladeSpin 0.15s linear infinite;
+      transform-origin: 50px 80px;
+    }
+
+    @keyframes bladeSpin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .btn-action-blend {
+      background: linear-gradient(135deg, var(--color-proc), var(--color-proc-dark));
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3);
+      transition: all var(--tr-fast);
+    }
+
+    .btn-action-blend:hover {
+      transform: scale(1.04);
+    }
+
+    .blender-output-card {
+      min-width: 200px;
+      padding: 10px 16px;
+      background: var(--color-output-light);
+      border: 2px dashed var(--color-output);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
+
+    .blender-output-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--color-output-dark);
+      text-transform: uppercase;
+    }
+
+    .blender-output-result {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      color: var(--color-output-dark);
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       SLIDE 4: MÁQUINA DE SALGADOS / VENDING MACHINE
+       ========================================================================== */
+    .vending-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: center;
+      height: 100%;
+    }
+
+    .vending-visual-card {
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      border: 2px solid #94a3b8;
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .vending-details {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .eps-row-card {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border-subtle);
+      background: var(--bg-surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .eps-row-card.row-in {
+      border-left: 6px solid var(--color-input);
+    }
+
+    .eps-row-card.row-pr {
+      border-left: 6px solid var(--color-proc);
+    }
+
+    .eps-row-card.row-out {
+      border-left: 6px solid var(--color-output);
+    }
+
+    .eps-row-tag {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .row-in .eps-row-tag {
+      color: var(--color-input);
+    }
+
+    .row-pr .eps-row-tag {
+      color: var(--color-proc);
+    }
+
+    .row-out .eps-row-tag {
+      color: var(--color-output);
+    }
+
+    .eps-row-content p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.38;
+    }
+
+    .highlight-pill {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-card);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .vending-interactive-prompt {
+      background: #fefce8;
+      border: 2px solid #fef08a;
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .prompt-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #854d0e;
+    }
+
+    .btn-reveal-vending {
+      background: #ca8a04;
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all var(--tr-fast);
+      white-space: nowrap;
+    }
+
+    .btn-reveal-vending:hover {
+      background: #a16207;
+    }
+
+    .vending-reveal-answer {
+      display: none;
+      margin-top: 8px;
+      font-size: 0.98rem;
+      color: #713f12;
+      background: #fffbeb;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      border-left: 4px solid #ca8a04;
+    }
+
+    /* ==========================================================================
+       SLIDE 5: SEMÁFORO E PREVISÃO DO TEMPO
+       ========================================================================== */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .compare-card {
+      background: var(--bg-surface);
+      border: 2px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .compare-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 2px solid var(--border-subtle);
+      padding-bottom: 10px;
+    }
+
+    .compare-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      background: var(--bg-surface-subtle);
+    }
+
+    .compare-title h3 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      color: var(--text-main);
+    }
+
+    .compare-title span {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .mini-eps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mini-eps-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.38;
+    }
+
+    .mini-badge {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .mb-in {
+      background: var(--color-input-light);
+      color: var(--color-input-dark);
+    }
+
+    .mb-pr {
+      background: var(--color-proc-light);
+      color: var(--color-proc-dark);
+    }
+
+    .mb-out {
+      background: var(--color-output-light);
+      color: var(--color-output-dark);
+    }
+
+    .bottom-insight-bar {
+      background: #faf5ff;
+      border: 1.5px solid #e9d5ff;
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-size: 1.05rem;
+      color: #6b21a8;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+      margin-top: 6px;
+    }
+
+    /* ==========================================================================
+       SLIDE 6: TIPOS DE DADOS (NÚMEROS X PALAVRAS)
+       ========================================================================== */
+    .data-types-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .type-card {
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 2px solid transparent;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .type-num {
+      background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+      border-color: #bfdbfe;
+    }
+
+    .type-txt {
+      background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+      border-color: #e9d5ff;
+    }
+
+    .type-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .type-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .type-num .type-badge {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .type-txt .type-badge {
+      background: #f3e8ff;
+      color: #7e22ce;
+    }
+
+    .type-header h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+    }
+
+    .type-card p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.38;
+    }
+
+    .examples-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .ex-pill {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: #ffffff;
+      border: 1.5px solid var(--border-card);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .type-num .ex-pill {
+      color: #1d4ed8;
+      border-color: #93c5fd;
+    }
+
+    .type-txt .ex-pill {
+      color: #7e22ce;
+      border-color: #d8b4fe;
+    }
+
+    /* Mini Quiz */
+    .mini-quiz-box {
+      background: #ffffff;
+      border: 2px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .quiz-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quiz-cards-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .quiz-item {
+      background: var(--bg-surface-subtle);
+      border: 2px dashed var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--tr-fast);
+    }
+
+    .quiz-item:hover {
+      border-color: var(--color-txt);
+      transform: translateY(-2px);
+    }
+
+    .quiz-label {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+    }
+
+    .quiz-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .quiz-item.revealed {
+      border-style: solid;
+      background: #ffffff;
+    }
+
+    .quiz-item.revealed.rev-num {
+      border-color: var(--color-num);
+      background: var(--color-num-light);
+    }
+
+    .quiz-item.revealed.rev-txt {
+      border-color: var(--color-txt);
+      background: var(--color-txt-light);
+    }
+
+    /* ==========================================================================
+       SLIDE 7: ATIVIDADE DOS DETETIVES (6 SITUAÇÕES-PROBLEMA)
+       ========================================================================== */
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      align-content: center;
+    }
+
+    .case-card {
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all var(--tr-fast);
+      position: relative;
+    }
+
+    .case-card:hover {
+      border-color: var(--color-input);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .case-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .case-number {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-full);
+      background: var(--text-main);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .case-emoji {
+      font-size: 1.4rem;
+    }
+
+    .case-card h4 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .case-scenario {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.32;
+      flex: 1;
+    }
+
+    .btn-toggle-case {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 5px 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all var(--tr-fast);
+      margin-top: auto;
+    }
+
+    .btn-toggle-case:hover {
+      background: #eff6ff;
+      border-color: var(--color-input);
+      color: var(--color-input-dark);
+    }
+
+    .case-breakdown {
+      display: none;
+      background: #f8fafc;
+      border-top: 1.5px solid var(--border-subtle);
+      padding-top: 6px;
+      font-size: 0.8rem;
+      line-height: 1.3;
+      color: var(--text-secondary);
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .case-breakdown.open {
+      display: flex;
+    }
+
+    /* ==========================================================================
+       SLIDE 8: FECHAMENTO (FRASE-CHAVE)
+       ========================================================================== */
+    .keyphrase-layout {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      gap: 24px;
+    }
+
+    .quote-hero-box {
+      background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+      border: 3px solid var(--color-input);
+      border-radius: var(--radius-lg);
+      padding: 36px 44px;
+      box-shadow: var(--shadow-float);
+      max-width: 1020px;
+      position: relative;
+    }
+
+    .quote-hero-box::before {
+      content: "“";
+      position: absolute;
+      top: -20px;
+      left: 24px;
+      font-family: var(--font-display);
+      font-size: 5rem;
+      color: var(--color-input-border);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .key-phrase {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .key-phrase .word-problem {
+      color: var(--color-proc);
+      text-decoration: underline wavy var(--color-proc-border);
+    }
+
+    .key-phrase .word-in {
+      color: var(--color-input);
+      background: var(--color-input-light);
+      padding: 2px 10px;
+      border-radius: 8px;
+    }
+
+    .key-phrase .word-out {
+      color: var(--color-output);
+      background: var(--color-output-light);
+      padding: 2px 10px;
+      border-radius: 8px;
+    }
+
+    .quote-bridge-concept {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 20px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+
+    .bridge-node {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      background: #fff;
+      border: 2px solid var(--border-card);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .notebook-tip-card {
+      background: #fefce8;
+      border: 2px dashed #ca8a04;
+      border-radius: var(--radius-md);
+      padding: 14px 24px;
+      font-size: 1.05rem;
+      color: #713f12;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 880px;
+    }
+
+    /* ==========================================================================
+       SLIDE 9: GANCHO PARA A PRÓXIMA AULA (ALGORITMOS)
+       ========================================================================== */
+    .teaser-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 32px;
+      align-items: center;
+      height: 100%;
+    }
+
+    .teaser-robot-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 12px;
+    }
+
+    .teaser-robot-frame {
+      width: 100%;
+      max-width: 320px;
+      animation: gentleFloat 3.5s ease-in-out infinite;
+    }
+
+    .teaser-content-side {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .teaser-question-card {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffffff 100%);
+      border: 2px solid var(--color-proc-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .teaser-question-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      color: var(--color-proc-dark);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .teaser-question-card p {
+      font-size: 1.08rem;
+      color: var(--text-secondary);
+      line-height: 1.42;
+    }
+
+    .teaser-points-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .teaser-point-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.38;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+
+    .teaser-point-item .tp-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+
+    .next-episode-banner {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      color: #fff;
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+    }
+
+    .next-banner-text h4 {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #e9d5ff;
+    }
+
+    .next-banner-text p {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 2px;
+    }
+
+    .btn-restart-deck {
+      background: #ffffff;
+      color: #7c3aed;
+      border: none;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--tr-fast);
+      white-space: nowrap;
+    }
+
+    .btn-restart-deck:hover {
+      background: #f3e8ff;
+      transform: scale(1.05);
+    }
+
+    /* ==========================================================================
+       BARRA INFERIOR DE CONTROLES (NAVIGATION DOCK)
+       ========================================================================== */
+    .deck-footer {
+      height: 76px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(12px);
+      border-top: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      z-index: 100;
+      position: relative;
+    }
+
+    .nav-hints {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .kbd-chip {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-card);
+      border-bottom: 2px solid var(--border-card);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-family: monospace;
+      font-weight: 700;
+      color: var(--text-main);
+      font-size: 0.85rem;
+    }
+
+    .nav-dots-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .slide-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: var(--radius-full);
+      background: #cbd5e1;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--tr-fast);
+    }
+
+    .slide-dot:hover {
+      background: #94a3b8;
+      transform: scale(1.2);
+    }
+
+    .slide-dot.active {
+      width: 32px;
+      background: var(--color-input);
+      border-color: var(--color-input-light);
+    }
+
+    .nav-buttons-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-nav {
+      background: var(--bg-surface);
+      border: 2px solid var(--border-card);
+      color: var(--text-main);
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--tr-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      background: var(--bg-surface-subtle);
+      border-color: var(--color-input);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-nav-primary {
+      background: linear-gradient(135deg, var(--color-input), #0369a1);
+      color: #fff;
+      border-color: #0284c7;
+    }
+
+    .btn-nav-primary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0284c7, #075985);
+      border-color: #0369a1;
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       MODAL DE GRADE DE SLIDES (OVERVIEW / ESCAPE)
+       ========================================================================== */
+    .grid-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--tr-normal);
+      padding: 30px;
+    }
+
+    .grid-modal.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .grid-modal-container {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 1120px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .grid-modal-header {
+      padding: 18px 24px;
+      border-bottom: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .grid-modal-header h2 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-close-grid {
+      background: var(--bg-surface-subtle);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all var(--tr-fast);
+    }
+
+    .btn-close-grid:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+
+    .grid-modal-body {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .grid-thumb-card {
+      background: var(--bg-surface-subtle);
+      border: 2px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      cursor: pointer;
+      transition: all var(--tr-fast);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .grid-thumb-card:hover {
+      border-color: var(--color-input);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-card);
+      background: #ffffff;
+    }
+
+    .grid-thumb-card.current {
+      border-color: var(--color-input);
+      background: var(--color-input-light);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25);
+    }
+
+    .grid-thumb-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .grid-thumb-card.current .grid-thumb-top {
+      color: var(--color-input-dark);
+    }
+
+    .grid-thumb-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    /* ==========================================================================
+       RESPONSIVIDADE (TELA CHEIA, PROJETORES, TABLETS & CELULARES)
+       ========================================================================== */
+    @media (max-width: 1024px) {
+      .hero-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .hero-visual-side {
+        display: none;
+      }
+
+      .hero-features {
+        justify-content: center;
+      }
+
+      .btn-hero-cta {
+        margin: 0 auto;
+      }
+
+      .story-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .story-connector {
+        transform: rotate(90deg);
+        margin: 4px 0;
+      }
+
+      .eps-hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .blender-sim-box {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .blender-controls {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .vending-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .vending-visual-card {
+        display: none;
+      }
+
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .data-types-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-cards-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cases-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .teaser-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .teaser-robot-side {
+        display: none;
+      }
+
+      .grid-modal-body {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .deck-header {
+        padding: 0 12px;
+      }
+
+      .brand-text h1 span {
+        display: none;
+      }
+
+      .slide {
+        padding: 18px 14px;
+        border-radius: var(--radius-md);
+      }
+
+      .nav-hints {
+        display: none;
+      }
+
+      .deck-footer {
+        padding: 0 12px;
+      }
+
+      .btn-nav {
+        padding: 8px 12px;
+        font-size: 0.95rem;
+      }
+
+      .cases-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quiz-cards-row {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-modal-body {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ==========================================================================
+       BARRA SUPERIOR (HEADER HUD)
+       ========================================================================== -->
+  <header class="deck-header">
+    <div class="progress-track" aria-hidden="true">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="header-brand">
+      <div class="brand-icon" title="Entrada, Processamento e Saída">⚡</div>
+      <div class="brand-text">
+        <h1>Computação - EPS <span>• 6º Ano</span></h1>
+      </div>
+      <span class="brand-badge">BNCC EF06CO05</span>
+    </div>
+
+    <div class="header-meta">
+      <div class="slide-counter" id="slideCounter">Slide 1 de 9</div>
+
+      <button class="btn-tool" id="btnAudioToggle" title="Ativar/Desativar Efeitos Sonoros">
+        <span id="audioIcon">🔊</span> Som
+      </button>
+
+      <button class="btn-tool" id="btnGridToggle" title="Ver Grade de Todos os Slides (G ou Esc)">
+        <span>⊞</span> Grade
+      </button>
+
+      <button class="btn-tool" id="btnFullscreenToggle" title="Tela Cheia para Projeção (F)">
+        <span>⛶</span> Tela Cheia
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       STAGE PRINCIPAL DO DECK DE SLIDES
+       ========================================================================== -->
+  <main class="deck-stage">
+    <div class="slide-canvas">
+
+      <!-- ====================================================================
+           SLIDE 1: CAPA
+           ==================================================================== -->
+      <section class="slide active" data-slide="1" id="slide-1">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-blue">
+            <span>💡 6º Ano do Ensino Fundamental</span>
+            <span>•</span>
+            <span>Pensamento Computacional</span>
+          </div>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="hero-layout">
+            <div class="hero-text-side">
+              <h2 class="hero-title">
+                O que é um "Problema" para um Computador?
+              </h2>
+              <p class="hero-lead">
+                Spoiler: Não é uma bronca na escola nem uma conta assustadora!
+                Para a computação, resolver um problema é uma ponte mágica entre
+                <strong class="highlight-input">o que ENTRA</strong> e
+                <strong class="highlight-output">o que SAI</strong>.
+              </p>
+
+              <div class="hero-features">
+                <div class="feature-tag">📥 Entrada (Input)</div>
+                <div class="feature-tag">⚙️ Processamento</div>
+                <div class="feature-tag">📤 Saída (Output)</div>
+                <div class="feature-tag">🔢 Números & Palavras</div>
+              </div>
+
+              <button class="btn-hero-cta" id="btnStartDeck">
+                Começar a Aventura <span>➔</span>
+              </button>
+            </div>
+
+            <div class="hero-visual-side">
+              <div class="hero-svg-wrap">
+                <!-- Ilustração SVG Lúdica EPS Ajustada -->
+                <svg viewBox="0 0 460 300" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  style="width: 100%; height: auto;">
+                  <!-- Fundo Suave -->
+                  <rect x="8" y="8" width="444" height="284" rx="24" fill="#F0F9FF" stroke="#BAE6FD" stroke-width="2.5"
+                    stroke-dasharray="6 6" />
+
+                  <!-- Caixa Entrada (Azul) -->
+                  <g transform="translate(25, 105)">
+                    <rect width="90" height="90" rx="18" fill="#0284C7" />
+                    <rect x="5" y="5" width="80" height="80" rx="14" fill="#38BDF8" />
+                    <text x="45" y="44" font-family="'Fredoka', cursive" font-size="28" fill="#FFFFFF"
+                      text-anchor="middle">📥</text>
+                    <text x="45" y="70" font-family="'Fredoka', cursive" font-weight="bold" font-size="12"
+                      fill="#FFFFFF" text-anchor="middle">ENTRADA</text>
+                  </g>
+
+                  <!-- Seta 1 -->
+                  <path d="M125 150 L160 150" stroke="#0284C7" stroke-width="4" stroke-linecap="round"
+                    stroke-dasharray="4 4" />
+                  <polygon points="168,150 158,143 158,157" fill="#0284C7" />
+
+                  <!-- Caixa Processamento (Laranja) -->
+                  <g transform="translate(175, 90)">
+                    <rect width="110" height="110" rx="22" fill="#EA580C" />
+                    <rect x="6" y="6" width="98" height="98" rx="18" fill="#FB923C" />
+                    <circle cx="55" cy="48" r="18" fill="#FFF7ED" />
+                    <circle cx="55" cy="48" r="8" fill="#EA580C" />
+                    <text x="55" y="88" font-family="'Fredoka', cursive" font-weight="bold" font-size="10.5"
+                      fill="#FFFFFF" text-anchor="middle">TRANSFORMAÇÃO</text>
+                  </g>
+
+                  <!-- Seta 2 -->
+                  <path d="M295 150 L330 150" stroke="#059669" stroke-width="4" stroke-linecap="round"
+                    stroke-dasharray="4 4" />
+                  <polygon points="338,150 328,143 328,157" fill="#059669" />
+
+                  <!-- Caixa Saída (Verde) -->
+                  <g transform="translate(345, 105)">
+                    <rect width="90" height="90" rx="18" fill="#059669" />
+                    <rect x="5" y="5" width="80" height="80" rx="14" fill="#34D399" />
+                    <text x="45" y="44" font-family="'Fredoka', cursive" font-size="28" fill="#FFFFFF"
+                      text-anchor="middle">📤</text>
+                    <text x="45" y="70" font-family="'Fredoka', cursive" font-weight="bold" font-size="12"
+                      fill="#FFFFFF" text-anchor="middle">SAÍDA</text>
+                  </g>
+
+                  <!-- Brilhos Decorativos -->
+                  <text x="35" y="50" font-size="20">✨</text>
+                  <text x="405" y="55" font-size="20">🎉</text>
+                  <text x="220" y="250" font-size="18">💡</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 2: GANCHO INICIAL (CAFÉ DA MANHÃ)
+           ==================================================================== -->
+      <section class="slide" data-slide="2" id="slide-2">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-orange">
+            <span>☕ Cenário Real</span>
+            <span>•</span>
+            <span>O Mistério do Café da Manhã</span>
+          </div>
+          <h2 class="slide-title">Como as coisas se transformam no seu dia a dia?</h2>
+          <p class="slide-desc">
+            Imagine que você acordou com fome e quer preparar algo especial antes de ir para a escola.
+            Observe com atenção os três momentos dessa missão:
+          </p>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="story-grid">
+            <!-- Antes -->
+            <div class="story-card card-before">
+              <span class="story-card-tag">1. O Começo</span>
+              <div class="story-icon-box" style="background: #e0f2fe;">
+                <span style="font-size: 2.3rem;">🍌🥛🍫</span>
+              </div>
+              <h3>Os Ingredientes</h3>
+              <p>Uma banana madura, leite geladinho e achocolatado. Estão todos separados.</p>
+            </div>
+
+            <!-- Conector 1 -->
+            <div class="story-connector">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span style="font-weight: 700; font-size: 0.8rem;">ENTRAM NO</span>
+            </div>
+
+            <!-- Meio -->
+            <div class="story-card card-during">
+              <span class="story-card-tag">2. O Meio</span>
+              <div class="story-icon-box" style="background: #ffedd5;">
+                <span style="font-size: 2.3rem;">🌪️⚡</span>
+              </div>
+              <h3>O Liquidificador</h3>
+              <p>Você aperta o botão. As lâminas giram a mil por hora misturando tudo!</p>
+            </div>
+
+            <!-- Conector 2 -->
+            <div class="story-connector">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span style="font-weight: 700; font-size: 0.8rem;">VIRA A</span>
+            </div>
+
+            <!-- Fim -->
+            <div class="story-card card-after">
+              <span class="story-card-tag">3. O Resultado</span>
+              <div class="story-icon-box" style="background: #dcfce7;">
+                <span style="font-size: 2.3rem;">🥤✨</span>
+              </div>
+              <h3>Vitamina Prontinha!</h3>
+              <p>Um copo cremoso e geladinho pronto para beber. Missão cumprida!</p>
+            </div>
+          </div>
+
+          <div class="takeaway-box">
+            <span style="font-size: 1.6rem;">💡</span>
+            <div>
+              <strong>Pense nisso:</strong> A vitamina não surgiu do nada no copo!
+              Você precisou de coisas no início (ingredientes) e de uma ação que transformou tudo.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 3: O PADRÃO DE OURO (EPS + SIMULADOR DO LIQUIDIFICADOR)
+           ==================================================================== -->
+      <section class="slide" data-slide="3" id="slide-3">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-blue">
+            <span>📐 O Modelo Universal</span>
+            <span>•</span>
+            <span>Entrada, Processamento e Saída</span>
+          </div>
+          <h2 class="slide-title">O Ciclo que Move Todas as Máquinas do Planeta!</h2>
+          <p class="slide-desc">
+            Do liquidificador da sua cozinha ao videogame mais moderno do mundo, tudo segue a mesma regra mágica de 3
+            passos:
+          </p>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="eps-hero-grid">
+            <!-- Bloco E -->
+            <div class="eps-column eps-input">
+              <span class="eps-badge">📥 1. ENTRADA (Input)</span>
+              <span class="eps-subtitle">O que entra na máquina</span>
+              <p>
+                Ingredientes, comandos, números, toques na tela ou informações que você coloca <strong>para
+                  dentro</strong> do sistema.
+              </p>
+            </div>
+
+            <!-- Bloco P -->
+            <div class="eps-column eps-proc">
+              <span class="eps-badge">⚙️ 2. PROCESSAMENTO</span>
+              <span class="eps-subtitle">A transformação</span>
+              <p>
+                O trabalho que a máquina faz! Pode ser <strong>calcular</strong>, <strong>misturar</strong>,
+                <strong>organizar</strong> ou seguir regras bem rápido.
+              </p>
+            </div>
+
+            <!-- Bloco S -->
+            <div class="eps-column eps-output">
+              <span class="eps-badge">📤 3. SAÍDA (Output)</span>
+              <span class="eps-subtitle">O resultado pronto</span>
+              <p>
+                O que a máquina entrega para você depois do trabalho: uma tela com mensagem, um lanche pronto ou um som
+                útil!
+              </p>
+            </div>
+          </div>
+
+          <!-- Laboratório Interativo: Simulador do Liquidificador -->
+          <div class="blender-sim-box">
+            <div class="blender-controls">
+              <strong style="font-size: 0.9rem; color: var(--text-main);">1. Escolha a Entrada:</strong>
+              <div style="display: flex; gap: 8px;">
+                <button class="btn-ingredient selected" data-item="banana">🍌 Banana</button>
+                <button class="btn-ingredient selected" data-item="morango">🍓 Morango</button>
+                <button class="btn-ingredient" data-item="chocolate">🍫 Chocolate</button>
+              </div>
+            </div>
+
+            <div class="blender-center">
+              <div class="blender-graphic" id="blenderGraphic">
+                <svg viewBox="0 0 100 120" style="width: 100%; height: 100%;">
+                  <!-- Copo de Vidro -->
+                  <path d="M25 20 L75 20 L68 85 L32 85 Z" fill="#E0F2FE" stroke="#0284C7" stroke-width="2.5"
+                    opacity="0.85" />
+                  <path id="blenderLiquid" d="M30 50 L70 50 L68 85 L32 85 Z" fill="#F472B6" opacity="0.6" />
+                  <!-- Tampa -->
+                  <rect x="20" y="14" width="60" height="8" rx="4" fill="#0284C7" />
+                  <rect x="42" y="8" width="16" height="8" rx="3" fill="#0369A1" />
+                  <!-- Base do Motor -->
+                  <path d="M28 85 L72 85 L78 115 L22 115 Z" fill="#334155" />
+                  <circle cx="50" cy="100" r="5" fill="#38BDF8" />
+                  <!-- Lâminas -->
+                  <g class="blender-blades">
+                    <line x1="42" y1="80" x2="58" y2="80" stroke="#94A3B8" stroke-width="3" stroke-linecap="round" />
+                    <line x1="50" y1="74" x2="50" y2="86" stroke="#94A3B8" stroke-width="3" stroke-linecap="round" />
+                  </g>
+                </svg>
+              </div>
+
+              <button class="btn-action-blend" id="btnBlendAction">
+                🌪️ Bater no Liquidificador!
+              </button>
+            </div>
+
+            <div class="blender-output-card">
+              <span class="blender-output-title">Resultado da Saída:</span>
+              <div class="blender-output-result" id="blenderOutputText">🥤 Vitamina Mista!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 4: SEGUNDO EXEMPLO (MÁQUINA DE SALGADOS / VENDING MACHINE)
+           ==================================================================== -->
+      <section class="slide" data-slide="4" id="slide-4">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-orange">
+            <span>🏪 Máquinas do Cotidiano</span>
+            <span>•</span>
+            <span>A Vending Machine</span>
+          </div>
+          <h2 class="slide-title">Você com fome no metrô: A Máquina de Salgadinhos!</h2>
+          <p class="slide-desc">
+            Sabe aquelas máquinas automáticas com biscoitos e salgados? Nenhum humano fica lá dentro entregando comida.
+            É pura lógica EPS!
+          </p>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="vending-layout">
+            <!-- Lado Visual: SVG da Máquina de Salgados -->
+            <div class="vending-visual-card">
+              <svg viewBox="0 0 200 280" style="width: 100%; max-width: 180px;">
+                <rect x="15" y="10" width="170" height="260" rx="14" fill="#1E293B" stroke="#0F172A" stroke-width="3" />
+                <rect x="25" y="25" width="110" height="150" rx="8" fill="#F8FAFC" stroke="#64748B" stroke-width="2" />
+                <line x1="25" y1="75" x2="135" y2="75" stroke="#CBD5E1" stroke-width="2" />
+                <text x="35" y="65" font-size="16">🍟</text>
+                <text x="70" y="65" font-size="16">🍿</text>
+                <text x="105" y="65" font-size="16">🍪</text>
+                <text x="40" y="73" font-size="8" font-weight="bold" fill="#0F172A">A1</text>
+                <text x="75" y="73" font-size="8" font-weight="bold" fill="#0F172A">A2</text>
+                <text x="110" y="73" font-size="8" font-weight="bold" fill="#0F172A">A3</text>
+
+                <line x1="25" y1="130" x2="135" y2="130" stroke="#CBD5E1" stroke-width="2" />
+                <text x="35" y="120" font-size="16">🍫</text>
+                <rect x="68" y="98" width="24" height="26" rx="4" fill="#EA580C" />
+                <text x="72" y="115" font-size="12" fill="#fff">🍟</text>
+                <text x="105" y="120" font-size="16">🧃</text>
+                <text x="40" y="128" font-size="8" font-weight="bold" fill="#0F172A">B3</text>
+                <text x="75" y="128" font-size="8" font-weight="bold" fill="#EA580C">B4</text>
+                <text x="110" y="128" font-size="8" font-weight="bold" fill="#0F172A">B5</text>
+
+                <rect x="142" y="30" width="36" height="24" rx="4" fill="#0F172A" stroke="#38BDF8" stroke-width="1.5" />
+                <text x="160" y="46" font-family="monospace" font-size="10" fill="#38BDF8"
+                  text-anchor="middle">B4</text>
+
+                <rect x="145" y="65" width="30" height="6" rx="2" fill="#94A3B8" />
+                <circle cx="160" cy="85" r="8" fill="#F59E0B" />
+
+                <rect x="145" y="105" width="30" height="40" rx="3" fill="#334155" />
+                <circle cx="152" cy="113" r="2" fill="#fff" />
+                <circle cx="160" cy="113" r="2" fill="#fff" />
+                <circle cx="168" cy="113" r="2" fill="#fff" />
+                <circle cx="152" cy="123" r="2" fill="#fff" />
+                <circle cx="160" cy="123" r="2" fill="#fff" />
+                <circle cx="168" cy="123" r="2" fill="#fff" />
+
+                <rect x="35" y="195" width="130" height="45" rx="6" fill="#020617" />
+                <text x="100" y="222" font-family="'Fredoka', cursive" font-size="11" fill="#94A3B8"
+                  text-anchor="middle">EMPURRE AQUI ⬇</text>
+              </svg>
+              <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">Máquina de Lanches</span>
+            </div>
+
+            <!-- Detalhamento EPS -->
+            <div class="vending-details">
+              <div class="eps-row-card row-in">
+                <div class="eps-row-tag">📥 ENTRADA</div>
+                <div class="eps-row-content">
+                  <p>
+                    Você digita no teclado o código <span class="highlight-pill">B4</span> e insere uma nota de <span
+                      class="highlight-pill">R$ 5,00</span> na ranhura da máquina.
+                  </p>
+                </div>
+              </div>
+
+              <div class="eps-row-card row-pr">
+                <div class="eps-row-tag">⚙️ PROCESSO</div>
+                <div class="eps-row-content">
+                  <p>
+                    O computador interno confere as regras: <em>"O lanche B4 custa R$ 4,00. O dinheiro pago (R$ 5) dá?
+                      Sim! Sobrou R$ 1,00 de troco. Gire a mola B4!"</em>
+                  </p>
+                </div>
+              </div>
+
+              <div class="eps-row-card row-out">
+                <div class="eps-row-tag">📤 SAÍDA</div>
+                <div class="eps-row-content">
+                  <p>
+                    A mola gira, o <strong>pacote de salgadinho</strong> cai na gaveta e a máquina devolve uma
+                    <strong>moeda de R$ 1,00 de troco</strong>!
+                  </p>
+                </div>
+              </div>
+
+              <div class="vending-interactive-prompt">
+                <div>
+                  <div class="prompt-text">🤔 E se você colocasse só R$ 2,00 para um salgado de R$ 4,00?</div>
+                  <div class="vending-reveal-answer" id="vendingAnswer">
+                    <strong>A Saída mudaria!</strong> A máquina não liberaria o salgado. Ela mostraria na tela a
+                    mensagem <em>"SALDO INSUFICIENTE"</em> e cuspiria a moeda de volta! Se a entrada muda, a saída muda!
+                  </div>
+                </div>
+                <button class="btn-reveal-vending" id="btnRevealVending">Descobrir Resposta</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 5: TERCEIRO EXEMPLO (SEMÁFORO & PREVISÃO DO TEMPO)
+           ==================================================================== -->
+      <section class="slide" data-slide="5" id="slide-5">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-green">
+            <span>🚦 Sensores e Dados</span>
+            <span>•</span>
+            <span>Semáforo e Previsão do Tempo</span>
+          </div>
+          <h2 class="slide-title">As máquinas também "sentem" o mundo ao redor!</h2>
+          <p class="slide-desc">
+            Entrada não é só botão de teclado! Sensores de calor, câmeras e satélites também enviam dados de entrada:
+          </p>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="compare-grid">
+            <!-- Card 1: Semáforo com Botão de Pedestre -->
+            <div class="compare-card">
+              <div class="compare-header">
+                <div class="compare-icon">🚦</div>
+                <div class="compare-title">
+                  <h3>Semáforo Inteligente</h3>
+                  <span>Com botão para pedestre atravessar</span>
+                </div>
+              </div>
+
+              <div class="mini-eps-list">
+                <div class="mini-eps-item">
+                  <span class="mini-badge mb-in">📥 ENTRADA</span>
+                  <div>Você aperta o botão amarelo do poste ("Quero atravessar a rua!").</div>
+                </div>
+
+                <div class="mini-eps-item">
+                  <span class="mini-badge mb-pr">⚙️ PROCESSO</span>
+                  <div>O chip calcula: espera 10 segundos de segurança para os carros frearem com calma.</div>
+                </div>
+
+                <div class="mini-eps-item">
+                  <span class="mini-badge mb-out">📤 SAÍDA</span>
+                  <div>Sinal vermelho para os carros, bonequinho verde para você e apito sonoro!</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Previsão do Tempo -->
+            <div class="compare-card">
+              <div class="compare-header">
+                <div class="compare-icon">🌦️</div>
+                <div class="compare-title">
+                  <h3>Previsão do Tempo</h3>
+                  <span>O aviso que aparece no celular</span>
+                </div>
+              </div>
+
+              <div class="mini-eps-list">
+                <div class="mini-eps-item">
+                  <span class="mini-badge mb-in">📥 ENTRADA</span>
+                  <div>Termômetros medem o calor, satélites fotografam nuvens e sensores medem o vento.</div>
+                </div>
+
+                <div class="mini-eps-item">
+                  <span class="mini-badge mb-pr">⚙️ PROCESSO</span>
+                  <div>Supercomputadores fazem milhões de cálculos para prever onde vai chover.</div>
+                </div>
+
+                <div class="mini-eps-item">
+                  <span class="mini-badge mb-out">📤 SAÍDA</span>
+                  <div>A notificação no celular: <em>"Amanhã: 24°C com 80% de chance de chuva 🌧️"</em>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bottom-insight-bar">
+            <span style="font-size: 1.4rem;">👀</span>
+            <div>
+              <strong>Olhe em volta:</strong> A catraca do ônibus, o elevador do prédio, o controle da TV...
+              Tudo ao seu redor está o tempo todo recebendo <strong>Entradas</strong> e gerando <strong>Saídas</strong>!
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 6: TIPOS DE DADOS (NÚMEROS X PALAVRAS)
+           ==================================================================== -->
+      <section class="slide" data-slide="6" id="slide-6">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-purple">
+            <span>🧠 Organizando as Coisas</span>
+            <span>•</span>
+            <span>Tipos de Dados</span>
+          </div>
+          <h2 class="slide-title">Que tipo de coisa entra e sai de um sistema?</h2>
+          <p class="slide-desc">
+            Para não misturar as coisas, o computador divide quase todas as informações em dois grandes grupos:
+          </p>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="data-types-grid">
+            <!-- Card Números -->
+            <div class="type-card type-num">
+              <div class="type-header">
+                <div class="type-badge">🔢</div>
+                <div>
+                  <h3>DADOS NUMÉRICOS</h3>
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #2563eb;">Valores, Contagens e Medidas</span>
+                </div>
+              </div>
+
+              <p>
+                Coisas que podemos <strong>somar</strong>, <strong>contar</strong> ou medir:
+              </p>
+
+              <div class="examples-pill-row">
+                <span class="ex-pill">R$ 5,00 (dinheiro)</span>
+                <span class="ex-pill">30 (segundos)</span>
+                <span class="ex-pill">24°C (temperatura)</span>
+                <span class="ex-pill">1 (clique no botão)</span>
+              </div>
+            </div>
+
+            <!-- Card Palavras/Texto -->
+            <div class="type-card type-txt">
+              <div class="type-header">
+                <div class="type-badge">🔤</div>
+                <div>
+                  <h3>DADOS EM TEXTO</h3>
+                  <span style="font-size: 0.8rem; font-weight: 700; color: #9333ea;">Palavras, Códigos e Letras</span>
+                </div>
+              </div>
+
+              <p>
+                Coisas escritas para <strong>ler</strong>, <strong>identificar nomes</strong> ou avisos:
+              </p>
+
+              <div class="examples-pill-row">
+                <span class="ex-pill">"B4" (código do salgado)</span>
+                <span class="ex-pill">"Vitamina de Morango"</span>
+                <span class="ex-pill">"PARE" e "SIGA"</span>
+                <span class="ex-pill">"Chuva à tarde"</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Quiz Interativo de 10 Segundos -->
+          <div class="mini-quiz-box">
+            <div class="quiz-title">
+              <span>⚡ Desafio Rápido da Turma:</span>
+              <span>Clique nos cartões para revelar se é NÚMERO ou TEXTO!</span>
+            </div>
+
+            <div class="quiz-cards-row">
+              <div class="quiz-item" data-type="num" data-answer="🔢 NÚMERO! (Idade que contamos)">
+                <div class="quiz-label">"12 anos"</div>
+                <div class="quiz-hint">Clique para testar</div>
+              </div>
+
+              <div class="quiz-item" data-type="txt" data-answer="🔤 TEXTO! (Mensagem para ler)">
+                <div class="quiz-label">"Você passou de fase!"</div>
+                <div class="quiz-hint">Clique para testar</div>
+              </div>
+
+              <div class="quiz-item" data-type="num" data-answer="🔢 NÚMERO! (Pontos)">
+                <div class="quiz-label">"1500 pontos"</div>
+                <div class="quiz-hint">Clique para testar</div>
+              </div>
+
+              <div class="quiz-item" data-type="txt" data-answer="🔤 TEXTO! (Letras e símbolos)">
+                <div class="quiz-label">"dragao_azul@email"</div>
+                <div class="quiz-hint">Clique para testar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 7: ATIVIDADE DOS DETETIVES (6 SITUAÇÕES-PROBLEMA)
+           ==================================================================== -->
+      <section class="slide" data-slide="7" id="slide-7">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-orange">
+            <span>🕵️‍♀️ Desafio em Equipes</span>
+            <span>•</span>
+            <span>Laboratório de Detetives</span>
+          </div>
+          <h2 class="slide-title">Missão: Encontre a Entrada, o Meio e a Saída!</h2>
+          <p class="slide-desc">
+            Em grupos de 3 ou 4 colegas, analisem cada situação do cotidiano abaixo:
+          </p>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="cases-grid">
+            <!-- Situação 1 -->
+            <div class="case-card">
+              <div class="case-top">
+                <div class="case-number">1</div>
+                <span class="case-emoji">📱</span>
+                <h4>Figurinha no Zap</h4>
+              </div>
+              <p class="case-scenario">Você escolhe uma figurinha engraçada e clica em enviar ao seu amigo.</p>
+              <button class="btn-toggle-case"><span>🔍</span> Ver Resposta Guiada</button>
+              <div class="case-breakdown">
+                <div><strong>📥 Entrada:</strong> Toque no ícone da figurinha (Texto/Imagem)</div>
+                <div><strong>⚙️ Processo:</strong> Enviar pela internet até o servidor</div>
+                <div><strong>📤 Saída:</strong> Figurinha e apito no celular do amigo</div>
+              </div>
+            </div>
+
+            <!-- Situação 2 -->
+            <div class="case-card">
+              <div class="case-top">
+                <div class="case-number">2</div>
+                <span class="case-emoji">🎮</span>
+                <h4>Pulo no Videogame</h4>
+              </div>
+              <p class="case-scenario">Jogando, você aperta o botão 'A' para pular um obstáculo no chão.</p>
+              <button class="btn-toggle-case"><span>🔍</span> Ver Resposta Guiada</button>
+              <div class="case-breakdown">
+                <div><strong>📥 Entrada:</strong> Aperto do botão físico 'A'</div>
+                <div><strong>⚙️ Processo:</strong> O jogo calcula a física e a gravidade</div>
+                <div><strong>📤 Saída:</strong> Animação do boneco no ar e som "Boing!"</div>
+              </div>
+            </div>
+
+            <!-- Situação 3 -->
+            <div class="case-card">
+              <div class="case-top">
+                <div class="case-number">3</div>
+                <span class="case-emoji">🛒</span>
+                <h4>Leitor de Mercado</h4>
+              </div>
+              <p class="case-scenario">A funcionária do caixa passa o pacote de bolacha no feixe vermelho.</p>
+              <button class="btn-toggle-case"><span>🔍</span> Ver Resposta Guiada</button>
+              <div class="case-breakdown">
+                <div><strong>📥 Entrada:</strong> Barrinhas pretas (código numérico)</div>
+                <div><strong>⚙️ Processo:</strong> Busca no sistema: bolacha custa R$ 4,50</div>
+                <div><strong>📤 Saída:</strong> "Bip!", nome na tela e soma no total</div>
+              </div>
+            </div>
+
+            <!-- Situação 4 -->
+            <div class="case-card">
+              <div class="case-top">
+                <div class="case-number">4</div>
+                <span class="case-emoji">🗣️</span>
+                <h4>Assistente de Voz</h4>
+              </div>
+              <p class="case-scenario">Você fala: <em>"Alexa, tocar minha música preferida!"</em>.</p>
+              <button class="btn-toggle-case"><span>🔍</span> Ver Resposta Guiada</button>
+              <div class="case-breakdown">
+                <div><strong>📥 Entrada:</strong> Som da sua voz pelo microfone (Áudio)</div>
+                <div><strong>⚙️ Processo:</strong> IA decodifica a fala e busca a música</div>
+                <div><strong>📤 Saída:</strong> A música começa a tocar nas caixas de som</div>
+              </div>
+            </div>
+
+            <!-- Situação 5 -->
+            <div class="case-card">
+              <div class="case-top">
+                <div class="case-number">5</div>
+                <span class="case-emoji">⏰</span>
+                <h4>Alarme do Celular</h4>
+              </div>
+              <p class="case-scenario">Você marcou o despertador para tocar pontualmente às 06h30.</p>
+              <button class="btn-toggle-case"><span>🔍</span> Ver Resposta Guiada</button>
+              <div class="case-breakdown">
+                <div><strong>📥 Entrada:</strong> Horário configurado (Número: 06:30)</div>
+                <div><strong>⚙️ Processo:</strong> O chip compara minuto a minuto com o relógio</div>
+                <div><strong>📤 Saída:</strong> O celular vibra e toca a música bem alto</div>
+              </div>
+            </div>
+
+            <!-- Situação 6 -->
+            <div class="case-card">
+              <div class="case-top">
+                <div class="case-number">6</div>
+                <span class="case-emoji">🍕</span>
+                <h4>Pedido de Lanche</h4>
+              </div>
+              <p class="case-scenario">No app de entrega, você escolhe pizza e clica em 'Fazer Pedido'.</p>
+              <button class="btn-toggle-case"><span>🔍</span> Ver Resposta Guiada</button>
+              <div class="case-breakdown">
+                <div><strong>📥 Entrada:</strong> Sabor escolhido (Texto) e endereço</div>
+                <div><strong>⚙️ Processo:</strong> Confere pagamento e manda para a pizzaria</div>
+                <div><strong>📤 Saída:</strong> Notificação: <em>"Chega em 30 min!"</em></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 8: FECHAMENTO (A FRASE-CHAVE DA AULA)
+           ==================================================================== -->
+      <section class="slide" data-slide="8" id="slide-8">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-blue">
+            <span>⭐ A Grande Lição de Hoje</span>
+            <span>•</span>
+            <span>Guarde para Sempre</span>
+          </div>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="keyphrase-layout">
+            <div class="quote-hero-box">
+              <div class="key-phrase">
+                "Na Computação, um <span class="word-problem">PROBLEMA</span> é apenas a ponte: uma relação entre <span
+                  class="word-in">o que ENTRA</span> e <span class="word-out">o que SAI</span>!"
+              </div>
+
+              <div class="quote-bridge-concept">
+                <div class="bridge-node" style="border-color: var(--color-input); color: var(--color-input-dark);">
+                  <span>📥</span> Tenho dados no início
+                </div>
+                <span style="font-size: 1.4rem; color: var(--color-proc);">➔</span>
+                <div class="bridge-node" style="border-color: var(--color-proc); color: var(--color-proc-dark);">
+                  <span>⚙️</span> Penso na transformação
+                </div>
+                <span style="font-size: 1.4rem; color: var(--color-output);">➔</span>
+                <div class="bridge-node" style="border-color: var(--color-output); color: var(--color-output-dark);">
+                  <span>📤</span> Chego no resultado
+                </div>
+              </div>
+            </div>
+
+            <div class="notebook-tip-card">
+              <span style="font-size: 2rem;">📝</span>
+              <div>
+                <strong>Dica de Ouro para o seu Caderno:</strong>
+                Sempre que olhar para um videogame ou programa, pergunte:
+                <em>"O que está entrando aqui? E o que deve sair?"</em>.
+                Você acabou de começar a pensar como um verdadeiro cientista da computação!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================================================================
+           SLIDE 9: GANCHO PARA A PRÓXIMA AULA
+           ==================================================================== -->
+      <section class="slide" data-slide="9" id="slide-9">
+        <div class="slide-header-wrap">
+          <div class="slide-eyebrow eyebrow-purple">
+            <span>🚀 O Próximo Capítulo</span>
+            <span>•</span>
+            <span>Continua na Próxima Aula...</span>
+          </div>
+        </div>
+
+        <div class="slide-content-area">
+          <div class="teaser-layout">
+            <div class="teaser-robot-side">
+              <div class="teaser-robot-frame">
+                <!-- SVG Robô Curioso e Divertido -->
+                <svg viewBox="0 0 300 320" style="width: 100%;">
+                  <!-- Antena com luz piscante -->
+                  <line x1="150" y1="60" x2="150" y2="25" stroke="#7C3AED" stroke-width="5" stroke-linecap="round" />
+                  <circle cx="150" cy="20" r="12" fill="#F59E0B">
+                    <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite" />
+                  </circle>
+
+                  <!-- Cabeça do Robô -->
+                  <rect x="70" y="60" width="160" height="120" rx="30" fill="#E2E8F0" stroke="#475569"
+                    stroke-width="4" />
+
+                  <!-- Olhos Expressivos -->
+                  <circle cx="115" cy="115" r="22" fill="#1E293B" />
+                  <circle cx="120" cy="110" r="8" fill="#38BDF8" />
+
+                  <circle cx="185" cy="115" r="22" fill="#1E293B" />
+                  <circle cx="190" cy="110" r="8" fill="#38BDF8" />
+
+                  <!-- Sobrancelhas de interrogação -->
+                  <line x1="100" y1="85" x2="130" y2="88" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+                  <path d="M170 92 Q185 80 200 88" stroke="#475569" stroke-width="4" fill="none"
+                    stroke-linecap="round" />
+
+                  <!-- Boca -->
+                  <path d="M125 150 Q150 162 175 150" stroke="#EA580C" stroke-width="4" fill="none"
+                    stroke-linecap="round" />
+
+                  <!-- Balão de Pensamento com '?' -->
+                  <g transform="translate(210, 10)">
+                    <circle cx="20" cy="20" r="24" fill="#FEF3C7" stroke="#F59E0B" stroke-width="2" />
+                    <text x="20" y="29" font-family="'Fredoka', cursive" font-size="28" font-weight="bold"
+                      fill="#D97706" text-anchor="middle">?</text>
+                  </g>
+
+                  <!-- Corpo do Robô -->
+                  <rect x="85" y="195" width="130" height="95" rx="20" fill="#CBD5E1" stroke="#475569"
+                    stroke-width="4" />
+                  <rect x="110" y="215" width="80" height="45" rx="8" fill="#F8FAFC" stroke="#94A3B8"
+                    stroke-width="2" />
+                  <text x="150" y="244" font-family="monospace" font-size="14" font-weight="bold" fill="#7C3AED"
+                    text-anchor="middle">EPS = 100%</text>
+
+                  <!-- Bracinhos -->
+                  <path d="M85 225 Q50 220 55 250" stroke="#475569" stroke-width="6" fill="none"
+                    stroke-linecap="round" />
+                  <path d="M215 225 Q250 210 245 240" stroke="#475569" stroke-width="6" fill="none"
+                    stroke-linecap="round" />
+                </svg>
+              </div>
+              <span style="font-size: 1rem; font-weight: 700; color: #475569;">"Eu sou rápido, mas não leio
+                mentes!"</span>
+            </div>
+
+            <div class="teaser-content-side">
+              <div class="teaser-question-card">
+                <h3>🤖 Uma pergunta misteriosa para você pensar:</h3>
+                <p>
+                  O computador faz bilhões de contas por segundo...
+                  <strong>Mas será que ele conseguiria fazer essa transformação de Entrada em Saída SOZINHO?</strong>
+                </p>
+              </div>
+
+              <div class="teaser-points-list">
+                <div class="teaser-point-item">
+                  <span class="tp-icon">❌</span>
+                  <div>
+                    <strong>A verdade chocante:</strong> O computador não sabe inventar nada por conta própria! Sem
+                    comandos, ele é só uma caixa de plástico e metal desligada.
+                  </div>
+                </div>
+
+                <div class="teaser-point-item">
+                  <span class="tp-icon">🧠</span>
+                  <div>
+                    <strong>Quem manda nele é VOCÊ:</strong> Ele só sabe o que fazer com cada entrada porque
+                    <em>alguém</em> escreveu um roteiro com passos detalhados.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Banner do Próximo Tema -->
+              <div class="next-episode-banner">
+                <div class="next-banner-text">
+                  <h4>Próxima Aula Imperdível</h4>
+                  <p>ALGORITMOS: A Arte de Dar Ordens para as Máquinas!</p>
+                </div>
+
+                <button class="btn-restart-deck" id="btnRestartDeck">
+                  <span>↺</span> Rever Slides
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ==========================================================================
+       BARRA INFERIOR DE CONTROLES (NAVIGATION DOCK)
+       ========================================================================== -->
+  <footer class="deck-footer">
+    <div class="nav-hints">
+      <span>Navegue com o teclado:</span>
+      <span class="kbd-chip">←</span>
+      <span class="kbd-chip">→</span>
+      <span class="kbd-chip">Espaço</span>
+      <span>|</span>
+      <span class="kbd-chip">F</span> Tela Cheia
+      <span class="kbd-chip">G</span> Grade
+    </div>
+
+    <div class="nav-dots-wrap" id="navDotsWrap">
+      <!-- Pontos dos 9 slides gerados dinamicamente via JS -->
+    </div>
+
+    <div class="nav-buttons-group">
+      <button class="btn-nav" id="btnPrevSlide" disabled>
+        <span>◀</span> Anterior
+      </button>
+      <button class="btn-nav btn-nav-primary" id="btnNextSlide">
+        Próximo <span>▶</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       MODAL DE GRADE DE SLIDES (VISÃO GERAL / SALTO RÁPIDO)
+       ========================================================================== -->
+  <div class="grid-modal" id="gridModal" aria-hidden="true">
+    <div class="grid-modal-container">
+      <div class="grid-modal-header">
+        <h2><span>⊞</span> Mapa de Todos os Slides da Aula</h2>
+        <button class="btn-close-grid" id="btnCloseGrid" title="Fechar Mapa (Esc ou G)">✕</button>
+      </div>
+      <div class="grid-modal-body" id="gridModalBody">
+        <!-- Gerado via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       LÓGICA JAVASCRIPT NATIVA, MODULAR E ROBUSTA
+       ========================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // Metadados amigáveis de cada slide para a grade e acessibilidade
+      const SLIDES_DATA = [
+        { id: 1, title: 'Capa: O que é um "Problema"?', tag: 'Abertura' },
+        { id: 2, title: 'O Mistério do Café da Manhã', tag: 'Cotidiano' },
+        { id: 3, title: 'O Ciclo EPS & Simulador', tag: 'Conceito Central' },
+        { id: 4, title: 'A Máquina de Salgados', tag: 'Exemplo Real' },
+        { id: 5, title: 'Semáforo e Previsão do Tempo', tag: 'Sensores' },
+        { id: 6, title: 'Números vs Palavras (Tipos)', tag: 'Classificação' },
+        { id: 7, title: 'Desafio dos Detetives (6 Casos)', tag: 'Atividade em Grupo' },
+        { id: 8, title: 'A Grande Lição de Ouro', tag: 'Fechamento' },
+        { id: 9, title: 'O Computador Pensa Sozinho?', tag: 'Próxima Aula' }
+      ];
+
+      const TOTAL_SLIDES = SLIDES_DATA.length;
+      let currentSlide = 1;
+      let isAudioEnabled = true;
+
+      // Elementos do DOM
+      const slides = document.querySelectorAll('.slide');
+      const progressBar = document.getElementById('progressBar');
+      const slideCounter = document.getElementById('slideCounter');
+      const btnPrev = document.getElementById('btnPrevSlide');
+      const btnNext = document.getElementById('btnNextSlide');
+      const navDotsWrap = document.getElementById('navDotsWrap');
+      const gridModal = document.getElementById('gridModal');
+      const gridModalBody = document.getElementById('gridModalBody');
+      const btnGridToggle = document.getElementById('btnGridToggle');
+      const btnCloseGrid = document.getElementById('btnCloseGrid');
+      const btnFullscreenToggle = document.getElementById('btnFullscreenToggle');
+      const btnAudioToggle = document.getElementById('btnAudioToggle');
+      const audioIcon = document.getElementById('audioIcon');
+      const btnStartDeck = document.getElementById('btnStartDeck');
+      const btnRestartDeck = document.getElementById('btnRestartDeck');
+
+      /* ========================================================================
+         SINTETIZADOR DE ÁUDIO VIA WEB AUDIO API (100% NATIVO, ZERO EXTERNO)
+         ======================================================================== */
+      let audioCtx = null;
+
+      function getAudioContext() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playTone(freq, type = 'sine', duration = 0.12, gainVal = 0.08) {
+        if (!isAudioEnabled) return;
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + duration);
+        } catch (e) { }
+      }
+
+      function playNavigationSound() {
+        playTone(520, 'sine', 0.1, 0.06);
+      }
+
+      function playSuccessChime() {
+        if (!isAudioEnabled) return;
+        setTimeout(() => playTone(523.25, 'triangle', 0.15, 0.08), 0);
+        setTimeout(() => playTone(659.25, 'triangle', 0.15, 0.08), 80);
+        setTimeout(() => playTone(783.99, 'triangle', 0.25, 0.09), 160);
+      }
+
+      function playBlenderSound() {
+        if (!isAudioEnabled) return;
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(140, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 0.3);
+          osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.6);
+          gain.gain.setValueAtTime(0.06, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.65);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.65);
+        } catch (e) { }
+      }
+
+      /* ========================================================================
+         SISTEMA DE NAVEGAÇÃO ENTRE OS SLIDES
+         ======================================================================== */
+      function renderDots() {
+        navDotsWrap.innerHTML = '';
+        for (let i = 1; i <= TOTAL_SLIDES; i++) {
+          const dot = document.createElement('div');
+          dot.className = `slide-dot ${i === currentSlide ? 'active' : ''}`;
+          dot.title = `Ir para o Slide ${i}: ${SLIDES_DATA[i - 1].title}`;
+          dot.addEventListener('click', () => {
+            goToSlide(i);
+          });
+          navDotsWrap.appendChild(dot);
+        }
+      }
+
+      function renderGridCards() {
+        gridModalBody.innerHTML = '';
+        SLIDES_DATA.forEach((s) => {
+          const card = document.createElement('div');
+          card.className = `grid-thumb-card ${s.id === currentSlide ? 'current' : ''}`;
+          card.innerHTML = `
+            <div class="grid-thumb-top">
+              <span>SLIDE ${s.id}</span>
+              <span>${s.tag}</span>
+            </div>
+            <div class="grid-thumb-title">${s.title}</div>
+          `;
+          card.addEventListener('click', () => {
+            goToSlide(s.id);
+            closeGrid();
+          });
+          gridModalBody.appendChild(card);
+        });
+      }
+
+      function updateUI() {
+        slides.forEach((slide) => {
+          const slideNum = parseInt(slide.getAttribute('data-slide'), 10);
+          if (slideNum === currentSlide) {
+            slide.classList.add('active');
+            slide.scrollTop = 0;
+          } else {
+            slide.classList.remove('active');
+          }
+        });
+
+        const pct = (currentSlide / TOTAL_SLIDES) * 100;
+        progressBar.style.width = `${pct}%`;
+        slideCounter.textContent = `Slide ${currentSlide} de ${TOTAL_SLIDES}`;
+
+        btnPrev.disabled = currentSlide === 1;
+        if (currentSlide === TOTAL_SLIDES) {
+          btnNext.innerHTML = 'Recomeçar <span>↺</span>';
+        } else {
+          btnNext.innerHTML = 'Próximo <span>▶</span>';
+        }
+
+        const dots = navDotsWrap.querySelectorAll('.slide-dot');
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx + 1 === currentSlide);
+        });
+
+        const gridCards = gridModalBody.querySelectorAll('.grid-thumb-card');
+        gridCards.forEach((card, idx) => {
+          card.classList.toggle('current', idx + 1 === currentSlide);
+        });
+      }
+
+      function goToSlide(targetSlide) {
+        if (targetSlide < 1) targetSlide = 1;
+        if (targetSlide > TOTAL_SLIDES) targetSlide = 1;
+        if (targetSlide !== currentSlide) {
+          currentSlide = targetSlide;
+          updateUI();
+          playNavigationSound();
+        }
+      }
+
+      function nextSlide() {
+        goToSlide(currentSlide + 1);
+      }
+
+      function prevSlide() {
+        if (currentSlide > 1) {
+          goToSlide(currentSlide - 1);
+        }
+      }
+
+      /* ========================================================================
+         MODAL DE GRADE (OVERVIEW) & TELA CHEIA
+         ======================================================================== */
+      function openGrid() {
+        gridModal.classList.add('open');
+        gridModal.setAttribute('aria-hidden', 'false');
+      }
+
+      function closeGrid() {
+        gridModal.classList.remove('open');
+        gridModal.setAttribute('aria-hidden', 'true');
+      }
+
+      function toggleGrid() {
+        if (gridModal.classList.contains('open')) {
+          closeGrid();
+        } else {
+          openGrid();
+        }
+      }
+
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => { });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+
+      /* ========================================================================
+         INTERAÇÕES ESPECÍFICAS DOS SLIDES
+         ======================================================================== */
+
+      // 1. Simulador do Liquidificador (Slide 3)
+      const ingredientBtns = document.querySelectorAll('.btn-ingredient');
+      const btnBlendAction = document.getElementById('btnBlendAction');
+      const blenderGraphic = document.getElementById('blenderGraphic');
+      const blenderOutputText = document.getElementById('blenderOutputText');
+
+      ingredientBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('selected');
+          playTone(440, 'sine', 0.08, 0.05);
+        });
+      });
+
+      if (btnBlendAction) {
+        btnBlendAction.addEventListener('click', () => {
+          const selected = Array.from(ingredientBtns)
+            .filter((b) => b.classList.contains('selected'))
+            .map((b) => b.textContent.trim());
+
+          if (selected.length === 0) {
+            blenderOutputText.textContent = '⚠️ Coloque pelo menos 1 fruta!';
+            playTone(220, 'square', 0.2, 0.06);
+            return;
+          }
+
+          blenderGraphic.classList.add('spinning');
+          playBlenderSound();
+          btnBlendAction.disabled = true;
+          blenderOutputText.textContent = '🌪️ Misturando os dados...';
+
+          setTimeout(() => {
+            blenderGraphic.classList.remove('spinning');
+            btnBlendAction.disabled = false;
+
+            const itemsClean = selected.map((s) => s.replace(/[^a-zA-ZÀ-ÿ\s]/g, '').trim()).join(' com ');
+            blenderOutputText.textContent = `🥤 Vitamina de ${itemsClean}!`;
+            playSuccessChime();
+          }, 800);
+        });
+      }
+
+      // 2. Revelação da Máquina de Salgados (Slide 4)
+      const btnRevealVending = document.getElementById('btnRevealVending');
+      const vendingAnswer = document.getElementById('vendingAnswer');
+      if (btnRevealVending && vendingAnswer) {
+        btnRevealVending.addEventListener('click', () => {
+          const isHidden = window.getComputedStyle(vendingAnswer).display === 'none';
+          vendingAnswer.style.display = isHidden ? 'block' : 'none';
+          btnRevealVending.textContent = isHidden ? 'Ocultar Resposta' : 'Descobrir Resposta';
+          if (isHidden) playSuccessChime();
+        });
+      }
+
+      // 3. Mini Quiz de Tipos de Dados (Slide 6)
+      const quizItems = document.querySelectorAll('.quiz-item');
+      quizItems.forEach((item) => {
+        item.addEventListener('click', () => {
+          const answer = item.getAttribute('data-answer');
+          const type = item.getAttribute('data-type');
+          const hint = item.querySelector('.quiz-hint');
+
+          if (!item.classList.contains('revealed')) {
+            item.classList.add('revealed');
+            item.classList.add(type === 'num' ? 'rev-num' : 'rev-txt');
+            hint.textContent = answer;
+            hint.style.fontWeight = '700';
+            hint.style.color = type === 'num' ? '#1d4ed8' : '#7e22ce';
+            playSuccessChime();
+          }
+        });
+      });
+
+      // 4. Cartões de Casos dos Detetives (Slide 7)
+      const toggleCaseBtns = document.querySelectorAll('.btn-toggle-case');
+      toggleCaseBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const card = btn.closest('.case-card');
+          const breakdown = card.querySelector('.case-breakdown');
+          const isOpen = breakdown.classList.contains('open');
+          breakdown.classList.toggle('open');
+          btn.innerHTML = isOpen ? '<span>🔍</span> Ver Resposta Guiada' : '<span>✕</span> Fechar Resposta';
+          if (!isOpen) playTone(587.33, 'triangle', 0.12, 0.05);
+        });
+      });
+
+      /* ========================================================================
+         EVENTOS DE CONTROLE E TECLADO
+         ======================================================================== */
+      btnPrev.addEventListener('click', prevSlide);
+      btnNext.addEventListener('click', nextSlide);
+      if (btnStartDeck) btnStartDeck.addEventListener('click', nextSlide);
+      if (btnRestartDeck) btnRestartDeck.addEventListener('click', () => goToSlide(1));
+
+      btnGridToggle.addEventListener('click', toggleGrid);
+      btnCloseGrid.addEventListener('click', closeGrid);
+      btnFullscreenToggle.addEventListener('click', toggleFullscreen);
+
+      btnAudioToggle.addEventListener('click', () => {
+        isAudioEnabled = !isAudioEnabled;
+        audioIcon.textContent = isAudioEnabled ? '🔊' : '🔇';
+        btnAudioToggle.style.opacity = isAudioEnabled ? '1' : '0.6';
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (gridModal.classList.contains('open')) {
+          if (e.key === 'Escape' || e.key === 'g' || e.key === 'G') {
+            closeGrid();
+            e.preventDefault();
+          }
+          return;
+        }
+
+        switch (e.key) {
+          case 'ArrowRight':
+          case ' ':
+          case 'PageDown':
+            e.preventDefault();
+            nextSlide();
+            break;
+          case 'ArrowLeft':
+          case 'PageUp':
+            e.preventDefault();
+            prevSlide();
+            break;
+          case 'Home':
+            e.preventDefault();
+            goToSlide(1);
+            break;
+          case 'End':
+            e.preventDefault();
+            goToSlide(TOTAL_SLIDES);
+            break;
+          case 'f':
+          case 'F':
+            e.preventDefault();
+            toggleFullscreen();
+            break;
+          case 'g':
+          case 'G':
+          case 'Escape':
+            e.preventDefault();
+            toggleGrid();
+            break;
+        }
+      });
+
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchEndX - touchStartX;
+        if (Math.abs(diff) > 50) {
+          if (diff < 0) {
+            nextSlide();
+          } else {
+            prevSlide();
+          }
+        }
+      }, { passive: true });
+
+      renderDots();
+      renderGridCards();
+      updateUI();
+    })();
+  </script>
+</body>
+
+</html>

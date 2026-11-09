@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caça ao viés</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg-2: #111833;
+    --surface: #161f3d;
+    --surface-2: #1d2850;
+    --line: #2c3a6b;
+    --text: #f4f6ff;
+    --muted: #b3bddb;
+    --yellow: #ffd23f;
+    --cyan: #22d3ee;
+    --stage-w: 1920px;
+    --stage-h: 1080px;
+    --nav-h: 110px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  /* Palco fixo 1920x1080 escalado para caber na tela, sempre em 16:9 */
+  .viewport {
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(34, 211, 238, 0.10), transparent 45%),
+      radial-gradient(circle at 90% 90%, rgba(255, 210, 63, 0.08), transparent 45%),
+      var(--bg);
+  }
+
+  .stage {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--stage-w);
+    height: var(--stage-h);
+    transform-origin: center center;
+    background: linear-gradient(160deg, var(--bg-2) 0%, var(--bg) 70%);
+    overflow: hidden;
+  }
+
+  .slides {
+    position: absolute;
+    inset: 0 0 var(--nav-h) 0;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 70px 110px 30px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(40px);
+    transition: opacity 0.45s ease, transform 0.45s ease, visibility 0.45s;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .slide.before { transform: translateX(-40px); }
+
+  .slide .note { display: none; }
+
+  .no-anim .slide, .no-anim .progress-bar span { transition: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.2s linear; transform: none; }
+    .slide.before { transform: none; }
+  }
+
+  /* Tipografia */
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 14px;
+  }
+
+  .kicker::before {
+    content: "";
+    width: 44px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--cyan);
+  }
+
+  h1, h2 {
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-size: 72px;
+    margin-bottom: 40px;
+  }
+
+  .hl { color: var(--yellow); }
+
+  p, li, td, th { font-size: 36px; line-height: 1.4; }
+
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .blank {
+    display: inline-block;
+    min-width: 120px;
+    height: 0.9em;
+    border-bottom: 4px solid var(--cyan);
+    color: transparent;
+    vertical-align: baseline;
+  }
+
+  .nowrap { white-space: nowrap; }
+
+  .arrow {
+    width: 90px;
+    height: 60px;
+    color: var(--yellow);
+  }
+
+  /* Rodapé em pílula ("Anote sua aposta", "Depois, 1 minuto...") */
+  .footline {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 34px;
+    padding: 18px 36px;
+    border-radius: 999px;
+    border: 3px solid var(--cyan);
+    color: var(--text);
+    font-size: 36px;
+    font-weight: 600;
+  }
+
+  /* Faixa amarela de destaque */
+  .banner {
+    padding: 30px 44px;
+    border-radius: 28px;
+    background: rgba(255, 210, 63, 0.12);
+    border: 4px solid var(--yellow);
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .banner strong { color: var(--yellow); }
+
+  /* 1. Capa */
+  .cover {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .cover h1 {
+    font-size: 150px;
+    color: var(--yellow);
+    margin-bottom: 30px;
+  }
+
+  .cover .subtitle {
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1.25;
+    max-width: 1050px;
+  }
+
+  .cover .subtitle strong { color: var(--cyan); font-weight: 700; }
+
+  .lupa {
+    width: 520px;
+    height: 520px;
+    filter: drop-shadow(0 0 40px rgba(34, 211, 238, 0.25));
+  }
+
+  /* 2. A aposta */
+  .bets {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 44px;
+    min-height: 0;
+  }
+
+  .bet {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    padding: 44px 54px;
+    border-radius: 32px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-top: 10px solid var(--yellow);
+  }
+
+  .bet:nth-child(2) { border-top-color: var(--cyan); }
+
+  .bet .ask {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .bet .what {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.12;
+    color: var(--yellow);
+  }
+
+  .bet:nth-child(2) .what { color: var(--cyan); }
+
+  .bet .q {
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .bet .q span { display: block; }
+
+  /* 3. Missão */
+  .mission {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 44px;
+  }
+
+  .mission li {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    font-size: 42px;
+    font-weight: 600;
+  }
+
+  .mission .n {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--cyan);
+    color: var(--bg);
+    font-size: 44px;
+    font-weight: 800;
+  }
+
+  .callout {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 34px 44px;
+    border-radius: 28px;
+    background: rgba(255, 210, 63, 0.12);
+    border: 4px solid var(--yellow);
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .callout .icon { font-size: 72px; line-height: 1; }
+  .callout strong { color: var(--yellow); }
+
+  /* 5. O que encontramos? */
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 3px solid var(--cyan);
+    border-radius: 24px;
+    overflow: hidden;
+    table-layout: fixed;
+  }
+
+  .table-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    margin-bottom: 26px;
+  }
+
+  .table-head h2 { margin-bottom: 0; }
+
+  .table-tools {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .btn.small {
+    font-size: 24px;
+    padding: 8px 22px;
+    border-width: 2px;
+    border-radius: 12px;
+  }
+
+  th {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--bg);
+    background: var(--cyan);
+    padding: 16px 18px;
+    text-align: left;
+    line-height: 1.2;
+    vertical-align: bottom;
+  }
+
+  th + th, td + td { border-left: 3px solid var(--line); }
+  th + th { border-left-color: rgba(11, 16, 32, 0.25); }
+
+  td {
+    height: 70px;
+    padding: 8px 18px;
+    background: var(--surface);
+    border-top: 3px solid var(--line);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.2;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+  }
+
+  .editable th, .editable td { cursor: text; outline: none; }
+  .editable td:hover { background: #24315f; }
+  .editable td:focus { box-shadow: inset 0 0 0 4px var(--yellow); background: #24315f; }
+  .editable th:focus { box-shadow: inset 0 0 0 4px var(--bg); }
+
+  tbody tr:nth-child(even) td { background: var(--surface-2); }
+  .editable tbody tr:nth-child(even) td:hover,
+  .editable tbody tr:nth-child(even) td:focus { background: #24315f; }
+
+  .duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 28px;
+  }
+
+  .duo p {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 20px 34px;
+    border-radius: 24px;
+    background: var(--surface);
+    border: 4px solid var(--yellow);
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .duo p:nth-child(2) { border-color: var(--cyan); }
+  .duo .q { font-size: 56px; color: var(--yellow); line-height: 1; }
+  .duo p:nth-child(2) .q { color: var(--cyan); }
+
+  /* 6. Por que isso acontece? */
+  .definition {
+    font-size: 44px;
+    line-height: 1.35;
+    font-weight: 600;
+    padding: 32px 50px;
+    border-left: 12px solid var(--yellow);
+    background: var(--surface);
+    border-radius: 0 24px 24px 0;
+    margin-bottom: 44px;
+  }
+
+  .pipeline {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: stretch;
+    gap: 30px;
+    margin-bottom: 44px;
+  }
+
+  .pipeline .arrow { align-self: center; }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 30px 26px;
+    text-align: center;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--cyan);
+  }
+
+  .step .emoji { font-size: 72px; line-height: 1; }
+  .step .label { font-size: 40px; font-weight: 700; line-height: 1.15; }
+
+  .punch {
+    padding: 30px 48px;
+    border-radius: 28px;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.25;
+    box-shadow: 0 20px 60px rgba(255, 210, 63, 0.2);
+  }
+
+  /* 7. Citação */
+  .quote {
+    position: relative;
+    font-size: 58px;
+    font-weight: 700;
+    line-height: 1.3;
+    padding: 60px 70px 60px 140px;
+    background: var(--surface);
+    border-radius: 32px;
+    border: 3px solid var(--line);
+  }
+
+  .quote::before {
+    content: "\201C";
+    position: absolute;
+    left: 40px;
+    top: 10px;
+    font-size: 200px;
+    line-height: 1;
+    color: var(--yellow);
+    font-family: Georgia, serif;
+  }
+
+  .attribution {
+    margin-top: 40px;
+    font-size: 36px;
+    color: var(--cyan);
+    font-weight: 600;
+  }
+
+  /* 8. Casos reais */
+  .cases {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 70px 1fr 70px 1fr;
+    align-items: stretch;
+    min-height: 0;
+  }
+
+  .case-col {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .flow-label {
+    align-self: center;
+    padding: 8px 26px;
+    border-radius: 999px;
+    background: var(--cyan);
+    color: var(--bg);
+    font-size: 30px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .case-arrow {
+    display: flex;
+    justify-content: center;
+    padding-top: 6px;
+  }
+
+  .case-arrow .arrow { width: 60px; height: 44px; color: var(--cyan); }
+
+  .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 30px 30px 32px;
+    border-radius: 26px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-top: 8px solid var(--yellow);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card .emoji { font-size: 60px; line-height: 1; }
+
+  .card .year {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--yellow);
+    border: 3px solid var(--yellow);
+    border-radius: 999px;
+    padding: 2px 18px;
+  }
+
+  .card h3 {
+    font-size: 34px;
+    line-height: 1.2;
+    font-weight: 800;
+  }
+
+  .card p {
+    font-size: 28px;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+
+  .source {
+    margin-top: 22px;
+    font-size: 28px;
+    color: var(--muted);
+  }
+
+  .source span { color: var(--cyan); }
+
+  /* 9. Analise seu caso */
+  .questions {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    flex: 1;
+    align-content: center;
+  }
+
+  .questions li {
+    display: flex;
+    gap: 26px;
+    align-items: center;
+    padding: 34px 40px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    font-size: 38px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .questions .n {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 40px;
+    font-weight: 800;
+  }
+
+  .questions li:nth-child(even) .n { background: var(--cyan); }
+
+  .time-chip {
+    display: inline-block;
+    padding: 0 22px;
+    margin-left: 8px;
+    border-radius: 999px;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 52px;
+    vertical-align: middle;
+    line-height: 1.3;
+  }
+
+  /* 10. Escada do dano */
+  .stairs {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 70px 1fr 70px 1fr;
+    align-items: end;
+    min-height: 0;
+  }
+
+  .stair-arrow {
+    align-self: end;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 60px;
+  }
+
+  .stair-arrow .arrow { width: 60px; height: 60px; color: var(--yellow); }
+
+  .stair {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 14px;
+    padding: 28px 34px;
+    border-radius: 26px 26px 8px 8px;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.22;
+  }
+
+  .stair .emoji { font-size: 60px; line-height: 1; }
+
+  .stair.s1 { height: 46%; background: #1b2c55; border: 3px solid var(--cyan); }
+  .stair.s2 { height: 70%; background: #2a3a5a; border: 3px solid #8fdc9a; }
+  .stair.s3 { height: 94%; background: #3b3a2a; border: 3px solid var(--yellow); }
+
+  .stair .lvl {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+
+  .ask-box {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    padding: 26px 40px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 4px solid var(--cyan);
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .ask-box .q { font-size: 64px; color: var(--cyan); line-height: 1; }
+
+  /* 11. E agora? */
+  .dests {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 36px;
+    min-height: 0;
+  }
+
+  .dest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 36px 32px 32px;
+    border-radius: 28px;
+    background: var(--surface);
+    border: 3px solid var(--line);
+    border-top: 10px solid var(--yellow);
+    text-align: center;
+  }
+
+  .dest:nth-child(2) { border-top-color: var(--cyan); }
+
+  .dest .emoji { font-size: 96px; line-height: 1; }
+
+  .dest h3 {
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .dest .space {
+    flex: 1;
+    width: 100%;
+    border: 3px dashed var(--line);
+    border-radius: 18px;
+    background:
+      repeating-linear-gradient(to bottom, transparent 0 58px, rgba(179, 189, 219, 0.18) 58px 61px);
+  }
+
+  .dests + .banner { margin-top: 30px; }
+
+  /* 12. Fechamento */
+  .ticket {
+    position: relative;
+    padding: 56px 70px;
+    border-radius: 32px;
+    background: var(--surface);
+    border: 4px dashed var(--yellow);
+    font-size: 60px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 34px;
+  }
+
+  .ticket .blank {
+    min-width: 200px;
+    border-bottom-width: 6px;
+  }
+
+  .ticket .icon {
+    position: absolute;
+    top: -46px;
+    right: 60px;
+    font-size: 80px;
+    line-height: 1;
+  }
+
+  .next-line {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 40px;
+  }
+
+  .next-line strong { color: var(--cyan); }
+  .next-line .blank { min-width: 90px; }
+
+  .reference {
+    font-size: 28px;
+    line-height: 1.5;
+    color: var(--muted);
+    padding-top: 24px;
+    border-top: 3px solid var(--line);
+    overflow-wrap: anywhere;
+  }
+
+  .reference .label {
+    display: block;
+    color: var(--cyan);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  /* Painel de notas do professor */
+  .notes {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: var(--nav-h);
+    z-index: 5;
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    padding: 30px 110px 34px;
+    background: #0e1531;
+    border-top: 5px solid var(--yellow);
+    box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(24px);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+  }
+
+  .notes.open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .notes .tag {
+    flex: none;
+    padding: 6px 20px;
+    border-radius: 999px;
+    background: var(--yellow);
+    color: var(--bg);
+    font-size: 26px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .notes p {
+    font-size: 32px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  /* Barra de navegação */
+  .nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 6;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 110px;
+    border-top: 3px solid var(--line);
+    background: #0b1020;
+  }
+
+  .progress {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .progress-bar {
+    width: 360px;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    overflow: hidden;
+  }
+
+  .progress-bar span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--cyan), var(--yellow));
+    transition: width 0.4s ease;
+  }
+
+  .progress-count strong { color: var(--text); }
+
+  .hint {
+    margin-left: 12px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #6f7ba3;
+  }
+
+  .hint kbd {
+    font: inherit;
+    font-weight: 800;
+    padding: 1px 10px;
+    border: 2px solid #3a4777;
+    border-radius: 6px;
+    color: var(--muted);
+  }
+
+  .buttons { display: flex; gap: 20px; }
+
+  .btn {
+    font: inherit;
+    font-size: 30px;
+    font-weight: 700;
+    padding: 14px 36px;
+    border-radius: 16px;
+    cursor: pointer;
+    border: 3px solid var(--cyan);
+    background: transparent;
+    color: var(--cyan);
+    transition: background 0.2s, color 0.2s, opacity 0.2s;
+  }
+
+  .btn.primary {
+    background: var(--yellow);
+    border-color: var(--yellow);
+    color: var(--bg);
+  }
+
+  .btn:hover:not(:disabled) { filter: brightness(1.12); }
+  .btn:focus-visible { outline: 4px solid var(--text); outline-offset: 4px; }
+  .btn:disabled { opacity: 0.3; cursor: default; }
+</style>
+</head>
+<body class="no-anim">
+<div class="viewport">
+  <div class="stage" id="stage">
+    <main class="slides">
+
+      <!-- 1. Capa -->
+      <section class="slide" aria-label="Capa">
+        <div class="cover">
+          <div>
+            <div class="kicker">Aula de Inteligência Artificial</div>
+            <h1>Caça ao viés</h1>
+            <p class="subtitle">O que a IA pensa quando imagina uma <strong>profissão</strong>?</p>
+          </div>
+          <svg class="lupa" viewBox="0 0 200 200" aria-hidden="true">
+            <circle cx="82" cy="82" r="58" fill="rgba(34,211,238,0.12)" stroke="#22d3ee" stroke-width="14"/>
+            <path d="M52 66 A36 36 0 0 1 80 46" fill="none" stroke="#f4f6ff" stroke-width="8" stroke-linecap="round" opacity="0.7"/>
+            <line x1="124" y1="124" x2="178" y2="178" stroke="#ffd23f" stroke-width="24" stroke-linecap="round"/>
+            <circle cx="72" cy="92" r="7" fill="#ffd23f"/>
+            <circle cx="96" cy="72" r="7" fill="#ffd23f"/>
+            <circle cx="100" cy="100" r="7" fill="#ffd23f"/>
+          </svg>
+        </div>
+        <aside class="note">Aula de 45 min. Os prompts e a tabela serão montados no quadro, junto com a turma.</aside>
+      </section>
+
+      <!-- 2. A aposta -->
+      <section class="slide" aria-label="A aposta">
+        <div class="kicker">A aposta</div>
+        <h2>Faça sua <span class="hl">aposta</span> 🎲</h2>
+        <div class="bets">
+          <div class="bet">
+            <p class="ask">Pedimos à IA:</p>
+            <p class="what">um CEO</p>
+            <p class="q"><span>Homem ou mulher?</span><span>Jovem ou mais velho?</span></p>
+          </div>
+          <div class="bet">
+            <p class="ask">Pedimos à IA:</p>
+            <p class="what">uma pessoa limpando uma casa</p>
+            <p class="q"><span>Homem ou mulher?</span><span>Jovem ou mais velho?</span></p>
+          </div>
+        </div>
+        <p class="footline"><span aria-hidden="true">✍️</span>Anote sua aposta. Vamos conferir depois.</p>
+        <aside class="note">Votação de mão levantada. Registre os números no quadro e NÃO apague até o fim da aula. Não explique nada sobre viés ainda.</aside>
+      </section>
+
+      <!-- 3. Missão dos grupos -->
+      <section class="slide" aria-label="Missão da turma">
+        <div class="kicker">Missão da turma</div>
+        <h2>Missão: <span class="hl">investigar a IA</span> 🔍</h2>
+        <ol class="mission">
+          <li><span class="n">1</span>Juntos, vamos montar os prompts no quadro.</li>
+          <li><span class="n">2</span>Observem as imagens que a IA gerar para cada prompt.</li>
+          <li><span class="n">3</span>Contamos juntos o que elas mostram e preenchemos a tabela.</li>
+          <li><span class="n">4</span>Funções: contador, conferente, anotador, porta-voz.</li>
+        </ol>
+        <div class="callout">
+          <span class="icon" aria-hidden="true">⚠️</span>
+          <span>Registre o que a imagem <strong>APARENTA</strong>, não a identidade real de alguém.</span>
+        </div>
+        <aside class="note">11 minutos. Não dê pistas sobre o que procurar além das categorias da tabela.</aside>
+      </section>
+
+
+      <!-- 5. O que encontramos? -->
+      <section class="slide" aria-label="O que encontramos?">
+        <div class="kicker">Resultados</div>
+        <div class="table-head">
+          <h2>O que <span class="hl">encontramos</span>?</h2>
+          <div class="table-tools">
+            <span>✏️ Clique numa célula para digitar</span>
+            <button class="btn small" id="clear-table" type="button">Limpar tabela</button>
+          </div>
+        </div>
+        <table class="editable" id="board">
+          <colgroup><col style="width: 26%"><col><col><col><col><col style="width: 17%"></colgroup>
+          <thead>
+            <tr>
+              <th>Prompt</th>
+              <th>Homens</th>
+              <th>Mulheres</th>
+              <th>Pele mais clara</th>
+              <th>Pele mais escura</th>
+              <th>Faixa etária mais comum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="duo">
+          <p><span class="q">?</span>Nossas apostas acertaram?</p>
+          <p><span class="q">?</span>Se acertamos, como conseguimos prever?</p>
+        </div>
+        <aside class="note">Ideia central a extrair: nós e a IA aprendemos com o mesmo mundo. Esse é o gancho para o próximo slide.</aside>
+      </section>
+
+      <!-- 6. Por que isso acontece? -->
+      <section class="slide" aria-label="Por que isso acontece?">
+        <div class="kicker">Conceito</div>
+        <h2>Por que isso <span class="hl">acontece</span>?</h2>
+        <p class="definition">Viés é quando um sistema favorece ou repete um padrão de forma desproporcional.</p>
+        <div class="pipeline">
+          <div class="step">
+            <span class="emoji" aria-hidden="true">🌐</span>
+            <span class="label">Dados da internet</span>
+          </div>
+          <svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step">
+            <span class="emoji" aria-hidden="true">⚙️</span>
+            <span class="label">Treinamento</span>
+          </div>
+          <svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step">
+            <span class="emoji" aria-hidden="true">🖼️</span>
+            <span class="label">Imagens geradas</span>
+          </div>
+        </div>
+        <p class="punch">A IA não só reflete o mundo: ela pode exagerar os padrões.</p>
+        <aside class="note">Só agora apresente o conceito. Retome os números do quadro como exemplo.</aside>
+      </section>
+
+      <!-- 7. Racismo algorítmico -->
+      <section class="slide" aria-label="Racismo algorítmico">
+        <div class="kicker">Conceito</div>
+        <h2>Racismo <span class="hl">algorítmico</span></h2>
+        <div class="center">
+          <blockquote class="quote">A tecnologia pode classificar e organizar pessoas de um jeito que repete desigualdades que já existem.</blockquote>
+          <p class="attribution">Conceito de Tarcízio Silva, pesquisador do projeto Desvelar</p>
+        </div>
+        <aside class="note">Explique que o sistema não tem intenção, mas produz efeitos, e são os efeitos que atingem as pessoas.</aside>
+      </section>
+
+      <!-- 8. Casos reais -->
+      <section class="slide" aria-label="Casos reais">
+        <div class="kicker">Do experimento ao mundo real</div>
+        <h2 style="margin-bottom: 30px;">Casos reais mapeados pelo <span class="hl">Desvelar</span></h2>
+        <div class="cases">
+          <div class="case-col">
+            <span class="flow-label">Imagem</span>
+            <article class="card">
+              <div class="card-head"><span class="emoji" aria-hidden="true">🎨</span><span class="year">2025</span></div>
+              <h3>Image Playground da Apple reproduz estereótipos</h3>
+              <p>Ao gerar imagens a partir da foto de um usuário, o app clareava a pele para 'rico' e 'bem-sucedido' e escurecia para 'pobre'.</p>
+            </article>
+          </div>
+          <div class="case-arrow"><svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="case-col">
+            <span class="flow-label">Informação</span>
+            <article class="card">
+              <div class="card-head"><span class="emoji" aria-hidden="true">🔎</span><span class="year">2024</span></div>
+              <h3>Google, Microsoft e Perplexity promovem racismo científico</h3>
+              <p>Buscadores com IA exibiram dados de estudos desacreditados e racistas como se fossem fatos.</p>
+            </article>
+          </div>
+          <div class="case-arrow"><svg class="arrow" viewBox="0 0 90 60" aria-hidden="true"><path d="M5 30 H70 M50 8 L78 30 L50 52" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="case-col">
+            <span class="flow-label">Decisão sobre a vida</span>
+            <article class="card">
+              <div class="card-head"><span class="emoji" aria-hidden="true">🛵</span><span class="year">2025</span></div>
+              <h3>iFood é condenado por racismo algorítmico</h3>
+              <p>O reconhecimento facial bloqueou um entregador negro que deixou o cabelo crescer. A Justiça condenou a empresa a pagar R$ 60 mil. Depois, o iFood editou um post sobre racismo algorítmico em seu blog.</p>
+            </article>
+          </div>
+        </div>
+        <p class="source">Fonte: <span>desvelar.org/casos-de-discriminacao-algoritmica</span></p>
+        <aside class="note">Distribua um cartão impresso por grupo. No caso 2, não mostre números de QI: o foco é como a IA deu credibilidade a uma fonte ruim.</aside>
+      </section>
+
+      <!-- 9. Analise seu caso -->
+      <section class="slide" aria-label="Analise seu caso">
+        <div class="kicker">Trabalho em grupo</div>
+        <h2 style="margin-bottom: 10px;">Analise seu <span class="hl">caso</span> <span class="time-chip">(5 min)</span></h2>
+        <ol class="questions">
+          <li><span class="n">1</span>O que aconteceu, em uma frase?</li>
+          <li><span class="n">2</span>Quem foi prejudicado, e de que forma?</li>
+          <li><span class="n">3</span>Onde o viés entrou: nos dados, no sistema ou na decisão de alguém?</li>
+          <li><span class="n">4</span>Quem deveria ser responsável por corrigir isso?</li>
+        </ol>
+        <p class="footline"><span aria-hidden="true">⏱️</span>Depois, 1 minuto por grupo para apresentar.</p>
+        <aside class="note">Ordem das apresentações: Apple → buscadores → iFood. Ao final, pergunte: o que muda quando o viés sai da imagem e passa a decidir a vida de alguém?</aside>
+      </section>
+
+      <!-- 10. Da imagem à decisão -->
+      <section class="slide" aria-label="Da imagem à decisão">
+        <div class="kicker">Da imagem à decisão</div>
+        <h2 style="margin-bottom: 24px;">Quanto maior o poder, <span class="hl">maior o dano</span></h2>
+        <div class="stairs">
+          <div class="stair s1">
+            <span class="emoji" aria-hidden="true">🎨</span>
+            <span>Uma imagem estereotipada</span>
+          </div>
+          <div class="stair-arrow"><svg class="arrow" viewBox="0 0 60 60" aria-hidden="true"><path d="M8 52 L50 10 M24 10 H50 V36" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stair s2">
+            <span class="emoji" aria-hidden="true">🔎</span>
+            <span>Uma informação falsa com cara de verdade</span>
+          </div>
+          <div class="stair-arrow"><svg class="arrow" viewBox="0 0 60 60" aria-hidden="true"><path d="M8 52 L50 10 M24 10 H50 V36" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="stair s3">
+            <span class="emoji" aria-hidden="true">🛵</span>
+            <span>Uma pessoa que perde a renda</span>
+          </div>
+        </div>
+        <p class="ask-box"><span class="q" aria-hidden="true">?</span>Por que uma empresa mudaria um texto sobre racismo algorítmico depois de ser condenada?</p>
+        <aside class="note">Deixe a turma responder livremente. Pergunta extra: isso é mudança real ou cuidado com a imagem?</aside>
+      </section>
+
+      <!-- 11. E agora? -->
+      <section class="slide" aria-label="E agora?">
+        <div class="kicker">Propostas</div>
+        <h2>E agora? <span class="hl">O que dá para fazer?</span> 💡</h2>
+        <div class="dests">
+          <div class="dest">
+            <span class="emoji" aria-hidden="true">🏢</span>
+            <h3>Para empresas de tecnologia</h3>
+            <div class="space" aria-hidden="true"></div>
+          </div>
+          <div class="dest">
+            <span class="emoji" aria-hidden="true">📱</span>
+            <h3>Para quem usa IA</h3>
+            <div class="space" aria-hidden="true"></div>
+          </div>
+          <div class="dest">
+            <span class="emoji" aria-hidden="true">🏫</span>
+            <h3>Para a nossa escola</h3>
+            <div class="space" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="banner">Cada grupo escolhe um destinatário e escreve <strong>UMA</strong> proposta concreta.</p>
+        <aside class="note">6 minutos. Cole as propostas no quadro. Se quiser, fotografe para o relatório da próxima aula.</aside>
+      </section>
+
+      <!-- 12. Fechamento -->
+      <section class="slide" aria-label="Fechamento">
+        <div class="kicker">Fechamento</div>
+        <h2 style="margin-bottom: 20px;">Antes e <span class="hl">depois</span></h2>
+        <div class="center">
+          <p class="ticket">
+            <span class="icon" aria-hidden="true">🎟️</span>
+            <span class="nowrap">Antes eu achava <span class="blank"></span>.</span>
+            <span class="nowrap">Agora eu penso <span class="blank"></span>.</span>
+          </p>
+          <p class="next-line"><strong>Próxima aula:</strong> relatório do grupo – Pedimos <span class="blank"></span>, esperávamos <span class="blank"></span>, encontramos <span class="blank"></span>.</p>
+          <p class="reference">
+            <span class="label">Referência</span>
+            DESVELAR (ed.) et al. <em>Mapeamento de Danos e Discriminação Algorítmica</em>. Desvelar, 2026. Disponível em: https://desvelar.org/casos-de-discriminacao-algoritmica/. Acesso em: [data].
+          </p>
+        </div>
+        <aside class="note">Recolha os tickets de saída: eles mostram o que ficou da aula e ajudam a planejar a próxima.</aside>
+      </section>
+
+    </main>
+
+    <aside class="notes" id="notes" aria-hidden="true" aria-live="polite">
+      <span class="tag" id="notes-tag">Nota · slide 1</span>
+      <p id="notes-text"></p>
+    </aside>
+
+    <nav class="nav" aria-label="Navegação dos slides">
+      <div class="progress">
+        <div class="progress-bar" aria-hidden="true"><span id="bar"></span></div>
+        <div class="progress-count" id="count" aria-live="polite"><strong>1</strong> / 11</div>
+        <span class="hint"><kbd>N</kbd> = notas</span>
+      </div>
+      <div class="buttons">
+        <button class="btn" id="prev" type="button">← Anterior</button>
+        <button class="btn primary" id="next" type="button">Próximo →</button>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var stage = document.getElementById('stage');
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var prev = document.getElementById('prev');
+    var next = document.getElementById('next');
+    var count = document.getElementById('count');
+    var bar = document.getElementById('bar');
+    var notes = document.getElementById('notes');
+    var notesTag = document.getElementById('notes-tag');
+    var notesText = document.getElementById('notes-text');
+    var total = slides.length;
+    var current = 0;
+
+    function fit() {
+      var scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+      stage.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+    }
+
+    function show(n) {
+      current = Math.max(0, Math.min(total - 1, n));
+      slides.forEach(function (s, i) {
+        s.classList.toggle('active', i === current);
+        s.classList.toggle('before', i < current);
+        s.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+      });
+      count.innerHTML = '<strong>' + (current + 1) + '</strong> / ' + total;
+      bar.style.width = ((current + 1) / total * 100) + '%';
+      prev.disabled = current === 0;
+      next.disabled = current === total - 1;
+
+      var note = slides[current].querySelector('.note');
+      notesTag.textContent = 'Nota · slide ' + (current + 1);
+      notesText.textContent = note ? note.textContent.trim() : '';
+
+      if (history.replaceState) history.replaceState(null, '', '#' + (current + 1));
+    }
+
+    function toggleNotes() {
+      var open = notes.classList.toggle('open');
+      notes.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+
+    prev.addEventListener('click', function () { show(current - 1); });
+    next.addEventListener('click', function () { show(current + 1); });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      var t = e.target;
+      if (t.isContentEditable || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); show(current + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(current - 1); }
+      else if (e.key === 'Home') { show(0); }
+      else if (e.key === 'End') { show(total - 1); }
+      else if (e.key === 'n' || e.key === 'N') { toggleNotes(); }
+    });
+
+    // Tabela digitável: salva no navegador para não perder se a página recarregar
+    var board = document.getElementById('board');
+    var cells = Array.prototype.slice.call(board.querySelectorAll('th, td'));
+    var STORE = 'caca-ao-vies-tabela';
+
+    cells.forEach(function (c) {
+      c.contentEditable = 'true';
+      c.spellcheck = false;
+      c.setAttribute('data-default', c.textContent);
+    });
+
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORE));
+      if (saved && saved.length === cells.length) {
+        cells.forEach(function (c, i) { c.textContent = saved[i]; });
+      }
+    } catch (err) {}
+
+    function saveTable() {
+      try {
+        localStorage.setItem(STORE, JSON.stringify(cells.map(function (c) { return c.textContent; })));
+      } catch (err) {}
+    }
+
+    board.addEventListener('input', saveTable);
+
+    board.addEventListener('paste', function (e) {
+      e.preventDefault();
+      var text = (e.clipboardData || window.clipboardData).getData('text');
+      document.execCommand('insertText', false, text.replace(/\s+/g, ' '));
+    });
+
+    board.addEventListener('keydown', function (e) {
+      var cell = e.target;
+      if (e.key === 'Escape') { cell.blur(); return; }
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var col = cell.cellIndex;
+      var row = cell.parentNode;
+      var nextRow = cell.tagName === 'TH' ? board.tBodies[0].rows[0] : row.nextElementSibling;
+      if (nextRow) {
+        var target = nextRow.cells[col];
+        target.focus();
+        var range = document.createRange();
+        range.selectNodeContents(target);
+        range.collapse(false);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } else {
+        cell.blur();
+      }
+    });
+
+    document.getElementById('clear-table').addEventListener('click', function () {
+      if (!confirm('Apagar tudo o que foi digitado na tabela?')) return;
+      cells.forEach(function (c) { c.textContent = c.getAttribute('data-default'); });
+      try { localStorage.removeItem(STORE); } catch (err) {}
+    });
+
+    window.addEventListener('resize', fit);
+    fit();
+
+    var start = parseInt(location.hash.slice(1), 10);
+    show(isNaN(start) ? 0 : start - 1);
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { document.body.classList.remove('no-anim'); });
+    });
+  })();
+</script>
+</body>
+</html>

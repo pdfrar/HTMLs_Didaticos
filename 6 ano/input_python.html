@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberPython: Missão Input | 6º Ano</title>
+  <meta name="description" content="Aprenda a receber dados do usuário em Python com input(), juntar textos, converter com int() e fazer cálculos, de forma gamificada e sequencial.">
+
+  <!-- Fontes Gamer / Terminal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <!-- Biblioteca Canvas Confetti via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #070a12;
+      --bg-surface: #0e1626;
+      --bg-card: rgba(18, 28, 48, 0.85);
+      --bg-card-border: rgba(0, 240, 255, 0.25);
+
+      --neon-cyan: #00f0ff;
+      --cyan-glow: rgba(0, 240, 255, 0.4);
+      --neon-green: #00ff9d;
+      --green-glow: rgba(0, 255, 157, 0.4);
+      --neon-purple: #b026ff;
+      --purple-glow: rgba(176, 38, 255, 0.4);
+      --neon-amber: #ffb700;
+      --amber-glow: rgba(255, 183, 0, 0.4);
+      --neon-red: #ff2a5f;
+      --red-glow: rgba(255, 42, 95, 0.45);
+
+      --text-main: #f0f6fc;
+      --text-muted: #8b9bb4;
+      --code-bg: #060911;
+
+      --font-display: 'Outfit', sans-serif;
+      --font-pixel: 'Press Start 2P', cursive;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(176, 38, 255, 0.08) 0%, transparent 40%),
+        linear-gradient(to bottom, rgba(7, 10, 18, 0.95), rgba(7, 10, 18, 0.98)),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 240, 255, 0.015) 3px, rgba(0, 240, 255, 0.015) 3px);
+      color: var(--text-main);
+      font-family: var(--font-display);
+      min-height: 100vh;
+      line-height: 1.6;
+      padding-bottom: 120px;
+      overflow-x: hidden;
+    }
+
+    code {
+      font-family: var(--font-code);
+      background: rgba(0, 240, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.92em;
+    }
+
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    /* BARRA FIXA DE XP SUPERIOR */
+    .top-xp-nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(10, 15, 26, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid rgba(0, 240, 255, 0.3);
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 240, 255, 0.2);
+      padding: 12px 20px;
+    }
+
+    .xp-nav-content {
+      max-width: 1050px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hud-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hud-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #00f0ff, #b026ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      border: 2px solid var(--neon-cyan);
+      box-shadow: 0 0 12px var(--cyan-glow);
+    }
+
+    .hud-text h1 {
+      font-family: var(--font-pixel);
+      font-size: 0.72rem;
+      color: var(--neon-cyan);
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px var(--cyan-glow);
+    }
+
+    .hud-rank-badge {
+      font-family: var(--font-code);
+      font-size: 0.78rem;
+      color: var(--neon-green);
+      font-weight: 700;
+    }
+
+    .xp-progress-section {
+      flex: 1;
+      min-width: 240px;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .xp-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+    }
+
+    .xp-status-txt { color: var(--text-muted); }
+
+    .xp-percent-txt {
+      color: var(--neon-amber);
+      font-weight: 700;
+      text-shadow: 0 0 8px var(--amber-glow);
+    }
+
+    .xp-track {
+      width: 100%;
+      height: 14px;
+      background: rgba(5, 8, 15, 0.9);
+      border-radius: 20px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .xp-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00f0ff, #00ff9d, #ffb700);
+      border-radius: 20px;
+      transition: width 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+      box-shadow: 0 0 14px var(--cyan-glow);
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hud-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .hud-btn:hover {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--neon-cyan);
+      transform: translateY(-1px);
+    }
+
+    /* CONTAINER PRINCIPAL */
+    .app-container {
+      max-width: 960px;
+      margin: 28px auto 0;
+      padding: 0 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* CABEÇALHO */
+    .hero-panel {
+      background: linear-gradient(135deg, rgba(14, 22, 38, 0.9), rgba(8, 12, 22, 0.95));
+      border: 2px solid rgba(0, 240, 255, 0.35);
+      border-radius: 18px;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 20px rgba(0, 240, 255, 0.05);
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), transparent);
+    }
+
+    .terminal-tag {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      font-family: var(--font-pixel);
+      font-size: 0.65rem;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      text-transform: uppercase;
+    }
+
+    .hero-title {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      background: linear-gradient(120deg, #ffffff 40%, var(--neon-cyan) 80%, #a5b4fc);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 720px;
+      margin: 0 auto 18px;
+    }
+
+    .mission-counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 255, 157, 0.1);
+      border: 1px solid rgba(0, 255, 157, 0.3);
+      padding: 6px 16px;
+      border-radius: 30px;
+      color: var(--neon-green);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    /* CARD DE MISSÃO */
+    .mission-card {
+      background: var(--bg-card);
+      border: 2px solid var(--bg-card-border);
+      border-radius: 18px;
+      padding: 32px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+      position: relative;
+      scroll-margin-top: 110px;
+    }
+
+    .mission-card.hidden { display: none; }
+
+    .mission-card.revealing {
+      animation: slideInMission 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideInMission {
+      from { opacity: 0; transform: translateY(40px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-pixel);
+      font-size: 0.68rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.12);
+      border: 1px solid var(--neon-cyan);
+      color: var(--neon-cyan);
+      margin-bottom: 8px;
+    }
+
+    .card-step-badge.phase-str { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; color: #60a5fa; }
+    .card-step-badge.phase-int { background: rgba(16, 185, 129, 0.15); border-color: #10b981; color: #34d399; }
+    .card-step-badge.phase-float { background: rgba(255, 183, 0, 0.15); border-color: #ffb700; color: #fbbf24; }
+    .card-step-badge.phase-bool { background: rgba(176, 38, 255, 0.15); border-color: #b026ff; color: #c084fc; }
+    .card-step-badge.phase-boss { background: rgba(255, 42, 95, 0.15); border-color: #ff2a5f; color: #fb7185; }
+
+    .card-title-group h2 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .xp-chip {
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .card-desc {
+      font-size: 1.02rem;
+      color: #cbd5e1;
+      margin-bottom: 18px;
+    }
+
+    .card-desc:last-child { margin-bottom: 0; }
+
+    .section-label {
+      font-family: var(--font-code);
+      font-size: 1rem;
+      color: var(--neon-cyan);
+      margin: 26px 0 10px;
+    }
+
+    /* DESTAQUES */
+    .callout-box {
+      background: rgba(12, 19, 34, 0.9);
+      border-left: 4px solid var(--neon-cyan);
+      border-radius: 0 12px 12px 0;
+      padding: 16px 20px;
+      margin: 18px 0;
+      font-size: 0.95rem;
+      color: #dbe4f0;
+    }
+
+    .callout-box.danger-alert {
+      background: rgba(45, 12, 20, 0.7);
+      border: 2px solid rgba(255, 42, 95, 0.5);
+      border-left: 5px solid var(--neon-red);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 25px rgba(255, 42, 95, 0.25);
+    }
+
+    .callout-box.danger-alert h4 {
+      color: #ff4770;
+      font-family: var(--font-pixel);
+      font-size: 0.75rem;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      text-shadow: 0 0 10px var(--red-glow);
+    }
+
+    .callout-box.gold-rule {
+      background: rgba(35, 26, 7, 0.6);
+      border: 1px solid rgba(255, 183, 0, 0.35);
+      border-left: 4px solid var(--neon-amber);
+      border-radius: 12px;
+    }
+
+    .callout-box.gold-rule h4 {
+      color: var(--neon-amber);
+      font-family: var(--font-code);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    /* BLOCOS DE CÓDIGO */
+    .code-terminal {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 18px 0;
+      font-family: var(--font-code);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+
+    .code-terminal-header {
+      background: rgba(17, 24, 39, 0.95);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .code-dots { display: flex; gap: 6px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .code-terminal pre {
+      padding: 16px 20px;
+      overflow-x: auto;
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+
+    /* Tokens de Sintaxe */
+    .token-var { color: #e2e8f0; font-weight: 600; }
+    .token-op { color: #f43f5e; font-weight: bold; }
+    .token-str { color: #38bdf8; }
+    .token-int { color: #34d399; font-weight: 600; }
+    .token-float { color: #fbbf24; font-weight: 600; }
+    .token-comment { color: #64748b; font-style: italic; }
+    .token-fn { color: #f472b6; }
+    .token-err { color: #ff2a5f; text-decoration: underline wavy #ff2a5f; background: rgba(255, 42, 95, 0.15); padding: 2px 4px; border-radius: 4px; }
+
+    /* DIAGRAMA EPS */
+    .eps-flow-diagram {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: stretch;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .eps-stage-box {
+      background: rgba(15, 23, 42, 0.9);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .eps-stage-box h3 {
+      font-family: var(--font-code);
+      font-size: 0.95rem;
+      margin: 6px 0 4px;
+    }
+
+    .eps-stage-box p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .eps-stage-box .eps-cmd {
+      display: inline-block;
+      margin-top: 10px;
+      font-family: var(--font-code);
+      font-size: 0.82rem;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .eps-stage-box.done { border-color: rgba(0, 255, 157, 0.55); }
+    .eps-stage-box.done .eps-cmd { background: rgba(0, 255, 157, 0.12); color: var(--neon-green); }
+
+    .eps-stage-box.locked {
+      border: 2px dashed var(--neon-amber);
+      box-shadow: 0 0 20px rgba(255, 183, 0, 0.2);
+    }
+    .eps-stage-box.locked .eps-cmd { background: rgba(255, 183, 0, 0.12); color: var(--neon-amber); }
+
+    .eps-flow-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+    }
+
+    /* SIMULADOR DE TERMINAL */
+    .sim-block {
+      margin: 18px 0;
+    }
+
+    .sim-block .code-terminal { margin: 0; border-radius: 12px 12px 0 0; }
+
+    .sim-toolbar {
+      background: rgba(17, 24, 39, 0.95);
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .sim-toolbar span {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .btn-run {
+      background: linear-gradient(135deg, #00ff9d, #10b981);
+      color: #04120b;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-run:hover { transform: translateY(-1px); box-shadow: 0 0 16px var(--green-glow); }
+    .btn-run:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
+
+    .console {
+      background: #02040a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: 1px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 0 0 12px 12px;
+      padding: 14px 18px;
+      min-height: 86px;
+      font-family: var(--font-code);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+
+    .console-title {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .console-hint { color: #475569; font-style: italic; }
+
+    .console-line { white-space: pre-wrap; word-break: break-word; }
+    .console-line.err { color: #ff6b8a; }
+    .console-line.end { color: #475569; font-size: 0.8rem; margin-top: 6px; }
+
+    .console-typed { color: var(--neon-amber); }
+
+    .console-input {
+      background: rgba(255, 183, 0, 0.08);
+      border: none;
+      border-bottom: 2px solid var(--neon-amber);
+      color: var(--neon-amber);
+      font-family: var(--font-code);
+      font-size: 0.92rem;
+      outline: none;
+      width: 160px;
+      max-width: 60%;
+      padding: 0 4px;
+      animation: blinkBorder 1s infinite;
+    }
+
+    @keyframes blinkBorder {
+      50% { border-bottom-color: transparent; }
+    }
+
+    /* COMPARADOR (FASE 3) */
+    .lab-panel {
+      background: rgba(10, 16, 28, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.2);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .lab-panel label {
+      display: block;
+      font-family: var(--font-code);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .lab-input {
+      background: rgba(4, 7, 14, 0.95);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      border-radius: 8px;
+      color: var(--text-main);
+      font-family: var(--font-code);
+      font-size: 0.95rem;
+      padding: 8px 12px;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .lab-input:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .compare-row:last-child { border-bottom: none; }
+
+    .compare-row pre {
+      font-family: var(--font-code);
+      font-size: 0.86rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .compare-out {
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      background: #02040a;
+      border-radius: 8px;
+      padding: 6px 12px;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .compare-note {
+      grid-column: 1 / -1;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .compare-note.ok { color: #6ee7b7; }
+    .compare-note.warn { color: #fbbf24; }
+
+    /* TABELA DE OPERADORES */
+    .ops-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .op-chip {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .op-symbol {
+      font-family: var(--font-code);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+
+    .op-name { font-size: 0.85rem; color: var(--text-muted); }
+    .op-example { font-family: var(--font-code); font-size: 0.8rem; color: #cbd5e1; margin-top: 4px; }
+
+    /* QUIZ */
+    .quiz-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .quiz-item {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+
+    .quiz-item.solved { border-color: rgba(0, 255, 157, 0.5); }
+
+    .quiz-q {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .quiz-code {
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      background: #02040a;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .quiz-opt {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--text-main);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: var(--font-code);
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quiz-opt:hover { border-color: var(--neon-cyan); background: rgba(0, 240, 255, 0.1); }
+    .quiz-opt.right { border-color: var(--neon-green); background: rgba(0, 255, 157, 0.15); color: var(--neon-green); }
+    .quiz-opt.wrong { border-color: var(--neon-red); background: rgba(255, 42, 95, 0.12); color: #ff8aa5; }
+    .quiz-item.solved .quiz-opt { pointer-events: none; }
+
+    .quiz-feedback {
+      margin-top: 10px;
+      font-size: 0.88rem;
+      display: none;
+    }
+
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.ok { color: #6ee7b7; }
+    .quiz-feedback.no { color: #ff8aa5; }
+
+    .quiz-score {
+      font-family: var(--font-code);
+      font-weight: 700;
+      color: var(--neon-amber);
+    }
+
+    /* MISSÃO FINAL */
+    .boss-final-zone {
+      background: radial-gradient(circle at top, rgba(40, 10, 20, 0.9), rgba(10, 14, 26, 0.98));
+      border: 2px solid var(--neon-red);
+      box-shadow: 0 0 35px rgba(255, 42, 95, 0.3), inset 0 0 30px rgba(255, 42, 95, 0.1);
+      border-radius: 20px;
+      padding: 34px;
+    }
+
+    .notebook-instruction-box {
+      background: #fffbe8;
+      color: #1e293b;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      border-left: 8px solid #f59e0b;
+    }
+
+    .notebook-instruction-box h3 {
+      font-size: 1.2rem;
+      color: #b45309;
+      margin-bottom: 8px;
+    }
+
+    .notebook-instruction-box p,
+    .notebook-instruction-box li {
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .notebook-instruction-box ol,
+    .notebook-instruction-box ul {
+      margin: 6px 0 0 22px;
+    }
+
+    .notebook-instruction-box li { margin-bottom: 4px; }
+
+    .notebook-instruction-box code {
+      background: rgba(180, 83, 9, 0.12);
+      color: #7c2d12;
+    }
+
+    .req-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .req-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.93rem;
+      user-select: none;
+    }
+
+    .req-item:hover { background: rgba(255, 255, 255, 0.09); border-color: var(--neon-cyan); }
+    .req-item.found { border-color: var(--neon-green); background: rgba(0, 255, 157, 0.1); }
+
+    .req-status {
+      font-family: var(--font-code);
+      font-weight: 700;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .req-item.found .req-status { color: var(--neon-green); }
+
+    .send-panel {
+      display: none;
+      background: rgba(16, 30, 22, 0.95);
+      border: 2px solid var(--neon-green);
+      border-radius: 14px;
+      padding: 20px 22px;
+      margin-top: 20px;
+      animation: slideInMission 0.5s ease;
+    }
+
+    .send-panel.show { display: block; }
+
+    .send-panel h3 {
+      color: var(--neon-green);
+      font-family: var(--font-code);
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .send-panel p { color: #cbd5e1; font-size: 0.93rem; }
+
+    .extra-challenge {
+      margin-top: 26px;
+      border: 1px dashed rgba(176, 38, 255, 0.6);
+      border-radius: 14px;
+      padding: 18px 20px;
+      background: rgba(176, 38, 255, 0.06);
+    }
+
+    .extra-challenge h3 {
+      font-family: var(--font-code);
+      color: #c084fc;
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .extra-challenge p { color: #cbd5e1; font-size: 0.93rem; }
+
+    /* BOTÃO DE AVANÇO */
+    .advance-action-area {
+      margin-top: 28px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-advance-mission {
+      background: linear-gradient(135deg, #00f0ff, #00b4d8);
+      color: #070a12;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-family: var(--font-pixel);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 0 20px var(--cyan-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .btn-advance-mission:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 0 30px var(--cyan-glow);
+      background: linear-gradient(135deg, #00ff9d, #00f0ff);
+    }
+
+    .btn-advance-mission:active { transform: translateY(0) scale(0.98); }
+
+    .btn-advance-mission.completed {
+      background: rgba(0, 255, 157, 0.2);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+      box-shadow: none;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* BANNER DE VITÓRIA */
+    .victory-badge-modal {
+      display: none;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 240, 255, 0.2));
+      border: 2px solid var(--neon-green);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      animation: victoryPulse 2s infinite alternate;
+    }
+
+    .victory-badge-modal h2 {
+      font-family: var(--font-pixel);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--neon-green);
+      margin-bottom: 8px;
+    }
+
+    .victory-badge-modal p {
+      color: #cbd5e1;
+      max-width: 620px;
+      margin: 0 auto;
+      font-size: 0.95rem;
+    }
+
+    @keyframes victoryPulse {
+      from { box-shadow: 0 0 20px rgba(0, 255, 157, 0.2); }
+      to { box-shadow: 0 0 45px rgba(0, 255, 157, 0.6); }
+    }
+
+    /* TOAST DE XP */
+    .xp-toast-hud {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(10, 15, 26, 0.95);
+      border: 2px solid var(--neon-green);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7), 0 0 20px var(--green-glow);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 2000;
+      pointer-events: none;
+    }
+
+    .xp-toast-hud.show { transform: translateY(0); opacity: 1; }
+
+    /* RESPONSIVO */
+    @media (max-width: 720px) {
+      .top-xp-nav { padding: 10px 16px; }
+      .app-container { padding: 0 16px; gap: 24px; }
+      .hero-panel { padding: 22px 18px; }
+      .mission-card, .boss-final-zone { padding: 22px 18px; }
+      .card-title-group h2 { font-size: 1.2rem; }
+      .eps-flow-diagram { grid-template-columns: 1fr; }
+      .eps-flow-arrow { justify-content: center; transform: rotate(90deg); }
+      .compare-row { grid-template-columns: 1fr; }
+      .ops-grid { grid-template-columns: repeat(2, 1fr); }
+      .code-terminal pre { padding: 14px; font-size: 0.82rem; }
+      .console { font-size: 0.84rem; padding: 12px 14px; }
+      .btn-advance-mission { padding: 12px 18px; font-size: 0.62rem; }
+      .advance-action-area { justify-content: stretch; }
+      .advance-action-area .btn-advance-mission { width: 100%; justify-content: center; }
+      .xp-toast-hud { left: 16px; right: 16px; bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA FIXA DE XP SUPERIOR -->
+  <header class="top-xp-nav">
+    <div class="xp-nav-content">
+
+      <div class="hud-profile">
+        <div class="hud-avatar">🎮</div>
+        <div class="hud-text">
+          <h1>CYBER_PYTHON</h1>
+          <div class="hud-rank-badge" id="hudLevelLabel">NÍVEL 1: RECRUTA</div>
+        </div>
+      </div>
+
+      <div class="xp-progress-section">
+        <div class="xp-meta-row">
+          <span class="xp-status-txt" id="missionCounterLabel">Missão 1 de 7</span>
+          <span class="xp-percent-txt" id="xpPercentDisplay">0% XP</span>
+        </div>
+        <div class="xp-track" title="Progresso da Missão">
+          <div class="xp-fill" id="xpProgressBar"></div>
+        </div>
+      </div>
+
+      <div class="hud-controls">
+        <button class="hud-btn" id="soundToggleBtn" title="Ativar/Desativar Sons 8-Bit">
+          <span id="soundIcon">🔊</span> SOM
+        </button>
+        <button class="hud-btn" id="resetBtn" title="Reiniciar do Início">
+          🔄 REINICIAR
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="app-container">
+
+    <!-- CABEÇALHO -->
+    <section class="hero-panel">
+      <div class="terminal-tag">SISTEMA PEDAGÓGICO DE PROGRAMAÇÃO</div>
+      <h1 class="hero-title">Missão Input: o programa que escuta</h1>
+      <p class="hero-desc">
+        Até aqui, os programas apenas mostravam informações na tela. Nesta missão, eles passarão a receber dados digitados pelo usuário. Complete as fases em ordem para chegar à missão final.
+      </p>
+      <div class="mission-counter-badge">
+        <span>⚡ STATUS:</span> <strong id="heroStatusText">Fase 1 Desbloqueada</strong>
+      </div>
+    </section>
+
+    <!-- =========================================================================
+         FASE 1: REVISÃO E A PEÇA QUE FALTA
+         ========================================================================= -->
+    <article class="mission-card" id="mission-1">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-step-badge">FASE 1 • REVISÃO</span>
+          <h2>A peça que falta no ciclo EPS</h2>
+        </div>
+        <span class="xp-chip" style="color: var(--neon-cyan);">+15% XP</span>
+      </div>
+
+      <p class="card-desc">
+        Na aula anterior, você usou o <code>print()</code> para mostrar mensagens e criou variáveis para guardar textos (<code>str</code>) e números inteiros (<code>int</code>). Observe o programa abaixo:
+      </p>
+
+      <div class="code-terminal">
+        <div class="code-terminal-header">
+          <div class="code-dots"><span class="code-dot dot-red"></span><span class="code-dot dot-yellow"></span><span class="code-dot dot-green"></span></div>
+          <span>revisao.py</span>
+        </div>
+        <pre><code><span class="token-var">nome</span> <span class="token-op">=</span> <span class="token-str">"Ana"</span>
+<span class="token-var">idade</span> <span class="token-op">=</span> <span class="token-int">11</span>
+<span class="token-fn">print</span>(<span class="token-str">"Nome:"</span>, <span class="token-var">nome</span>)
+<span class="token-fn">print</span>(<span class="token-str">"Idade:"</span>, <span class="token-var">idade</span>)</code></pre>
+      </div>
+
+      <p class="card-desc">
+        O programa funciona, mas tem uma limitação: ele sempre mostrará <strong>Ana</strong> e <strong>11</strong>, não importa quem esteja usando o computador. Os valores foram escritos pelo programador diretamente no código.
+      </p>
+
+      <div class="eps-flow-diagram">
+        <div class="eps-stage-box locked">
+          <h3 style="color: var(--neon-amber);">1. ENTRADA</h3>
+          <p>O usuário fornece os dados pelo teclado.</p>
+          <span class="eps-cmd">input() — nesta aula</span>
+        </div>
+        <div class="eps-flow-arrow">➔</div>
+        <div class="eps-stage-box done">
+          <h3 style="color: var(--neon-purple);">2. PROCESSAMENTO</h3>
+          <p>O programa guarda e trabalha os dados.</p>
+          <span class="eps-cmd">variáveis ✓</span>
+        </div>
+        <div class="eps-flow-arrow">➔</div>
+        <div class="eps-stage-box done">
+          <h3 style="color: var(--neon-green);">3. SAÍDA</h3>
+          <p>O resultado aparece na tela.</p>
+          <span class="eps-cmd">print() ✓</span>
+        </div>
+      </div>
+
+      <div class="callout-box">
+        Para que o programa funcione com <strong>qualquer</strong> pessoa, falta a etapa de <strong>Entrada</strong>. Em Python, ela é feita pelo comando <code>input()</code>.
+      </div>
+
+      <div class="advance-action-area">
+        <button class="btn-advance-mission" id="btn-advance-1" onclick="advanceToPhase(2)">
+          <span>🔓 DESBLOQUEAR COMANDO: INPUT</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 2: O COMANDO INPUT
+         ========================================================================= -->
+    <article class="mission-card hidden" id="mission-2">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-step-badge phase-str">FASE 2 • ENTRADA</span>
+          <h2>O comando input()</h2>
+        </div>
+        <span class="xp-chip" style="color: #60a5fa;">+15% XP</span>
+      </div>
+
+      <p class="card-desc">
+        O <code>input()</code> faz o programa <strong>parar e esperar</strong> o usuário digitar alguma coisa. Quando o usuário aperta <strong>Enter</strong>, o que foi digitado é guardado em uma variável.
+      </p>
+
+      <div class="callout-box gold-rule">
+        <h4>Como se escreve:</h4>
+        <code>variavel = input("Pergunta que aparece na tela ")</code><br><br>
+        O texto entre aspas é a pergunta exibida para o usuário. A resposta digitada fica guardada na variável da esquerda. Deixe um espaço no final da pergunta, para que a resposta não fique grudada nela.
+      </div>
+
+      <h3 class="section-label">Teste o programa: clique em Executar e responda no terminal.</h3>
+
+      <div class="sim-block">
+        <div class="code-terminal">
+          <div class="code-terminal-header">
+            <div class="code-dots"><span class="code-dot dot-red"></span><span class="code-dot dot-yellow"></span><span class="code-dot dot-green"></span></div>
+            <span>main.py</span>
+          </div>
+          <pre><code><span class="token-var">nome</span> <span class="token-op">=</span> <span class="token-fn">input</span>(<span class="token-str">"Qual é o seu nome? "</span>)
+<span class="token-fn">print</span>(<span class="token-str">"Olá,"</span>, <span class="token-var">nome</span>)
+<span class="token-fn">print</span>(<span class="token-str">"Seja bem-vindo à base CyberPython."</span>)</code></pre>
+        </div>
+        <div class="sim-toolbar">
+          <span>Simulador de terminal</span>
+          <button class="btn-run" data-program="ola">▶ Executar</button>
+        </div>
+        <div class="console" id="console-ola">
+          <div class="console-title">Console</div>
+          <div class="console-hint">Clique em Executar para iniciar o programa.</div>
+        </div>
+      </div>
+
+      <p class="card-desc">
+        Execute o programa mais de uma vez, com nomes diferentes. O código é o mesmo, mas a saída muda conforme a entrada. É isso que torna um programa interativo.
+      </p>
+
+      <div class="callout-box">
+        <strong>Ordem de execução:</strong> o Python lê o código de cima para baixo. Na linha 1, ele mostra a pergunta e espera. Somente depois que o usuário aperta Enter é que ele segue para a linha 2.
+      </div>
+
+      <div class="advance-action-area">
+        <button class="btn-advance-mission" id="btn-advance-2" onclick="advanceToPhase(3)">
+          <span>🔓 DESBLOQUEAR: JUNTANDO TEXTOS</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 3: JUNTANDO TEXTOS
+         ========================================================================= -->
+    <article class="mission-card hidden" id="mission-3">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-step-badge phase-str">FASE 3 • SAÍDA</span>
+          <h2>Juntando textos: vírgula ou sinal de mais?</h2>
+        </div>
+        <span class="xp-chip" style="color: #60a5fa;">+15% XP</span>
+      </div>
+
+      <p class="card-desc">
+        Há duas formas de mostrar um texto fixo junto com o conteúdo de uma variável no <code>print()</code>:
+      </p>
+
+      <ul class="card-desc" style="margin-left: 22px;">
+        <li><strong>Vírgula ( , )</strong>: o Python coloca um espaço automaticamente entre cada parte.</li>
+        <li><strong>Sinal de mais ( + )</strong>: o Python cola os textos exatamente como estão, sem acrescentar espaço. Esse processo se chama <strong>concatenação</strong>.</li>
+      </ul>
+
+      <div class="lab-panel">
+        <label for="concatNameInput">Digite um nome para guardar na variável <code>nome</code>:</label>
+        <input type="text" id="concatNameInput" class="lab-input" value="Ana" maxlength="20" autocomplete="off">
+
+        <div style="margin-top: 16px;">
+          <div class="compare-row">
+            <pre><span class="token-fn">print</span>(<span class="token-str">"Bem-vindo,"</span>, <span class="token-var">nome</span>)</pre>
+            <div class="compare-out" id="concatOut1"></div>
+            <div class="compare-note ok">Com vírgula, o espaço entre as partes aparece sozinho.</div>
+          </div>
+          <div class="compare-row">
+            <pre><span class="token-fn">print</span>(<span class="token-str">"Bem-vindo,"</span> <span class="token-op">+</span> <span class="token-var">nome</span>)</pre>
+            <div class="compare-out" id="concatOut2"></div>
+            <div class="compare-note warn">Com o sinal de mais, o nome ficou colado na vírgula.</div>
+          </div>
+          <div class="compare-row">
+            <pre><span class="token-fn">print</span>(<span class="token-str">"Bem-vindo, "</span> <span class="token-op">+</span> <span class="token-var">nome</span> <span class="token-op">+</span> <span class="token-str">"!"</span>)</pre>
+            <div class="compare-out" id="concatOut3"></div>
+            <div class="compare-note ok">Com o sinal de mais, o espaço precisa ser escrito dentro das aspas. Assim também é possível colar o ponto de exclamação logo depois do nome.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout-box">
+        As duas formas estão corretas. A vírgula é mais prática; o sinal de mais dá mais controle sobre a pontuação e os espaços.
+      </div>
+
+      <div class="advance-action-area">
+        <button class="btn-advance-mission" id="btn-advance-3" onclick="advanceToPhase(4)">
+          <span>⚠️ INVESTIGAR: O PROBLEMA DOS NÚMEROS</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 4: O PROBLEMA DOS NÚMEROS
+         ========================================================================= -->
+    <article class="mission-card hidden" id="mission-4">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-step-badge phase-boss">FASE 4 • INVESTIGAÇÃO</span>
+          <h2>O problema dos números</h2>
+        </div>
+        <span class="xp-chip" style="color: #fb7185;">+15% XP</span>
+      </div>
+
+      <p class="card-desc">
+        O programa abaixo deveria mostrar quantos anos o usuário terá no ano que vem. Antes de executar, responda mentalmente: <strong>o que vai aparecer na tela?</strong>
+      </p>
+
+      <div class="sim-block">
+        <div class="code-terminal">
+          <div class="code-terminal-header">
+            <div class="code-dots"><span class="code-dot dot-red"></span><span class="code-dot dot-yellow"></span><span class="code-dot dot-green"></span></div>
+            <span>main.py</span>
+          </div>
+          <pre><code><span class="token-var">idade</span> <span class="token-op">=</span> <span class="token-fn">input</span>(<span class="token-str">"Quantos anos você tem? "</span>)
+<span class="token-fn">print</span>(<span class="token-var">idade</span> <span class="token-op">+</span> <span class="token-int">1</span>)</code></pre>
+        </div>
+        <div class="sim-toolbar">
+          <span>Simulador de terminal</span>
+          <button class="btn-run" data-program="idadeErro">▶ Executar</button>
+        </div>
+        <div class="console" id="console-idadeErro">
+          <div class="console-title">Console</div>
+          <div class="console-hint">Clique em Executar para iniciar o programa.</div>
+        </div>
+      </div>
+
+      <div class="callout-box danger-alert">
+        <h4>TypeError: o Python não conseguiu fazer a conta</h4>
+        A mensagem <code>can only concatenate str (not "int") to str</code> significa: "só consigo juntar texto com texto, e você tentou juntar um texto com um número inteiro".
+      </div>
+
+      <p class="card-desc">
+        Mas o usuário digitou um número! Por que o Python diz que é texto? Execute este segundo programa, que soma dois números digitados:
+      </p>
+
+      <div class="sim-block">
+        <div class="code-terminal">
+          <div class="code-terminal-header">
+            <div class="code-dots"><span class="code-dot dot-red"></span><span class="code-dot dot-yellow"></span><span class="code-dot dot-green"></span></div>
+            <span>main.py</span>
+          </div>
+          <pre><code><span class="token-var">a</span> <span class="token-op">=</span> <span class="token-fn">input</span>(<span class="token-str">"Primeiro número: "</span>)
+<span class="token-var">b</span> <span class="token-op">=</span> <span class="token-fn">input</span>(<span class="token-str">"Segundo número: "</span>)
+<span class="token-fn">print</span>(<span class="token-str">"Resultado:"</span>, <span class="token-var">a</span> <span class="token-op">+</span> <span class="token-var">b</span>)</code></pre>
+        </div>
+        <div class="sim-toolbar">
+          <span>Sugestão: digite 10 e depois 5</span>
+          <button class="btn-run" data-program="somaTexto">▶ Executar</button>
+        </div>
+        <div class="console" id="console-somaTexto">
+          <div class="console-title">Console</div>
+          <div class="console-hint">Clique em Executar para iniciar o programa.</div>
+        </div>
+      </div>
+
+      <div class="callout-box gold-rule">
+        <h4>A regra do input():</h4>
+        O <code>input()</code> <strong>sempre</strong> devolve um texto (<code>str</code>), mesmo quando o usuário digita um número. Por isso, <code>"10" + "5"</code> resultou em <code>105</code>: o Python colou os dois textos, como fez com os nomes na fase anterior.
+      </div>
+
+      <div class="advance-action-area">
+        <button class="btn-advance-mission" id="btn-advance-4" onclick="advanceToPhase(5)">
+          <span>🔓 DESBLOQUEAR A SOLUÇÃO: INT()</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 5: CONVERTENDO COM INT
+         ========================================================================= -->
+    <article class="mission-card hidden" id="mission-5">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-step-badge phase-int">FASE 5 • CONVERSÃO</span>
+          <h2>A solução: converter com int()</h2>
+        </div>
+        <span class="xp-chip" style="color: #34d399;">+20% XP</span>
+      </div>
+
+      <p class="card-desc">
+        O comando <code>int()</code> transforma um texto que contém um número em um número inteiro de verdade. Para isso, colocamos o <code>input()</code> <strong>dentro</strong> do <code>int()</code>:
+      </p>
+
+      <div class="callout-box gold-rule">
+        <h4>Como se escreve:</h4>
+        <code>idade = int(input("Quantos anos você tem? "))</code><br><br>
+        Primeiro o <code>input()</code> recebe o texto digitado; em seguida, o <code>int()</code> converte esse texto em número. Observe que a linha termina com <strong>dois</strong> parênteses: um fecha o <code>input</code> e o outro fecha o <code>int</code>.
+      </div>
+
+      <div class="sim-block">
+        <div class="code-terminal">
+          <div class="code-terminal-header">
+            <div class="code-dots"><span class="code-dot dot-red"></span><span class="code-dot dot-yellow"></span><span class="code-dot dot-green"></span></div>
+            <span>main.py</span>
+          </div>
+          <pre><code><span class="token-var">idade</span> <span class="token-op">=</span> <span class="token-fn">int</span>(<span class="token-fn">input</span>(<span class="token-str">"Quantos anos você tem? "</span>))
+<span class="token-var">proximo_ano</span> <span class="token-op">=</span> <span class="token-var">idade</span> <span class="token-op">+</span> <span class="token-int">1</span>
+<span class="token-fn">print</span>(<span class="token-str">"No ano que vem, você terá"</span>, <span class="token-var">proximo_ano</span>, <span class="token-str">"anos."</span>)</code></pre>
+        </div>
+        <div class="sim-toolbar">
+          <span>Simulador de terminal</span>
+          <button class="btn-run" data-program="idadeOk">▶ Executar</button>
+        </div>
+        <div class="console" id="console-idadeOk">
+          <div class="console-title">Console</div>
+          <div class="console-hint">Clique em Executar para iniciar o programa.</div>
+        </div>
+      </div>
+
+      <p class="card-desc">
+        Agora o ciclo EPS está completo: a <strong>Entrada</strong> é a idade digitada, o <strong>Processamento</strong> é a conta <code>idade + 1</code> e a <strong>Saída</strong> é a frase mostrada pelo <code>print()</code>.
+      </p>
+
+      <div class="callout-box danger-alert">
+        <h4>Teste: execute de novo e digite uma palavra</h4>
+        Se o usuário digitar <code>doze</code> em vez de <code>12</code>, o <code>int()</code> não consegue fazer a conversão e o Python mostra um <code>ValueError</code>. O <code>int()</code> só funciona com textos formados por algarismos.
+      </div>
+
+      <div class="advance-action-area">
+        <button class="btn-advance-mission" id="btn-advance-5" onclick="advanceToPhase(6)">
+          <span>🔓 DESBLOQUEAR: OPERAÇÕES MATEMÁTICAS</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 6: OPERAÇÕES E QUIZ
+         ========================================================================= -->
+    <article class="mission-card hidden" id="mission-6">
+      <div class="card-header">
+        <div class="card-title-group">
+          <span class="card-step-badge phase-float">FASE 6 • PROCESSAMENTO</span>
+          <h2>Operações matemáticas</h2>
+        </div>
+        <span class="xp-chip" style="color: #fbbf24;">+20% XP</span>
+      </div>
+
+      <p class="card-desc">
+        Depois de converter a entrada com <code>int()</code>, o Python pode fazer qualquer uma das quatro operações básicas. Atenção aos símbolos de multiplicação e divisão, que são diferentes dos usados no caderno:
+      </p>
+
+      <div class="ops-grid">
+        <div class="op-chip">
+          <div class="op-symbol">+</div>
+          <div class="op-name">Adição</div>
+          <div class="op-example">7 + 3 → 10</div>
+        </div>
+        <div class="op-chip">
+          <div class="op-symbol">-</div>
+          <div class="op-name">Subtração</div>
+          <div class="op-example">7 - 3 → 4</div>
+        </div>
+        <div class="op-chip">
+          <div class="op-symbol">*</div>
+          <div class="op-name">Multiplicação</div>
+          <div class="op-example">7 * 3 → 21</div>
+        </div>
+        <div class="op-chip">
+          <div class="op-symbol">/</div>
+          <div class="op-name">Divisão</div>
+          <div class="op-example">6 / 3 → 2.0</div>
+        </div>
+      </div>
+
+      <h3 class="section-label">Exemplo: a loja do jogo</h3>
+
+      <div class="sim-block">
+        <div class="code-terminal">
+          <div class="code-terminal-header">
+            <div class="code-dots"><span class="code-dot dot-red"></span><span class="code-dot dot-yellow"></span><span class="code-dot dot-green"></span></div>
+            <span>main.py</span>
+          </div>
+          <pre><code><span class="token-fn">print</span>(<span class="token-str">"=== LOJA DO JOGO ==="</span>)
+<span class="token-var">preco</span> <span class="token-op">=</span> <span class="token-fn">int</span>(<span class="token-fn">input</span>(<span class="token-str">"Preço de uma poção (em moedas): "</span>))
+<span class="token-var">quantidade</span> <span class="token-op">=</span> <span class="token-fn">int</span>(<span class="token-fn">input</span>(<span class="token-str">"Quantas poções você quer? "</span>))
+<span class="token-var">total</span> <span class="token-op">=</span> <span class="token-var">preco</span> <span class="token-op">*</span> <span class="token-var">quantidade</span>
+<span class="token-fn">print</span>(<span class="token-str">"Total a pagar:"</span>, <span class="token-var">total</span>, <span class="token-str">"moedas"</span>)</code></pre>
+        </div>
+        <div class="sim-toolbar">
+          <span>Simulador de terminal</span>
+          <button class="btn-run" data-program="loja">▶ Executar</button>
+        </div>
+        <div class="console" id="console-loja">
+          <div class="console-title">Console</div>
+          <div class="console-hint">Clique em Executar para iniciar o programa.</div>
+        </div>
+      </div>
+
+      <div class="callout-box">
+        Os nomes de variáveis não devem ter acento nem espaço. Por isso escrevemos <code>preco</code> em vez de <code>preço</code>, e <code>proximo_ano</code> com sublinhado no lugar do espaço.
+      </div>
+
+      <h3 class="section-label">Desafio: qual será a saída? <span class="quiz-score" id="quizScore">(0 de 5)</span></h3>
+
+      <div class="quiz-list" id="quizList"></div>
+
+      <div class="advance-action-area">
+        <button class="btn-advance-mission" id="btn-advance-6" onclick="advanceToPhase(7)">
+          <span>👾 CHEGAR A 100% XP E ABRIR A MISSÃO FINAL</span> ➔
+        </button>
+      </div>
+    </article>
+
+    <!-- =========================================================================
+         FASE 7: MISSÃO FINAL (ONLINEGDB + CLASSAPP)
+         ========================================================================= -->
+    <article class="mission-card hidden boss-final-zone" id="mission-7">
+
+      <div class="victory-badge-modal" id="victoryBanner">
+        <div style="font-size: 2.6rem; margin-bottom: 6px;">🏆</div>
+        <h2>NÍVEL 7: MESTRE DA ENTRADA ATINGIDO! 100% XP!</h2>
+        <p>
+          Você completou o ciclo EPS em Python: recebeu dados com <code>input()</code>, converteu com <code>int()</code>, fez cálculos e mostrou os resultados com <code>print()</code>. Agora é hora de escrever um programa completo.
+        </p>
+      </div>
+
+      <div class="card-header" style="border-bottom-color: rgba(255, 42, 95, 0.4);">
+        <div class="card-title-group">
+          <span class="card-step-badge phase-boss">FASE 7 • MISSÃO FINAL</span>
+          <h2 style="color: #ff4770;">Ficha de Personagem no OnlineGDB</h2>
+        </div>
+        <span class="xp-chip" style="color: var(--neon-red);">ENTREGA PELO CLASSAPP</span>
+      </div>
+
+      <div class="notebook-instruction-box">
+        <h3>Missão: crie um programa que monte a ficha de um personagem de jogo</h3>
+        <p>Abra o <strong>onlinegdb.com</strong>, confira se a linguagem selecionada no canto superior direito é <strong>Python 3</strong> e escreva um programa que:</p>
+        <ol>
+          <li>Mostre, na primeira linha, o <strong>seu nome e a sua turma</strong> com um <code>print()</code>.</li>
+          <li>Pergunte o <strong>nome do personagem</strong> com <code>input()</code>.</li>
+          <li>Pergunte a <strong>idade do personagem</strong> e a <strong>quantidade de moedas</strong> que ele tem, usando <code>int(input())</code>.</li>
+          <li>Calcule a <strong>idade do personagem daqui a 10 anos</strong> e as <strong>moedas depois de um bônus que dobra o valor</strong>.</li>
+          <li>Mostre a ficha completa na tela com <code>print()</code>.</li>
+        </ol>
+        <p style="margin-top: 10px;">Ao clicar em <strong>Run</strong>, as perguntas aparecem na parte de baixo da tela. Clique ali, digite as respostas e aperte <strong>Enter</strong> depois de cada uma.</p>
+      </div>
+
+      <h3 class="section-label">Exemplo de como o programa pode ficar ao ser executado:</h3>
+
+      <div class="console" style="border-radius: 12px; border-top: 1px solid rgba(255, 255, 255, 0.12);">
+        <div class="console-title">Console</div>
+        <div class="console-line">Aluno: Maria Souza - 6º ano A</div>
+        <div class="console-line">Nome do personagem: <span class="console-typed">Kira</span></div>
+        <div class="console-line">Idade do personagem: <span class="console-typed">14</span></div>
+        <div class="console-line">Quantas moedas ele tem? <span class="console-typed">250</span></div>
+        <div class="console-line">=== FICHA DO PERSONAGEM ===</div>
+        <div class="console-line">Nome: Kira</div>
+        <div class="console-line">Idade daqui a 10 anos: 24</div>
+        <div class="console-line">Moedas com o bônus: 500</div>
+      </div>
+
+      <p class="card-desc" style="margin-top: 14px; font-size: 0.92rem;">
+        As respostas em amarelo foram digitadas pelo usuário. As frases e o visual da ficha podem ser diferentes; o importante é cumprir os cinco itens da missão.
+      </p>
+
+      <h3 class="section-label">Antes de enviar, confira cada item (clique para marcar):</h3>
+
+      <div class="req-checklist" id="reqChecklist">
+        <div class="req-item" data-req="1"><span>O programa mostra meu nome e minha turma.</span><span class="req-status">[ PENDENTE ]</span></div>
+        <div class="req-item" data-req="2"><span>Usei <code>input()</code> para perguntar o nome do personagem.</span><span class="req-status">[ PENDENTE ]</span></div>
+        <div class="req-item" data-req="3"><span>Usei <code>int(input())</code> para a idade e para as moedas.</span><span class="req-status">[ PENDENTE ]</span></div>
+        <div class="req-item" data-req="4"><span>O programa calcula a idade daqui a 10 anos e o dobro das moedas.</span><span class="req-status">[ PENDENTE ]</span></div>
+        <div class="req-item" data-req="5"><span>Executei o programa, respondi as perguntas e ele funcionou sem erro.</span><span class="req-status">[ PENDENTE ]</span></div>
+      </div>
+
+      <div class="send-panel" id="sendPanel">
+        <h3>✅ Programa pronto para entrega</h3>
+        <p>
+          Tire um print da tela em que apareçam <strong>o código completo</strong> e <strong>o resultado no console</strong>, com as respostas que você digitou. Envie a imagem para o professor pelo <strong>ClassApp</strong>.
+        </p>
+      </div>
+
+      <div class="extra-challenge">
+        <h3>Desafio extra (opcional)</h3>
+        <p>
+          Acrescente à ficha uma pergunta sobre a <strong>força</strong> do personagem e mostre o <strong>dano do ataque especial</strong>, calculado como força vezes 3. Depois, pergunte quantas moedas ele vai gastar na loja e mostre <strong>quantas moedas sobram</strong>.
+        </p>
+      </div>
+
+    </article>
+
+  </main>
+
+  <!-- TOAST FLUTUANTE DE NOTIFICAÇÃO DE XP -->
+  <div class="xp-toast-hud" id="xpToastHud">
+    <span style="font-size: 1.4rem;">⚡</span>
+    <div>
+      <div style="font-weight: 700; color: var(--neon-cyan);" id="xpToastTitle">+15% XP DESBLOQUEADO!</div>
+      <div style="font-size: 0.78rem; color: #94a3b8;" id="xpToastSub">Você subiu de nível no sistema.</div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       SISTEMA DE ÁUDIO 8-BIT (WEB AUDIO API)
+       ========================================================================== */
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playTone(ctx, type, freqs, step, volume, start) {
+      freqs.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        const t = start + idx * step;
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(volume, t);
+        gain.gain.linearRampToValueAtTime(0.01, t + step + 0.08);
+        osc.start(t);
+        osc.stop(t + step + 0.08);
+      });
+    }
+
+    function playSound(type) {
+      if (!isSoundOn) return;
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      try {
+        const now = ctx.currentTime;
+        if (type === 'click') playTone(ctx, 'square', [440, 880], 0.04, 0.07, now);
+        else if (type === 'levelup') playTone(ctx, 'triangle', [330, 440, 554.37, 659.25], 0.1, 0.12, now);
+        else if (type === 'victory') playTone(ctx, 'square', [523.25, 659.25, 783.99, 1046.5], 0.12, 0.1, now);
+        else if (type === 'error') playTone(ctx, 'sawtooth', [220, 160], 0.12, 0.08, now);
+        else if (type === 'key') playTone(ctx, 'sine', [700], 0.03, 0.05, now);
+      } catch (e) {
+        console.warn('Áudio não pôde ser iniciado:', e);
+      }
+    }
+
+    /* ==========================================================================
+       ESTADO DA GAMIFICAÇÃO & NÍVEIS
+       ========================================================================== */
+    const TOTAL_PHASES = 7;
+
+    const GAME_STATE = {
+      currentLevel: 1,
+      xpPercent: 0,
+      ranks: [
+        'NÍVEL 1: RECRUTA HACKER',
+        'NÍVEL 2: OUVINTE DO TECLADO',
+        'NÍVEL 3: COLADOR DE TEXTOS',
+        'NÍVEL 4: DETETIVE DE BUGS',
+        'NÍVEL 5: CONVERSOR DE DADOS',
+        'NÍVEL 6: CALCULISTA PYTHON',
+        'NÍVEL 7: MESTRE DA ENTRADA'
+      ],
+      xpPerPhase: [0, 15, 30, 45, 60, 80, 100]
+    };
+
+    const ADVANCE_LABELS = {
+      1: '🔓 DESBLOQUEAR COMANDO: INPUT',
+      2: '🔓 DESBLOQUEAR: JUNTANDO TEXTOS',
+      3: '⚠️ INVESTIGAR: O PROBLEMA DOS NÚMEROS',
+      4: '🔓 DESBLOQUEAR A SOLUÇÃO: INT()',
+      5: '🔓 DESBLOQUEAR: OPERAÇÕES MATEMÁTICAS',
+      6: '👾 CHEGAR A 100% XP E ABRIR A MISSÃO FINAL'
+    };
+
+    function updateHUD() {
+      document.getElementById('xpPercentDisplay').textContent = `${GAME_STATE.xpPercent}% XP`;
+      document.getElementById('xpProgressBar').style.width = `${GAME_STATE.xpPercent}%`;
+      document.getElementById('hudLevelLabel').textContent = GAME_STATE.ranks[GAME_STATE.currentLevel - 1];
+      document.getElementById('missionCounterLabel').textContent = `Missão ${GAME_STATE.currentLevel} de ${TOTAL_PHASES}`;
+      document.getElementById('heroStatusText').textContent = GAME_STATE.xpPercent === 100
+        ? 'Missão Final Liberada'
+        : `Fase ${GAME_STATE.currentLevel} Desbloqueada (${GAME_STATE.xpPercent}% XP)`;
+    }
+
+    let toastTimer = null;
+    function showToast(title, desc) {
+      const toast = document.getElementById('xpToastHud');
+      document.getElementById('xpToastTitle').textContent = title;
+      document.getElementById('xpToastSub').textContent = desc;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+    }
+
+    /* ==========================================================================
+       AVANÇO PROGRESSIVO DAS MISSÕES
+       ========================================================================== */
+    function advanceToPhase(nextPhaseNum) {
+      playSound('click');
+
+      const currentBtn = document.getElementById(`btn-advance-${nextPhaseNum - 1}`);
+      if (currentBtn) {
+        currentBtn.classList.add('completed');
+        currentBtn.innerHTML = `<span>✅ MISSÃO ${nextPhaseNum - 1} CONCLUÍDA</span>`;
+      }
+
+      const gained = GAME_STATE.xpPerPhase[nextPhaseNum - 1] - GAME_STATE.xpPercent;
+      GAME_STATE.currentLevel = nextPhaseNum;
+      GAME_STATE.xpPercent = GAME_STATE.xpPerPhase[nextPhaseNum - 1];
+      updateHUD();
+
+      const nextCard = document.getElementById(`mission-${nextPhaseNum}`);
+      if (nextCard) {
+        nextCard.classList.remove('hidden');
+        nextCard.classList.add('revealing');
+        setTimeout(() => nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+      }
+
+      if (nextPhaseNum === TOTAL_PHASES) {
+        triggerFinalVictory();
+      } else {
+        playSound('levelup');
+        showToast(`+${gained}% XP! NÍVEL ${nextPhaseNum} ALCANÇADO!`, `Missão ${nextPhaseNum} liberada no terminal.`);
+      }
+    }
+
+    function triggerFinalVictory() {
+      playSound('victory');
+      showToast('🏆 100% XP ALCANÇADO!', 'A missão final foi desbloqueada.');
+      document.getElementById('victoryBanner').style.display = 'block';
+
+      if (typeof confetti === 'function') {
+        const count = 200;
+        const defaults = { origin: { y: 0.7 }, colors: ['#00f0ff', '#00ff9d', '#ffb700', '#b026ff', '#ff2a5f'] };
+        const fire = (ratio, opts) => confetti(Object.assign({}, defaults, opts, { particleCount: Math.floor(count * ratio) }));
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+      }
+    }
+
+    /* ==========================================================================
+       SIMULADOR DE TERMINAL PYTHON
+       Cada programa é uma função assíncrona que usa um "console" falso com
+       print(), input() e error(), imitando o comportamento do Python.
+       ========================================================================== */
+    class PythonError extends Error {}
+
+    function createConsole(el) {
+      el.innerHTML = '<div class="console-title">Console</div>';
+
+      const addLine = (text, cls) => {
+        const line = document.createElement('div');
+        line.className = 'console-line' + (cls ? ' ' + cls : '');
+        line.textContent = text;
+        el.appendChild(line);
+        return line;
+      };
+
+      return {
+        print: (...parts) => addLine(parts.join(' ')),
+        input: (prompt) => new Promise((resolve) => {
+          const line = addLine(prompt);
+          const field = document.createElement('input');
+          field.type = 'text';
+          field.className = 'console-input';
+          field.autocomplete = 'off';
+          field.spellcheck = false;
+          field.setAttribute('enterkeyhint', 'done');
+          field.setAttribute('aria-label', prompt.trim());
+          line.appendChild(field);
+          field.focus({ preventScroll: true });
+          field.addEventListener('keydown', (ev) => {
+            if (ev.key !== 'Enter') { playSound('key'); return; }
+            ev.preventDefault();
+            const value = field.value;
+            const typed = document.createElement('span');
+            typed.className = 'console-typed';
+            typed.textContent = value;
+            field.replaceWith(typed);
+            resolve(value);
+          });
+        }),
+        error: (lineNo, codeLine, message) => {
+          playSound('error');
+          addLine('Traceback (most recent call last):', 'err');
+          addLine(`  File "main.py", line ${lineNo}, in <module>`, 'err');
+          addLine(`    ${codeLine}`, 'err');
+          addLine(message, 'err');
+          throw new PythonError(message);
+        },
+        end: (ok) => addLine(ok ? '...Program finished with exit code 0' : '...Program finished with exit code 1', 'end')
+      };
+    }
+
+    // Imita o int() do Python: aceita algarismos com sinal e espaços nas pontas
+    function pyInt(c, text, lineNo, codeLine) {
+      if (/^\s*[+-]?\d+\s*$/.test(text)) return parseInt(text, 10);
+      const shown = "'" + text.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + "'";
+      return c.error(lineNo, codeLine, `ValueError: invalid literal for int() with base 10: ${shown}`);
+    }
+
+    const PROGRAMS = {
+      ola: async (c) => {
+        const nome = await c.input('Qual é o seu nome? ');
+        c.print('Olá,', nome);
+        c.print('Seja bem-vindo à base CyberPython.');
+      },
+
+      idadeErro: async (c) => {
+        await c.input('Quantos anos você tem? ');
+        c.error(2, 'print(idade + 1)', 'TypeError: can only concatenate str (not "int") to str');
+      },
+
+      somaTexto: async (c) => {
+        const a = await c.input('Primeiro número: ');
+        const b = await c.input('Segundo número: ');
+        c.print('Resultado:', a + b);
+      },
+
+      idadeOk: async (c) => {
+        const codeLine = 'idade = int(input("Quantos anos você tem? "))';
+        const idade = pyInt(c, await c.input('Quantos anos você tem? '), 1, codeLine);
+        c.print('No ano que vem, você terá', idade + 1, 'anos.');
+      },
+
+      loja: async (c) => {
+        c.print('=== LOJA DO JOGO ===');
+        const preco = pyInt(c, await c.input('Preço de uma poção (em moedas): '), 2,
+          'preco = int(input("Preço de uma poção (em moedas): "))');
+        const quantidade = pyInt(c, await c.input('Quantas poções você quer? '), 3,
+          'quantidade = int(input("Quantas poções você quer? "))');
+        c.print('Total a pagar:', preco * quantidade, 'moedas');
+      }
+    };
+
+    const runningConsoles = new Set();
+
+    async function runProgram(name, button) {
+      const el = document.getElementById(`console-${name}`);
+      if (runningConsoles.has(name)) return;
+      runningConsoles.add(name);
+      button.disabled = true;
+      playSound('click');
+
+      const c = createConsole(el);
+      let ok = true;
+      try {
+        await PROGRAMS[name](c);
+      } catch (e) {
+        if (!(e instanceof PythonError)) throw e;
+        ok = false;
+      } finally {
+        c.end(ok);
+        runningConsoles.delete(name);
+        button.disabled = false;
+        button.textContent = '▶ Executar de novo';
+      }
+    }
+
+    document.querySelectorAll('.btn-run').forEach((btn) => {
+      btn.addEventListener('click', () => runProgram(btn.dataset.program, btn));
+    });
+
+    /* ==========================================================================
+       FASE 3: COMPARADOR DE CONCATENAÇÃO
+       ========================================================================== */
+    const concatInput = document.getElementById('concatNameInput');
+
+    function updateConcat() {
+      const nome = concatInput.value;
+      document.getElementById('concatOut1').textContent = 'Bem-vindo, ' + nome;
+      document.getElementById('concatOut2').textContent = 'Bem-vindo,' + nome;
+      document.getElementById('concatOut3').textContent = 'Bem-vindo, ' + nome + '!';
+    }
+
+    concatInput.addEventListener('input', updateConcat);
+
+    /* ==========================================================================
+       FASE 6: QUIZ "QUAL SERÁ A SAÍDA?"
+       ========================================================================== */
+    const QUIZ = [
+      {
+        q: 'O que este programa mostra na tela?',
+        code: 'print(4 * 5)',
+        options: ['20', '4 * 5', '45'],
+        answer: '20',
+        explain: 'O asterisco é o símbolo de multiplicação: 4 vezes 5 é igual a 20.'
+      },
+      {
+        q: 'O que este programa mostra na tela?',
+        code: 'print("4" + "5")',
+        options: ['9', '45', 'Erro'],
+        answer: '45',
+        explain: 'Os números estão entre aspas, então são textos. O sinal de mais cola os textos: "4" + "5" vira "45".'
+      },
+      {
+        q: 'O usuário digitou 12. O que aparece na tela?',
+        code: 'idade = input("Idade: ")\nprint(idade + 1)',
+        options: ['13', '121', 'Erro'],
+        answer: 'Erro',
+        explain: 'Faltou o int(). A idade continua sendo texto, e o Python não consegue somar texto com número: aparece um TypeError.'
+      },
+      {
+        q: 'O usuário digitou 8. O que aparece na tela?',
+        code: 'numero = int(input("Número: "))\nprint(numero + 2)',
+        options: ['82', '10', 'Erro'],
+        answer: '10',
+        explain: 'Com o int(), o texto "8" virou o número 8. Então 8 + 2 é igual a 10.'
+      },
+      {
+        q: 'O que este programa mostra na tela?',
+        code: 'print(10 / 2)',
+        options: ['5', '5.0', '10 / 2'],
+        answer: '5.0',
+        explain: 'Em Python, a divisão com / sempre resulta em um número decimal (float), mesmo quando a conta é exata.'
+      }
+    ];
+
+    const quizSolved = new Set();
+
+    function updateQuizScore() {
+      document.getElementById('quizScore').textContent = `(${quizSolved.size} de ${QUIZ.length})`;
+    }
+
+    function renderQuiz() {
+      const list = document.getElementById('quizList');
+      list.innerHTML = '';
+      quizSolved.clear();
+      updateQuizScore();
+
+      QUIZ.forEach((item, idx) => {
+        const box = document.createElement('div');
+        box.className = 'quiz-item';
+
+        const q = document.createElement('div');
+        q.className = 'quiz-q';
+        q.textContent = `${idx + 1}. ${item.q}`;
+
+        const code = document.createElement('div');
+        code.className = 'quiz-code';
+        code.textContent = item.code;
+
+        const opts = document.createElement('div');
+        opts.className = 'quiz-options';
+
+        const feedback = document.createElement('div');
+        feedback.className = 'quiz-feedback';
+
+        item.options.forEach((opt) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-opt';
+          btn.textContent = opt;
+          btn.addEventListener('click', () => {
+            if (opt === item.answer) {
+              btn.classList.add('right');
+              box.classList.add('solved');
+              feedback.className = 'quiz-feedback show ok';
+              feedback.textContent = '✅ Correto! ' + item.explain;
+              quizSolved.add(idx);
+              updateQuizScore();
+              playSound(quizSolved.size === QUIZ.length ? 'victory' : 'levelup');
+              if (quizSolved.size === QUIZ.length) {
+                showToast('DESAFIO CONCLUÍDO!', 'Você acertou as 5 previsões.');
+              }
+            } else {
+              btn.classList.add('wrong');
+              feedback.className = 'quiz-feedback show no';
+              feedback.textContent = '❌ Ainda não. Leia o código com atenção e tente outra opção.';
+              playSound('error');
+            }
+          });
+          opts.appendChild(btn);
+        });
+
+        box.append(q, code, opts, feedback);
+        list.appendChild(box);
+      });
+    }
+
+    /* ==========================================================================
+       FASE 7: CHECKLIST DE ENTREGA
+       ========================================================================== */
+    const reqItems = document.querySelectorAll('.req-item');
+
+    function updateSendPanel() {
+      const allDone = [...reqItems].every((item) => item.classList.contains('found'));
+      const panel = document.getElementById('sendPanel');
+      const wasShown = panel.classList.contains('show');
+      panel.classList.toggle('show', allDone);
+      if (allDone && !wasShown) {
+        playSound('victory');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    reqItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        playSound('click');
+        const done = item.classList.toggle('found');
+        item.querySelector('.req-status').textContent = done ? '✅ [ OK ]' : '[ PENDENTE ]';
+        updateSendPanel();
+      });
+    });
+
+    /* ==========================================================================
+       CONTROLES GLOBAIS: SOM & REINICIAR
+       ========================================================================== */
+    document.getElementById('soundToggleBtn').addEventListener('click', () => {
+      isSoundOn = !isSoundOn;
+      document.getElementById('soundIcon').textContent = isSoundOn ? '🔊' : '🔇';
+      showToast(isSoundOn ? 'Sons 8-Bit Ativados!' : 'Sons Silenciados!', 'Preferência de áudio atualizada.');
+    });
+
+    function resetConsoles() {
+      document.querySelectorAll('.console[id^="console-"]').forEach((el) => {
+        el.innerHTML = '<div class="console-title">Console</div><div class="console-hint">Clique em Executar para iniciar o programa.</div>';
+      });
+      document.querySelectorAll('.btn-run').forEach((btn) => {
+        btn.disabled = false;
+        btn.textContent = '▶ Executar';
+      });
+      runningConsoles.clear();
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      if (!confirm('Deseja reiniciar a missão desde a Fase 1 com 0% de XP?')) return;
+      playSound('click');
+      GAME_STATE.currentLevel = 1;
+      GAME_STATE.xpPercent = 0;
+      updateHUD();
+
+      for (let i = 2; i <= TOTAL_PHASES; i++) {
+        const card = document.getElementById(`mission-${i}`);
+        card.classList.add('hidden');
+        card.classList.remove('revealing');
+      }
+      Object.entries(ADVANCE_LABELS).forEach(([num, label]) => {
+        const btn = document.getElementById(`btn-advance-${num}`);
+        btn.classList.remove('completed');
+        btn.innerHTML = `<span>${label}</span> ➔`;
+      });
+
+      document.getElementById('victoryBanner').style.display = 'none';
+      reqItems.forEach((item) => {
+        item.classList.remove('found');
+        item.querySelector('.req-status').textContent = '[ PENDENTE ]';
+      });
+      document.getElementById('sendPanel').classList.remove('show');
+
+      resetConsoles();
+      renderQuiz();
+      concatInput.value = 'Ana';
+      updateConcat();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Missão Reiniciada!', 'XP zerado. Boa sorte no treinamento!');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateHUD();
+      updateConcat();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>

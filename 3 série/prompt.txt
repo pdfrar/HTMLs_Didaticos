@@ -1,0 +1,83 @@
+Reorganize a apresentação HTML "Caça ao viés" que você gerou (ou que colei abaixo). MANTENHA o mesmo visual: cores, fontes, fundo escuro, estilo dos cartões, navegação por setas e botões, e indicador de progresso. Mude apenas a ordem e o conteúdo dos slides, seguindo EXATAMENTE a estrutura abaixo. Não invente casos, dados, números ou citações; use os textos como estão.
+
+Acrescente também NOTAS DO PROFESSOR: um painel na parte de baixo da tela que aparece e some ao apertar a tecla "N" (começa oculto). Cada slide tem sua nota, indicada abaixo como "Nota:". Mostre um aviso discreto no canto: "N = notas".
+
+Nova estrutura (12 slides):
+
+1. CAPA
+Título "Caça ao viés", subtítulo "O que a IA pensa quando imagina uma profissão?" e o ícone de uma lupa.
+Nota: "Aula de 45 min. Deixe o kit de imagens e as fichas separados por grupo antes de começar."
+
+2. A APOSTA
+Título "Faça sua aposta 🎲". Dois cartões grandes lado a lado:
+Cartão 1: "Pedimos à IA: um CEO" / "Homem ou mulher? Jovem ou mais velho?"
+Cartão 2: "Pedimos à IA: uma pessoa limpando uma casa" / "Homem ou mulher? Jovem ou mais velho?"
+Rodapé: "Anote sua aposta. Vamos conferir depois."
+Nota: "Votação de mão levantada. Registre os números no quadro e NÃO apague até o fim da aula. Não explique nada sobre viés ainda."
+
+3. MISSÃO DOS GRUPOS
+Título "Missão: investigar a IA 🔍". Tópicos:
+- "Cada grupo recebe 2 prompts e 8 imagens de cada."
+- "Contem o que as imagens mostram usando a ficha."
+- "Funções: contador, conferente, anotador, porta-voz."
+Lembrete em destaque: "Registre o que a imagem APARENTA, não a identidade real de alguém."
+Nota: "11 minutos. Circule pelos grupos, mas não dê pistas sobre o que procurar além das categorias da ficha."
+
+4. FICHA DE CONTAGEM
+Título "Como preencher a ficha". Mostre um exemplo visual da ficha para UM prompt, com as linhas:
+"Parece homem ___ | Parece mulher ___ | Não dá para dizer ___"
+"Parece jovem ___ | Meia-idade ___ | Mais velho ___"
+"Pele mais clara ___ | Pele mais escura ___ | Não dá para dizer ___"
+"Cenário/roupa que mais aparece: ___"
+Mostre tracinhos de contagem (||||) como exemplo em uma das linhas.
+Nota: "Se algum grupo terminar antes, peça que escrevam o que mais chamou atenção."
+
+5. O QUE ENCONTRAMOS?
+Título "O que encontramos?". Uma tabela grande e vazia para o professor preencher no quadro, com as colunas: Prompt | Homens | Mulheres | Pele mais clara | Pele mais escura | Faixa etária mais comum. Com 6 linhas em branco.
+Abaixo, duas perguntas em destaque: "Nossas apostas acertaram?" e "Se acertamos, como conseguimos prever?"
+Nota: "Ideia central a extrair: nós e a IA aprendemos com o mesmo mundo. Esse é o gancho para o próximo slide."
+
+6. POR QUE ISSO ACONTECE?
+Título "Por que isso acontece?". Definição: "Viés é quando um sistema favorece ou repete um padrão de forma desproporcional." Esquema visual em 3 etapas conectadas por setas: "Dados da internet → Treinamento → Imagens geradas". Frase final em destaque: "A IA não só reflete o mundo: ela pode exagerar os padrões."
+Nota: "Só agora apresente o conceito. Retome os números do quadro como exemplo."
+
+7. RACISMO ALGORÍTMICO
+Frase em destaque: "A tecnologia pode classificar e organizar pessoas de um jeito que repete desigualdades que já existem." Abaixo: "Conceito de Tarcízio Silva, pesquisador do projeto Desvelar".
+Nota: "Explique que o sistema não tem intenção, mas produz efeitos, e são os efeitos que atingem as pessoas."
+
+8. CASOS REAIS
+Título "Casos reais mapeados pelo Desvelar". Três cartões lado a lado, com uma seta conectando-os e os rótulos "Imagem → Informação → Decisão sobre a vida":
+Cartão 1 (ícone 🎨) – "Image Playground da Apple reproduz estereótipos" (2025): "Ao gerar imagens a partir da foto de um usuário, o app clareava a pele para 'rico' e 'bem-sucedido' e escurecia para 'pobre'."
+Cartão 2 (ícone 🔎) – "Google, Microsoft e Perplexity promovem racismo científico" (2024): "Buscadores com IA exibiram dados de estudos desacreditados e racistas como se fossem fatos."
+Cartão 3 (ícone 🛵) – "iFood é condenado por racismo algorítmico" (2025): "O reconhecimento facial bloqueou um entregador negro que deixou o cabelo crescer. A Justiça condenou a empresa a pagar R$ 60 mil. Depois, o iFood editou um post sobre racismo algorítmico em seu blog."
+Rodapé: "Fonte: desvelar.org/casos-de-discriminacao-algoritmica".
+Nota: "Distribua um cartão impresso por grupo. No caso 2, não mostre números de QI: o foco é como a IA deu credibilidade a uma fonte ruim."
+
+9. ANALISE SEU CASO
+Título "Analise seu caso (5 min)". Quatro perguntas numeradas:
+1. "O que aconteceu, em uma frase?"
+2. "Quem foi prejudicado, e de que forma?"
+3. "Onde o viés entrou: nos dados, no sistema ou na decisão de alguém?"
+4. "Quem deveria ser responsável por corrigir isso?"
+Rodapé: "Depois, 1 minuto por grupo para apresentar."
+Nota: "Ordem das apresentações: Apple → buscadores → iFood. Ao final, pergunte: o que muda quando o viés sai da imagem e passa a decidir a vida de alguém?"
+
+10. DA IMAGEM À DECISÃO
+Título "Quanto maior o poder, maior o dano". Uma escada ou rampa visual com três degraus crescentes: "🎨 Uma imagem estereotipada" → "🔎 Uma informação falsa com cara de verdade" → "🛵 Uma pessoa que perde a renda". Pergunta abaixo: "Por que uma empresa mudaria um texto sobre racismo algorítmico depois de ser condenada?"
+Nota: "Deixe a turma responder livremente. Pergunta extra: isso é mudança real ou cuidado com a imagem?"
+
+11. E AGORA?
+Título "E agora? O que dá para fazer? 💡". Três cartões, um para cada destinatário:
+"🏢 Para empresas de tecnologia"
+"📱 Para quem usa IA"
+"🏫 Para a nossa escola"
+Instrução abaixo: "Cada grupo escolhe um destinatário e escreve UMA proposta concreta."
+Nota: "6 minutos. Cole as propostas no quadro. Se quiser, fotografe para o relatório da próxima aula."
+
+12. FECHAMENTO
+Título "Antes e depois". Em destaque: "Antes eu achava ___. Agora eu penso ___." Abaixo, uma linha menor: "Próxima aula: relatório do grupo – Pedimos ___, esperávamos ___, encontramos ___."
+No rodapé, em fonte pequena, a referência:
+"DESVELAR (ed.) et al. Mapeamento de Danos e Discriminação Algorítmica. Desvelar, 2026. Disponível em: https://desvelar.org/casos-de-discriminacao-algoritmica/. Acesso em: [data]."
+Nota: "Recolha os tickets de saída: eles mostram o que ficou da aula e ajudam a planejar a próxima."
+
+Atualize o indicador de progresso para 12 slides. Todo o texto em português do Brasil, com tom acolhedor e direto, para adolescentes de 15 a 17 anos.
