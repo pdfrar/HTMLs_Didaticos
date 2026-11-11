@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python – Encontro 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --escuro: #16202E;
+    --claro: #F6F4EE;
+    --azul: #3A6EA5;
+    --amarelo: #F2C14E;
+    --texto-suave: #4A5568;
+    --cinza: #6B7280;
+    --cartao: #FDFCF8;
+    --borda: #E2DED3;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0B1119;
+    overflow: hidden;
+    font-family: Inter, Arial, sans-serif;
+  }
+  #palco {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: center center;
+  }
+  section {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .35s ease, visibility .35s;
+    overflow: hidden;
+  }
+  section.ativo { opacity: 1; visibility: visible; }
+  section h1, section h2, section h3, section p, section ol, section ul { margin: 0; }
+  section ol { padding-left: 1.3em; }
+  section ol li { padding-left: .3em; margin-bottom: 12px; }
+  section ol li::marker { color: var(--azul); font-weight: 600; }
+  section aside { display: none; }
+
+  /* Tabelas */
+  section table { width: 100%; border-collapse: collapse; }
+  section th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--azul);
+    padding: 16px 24px 16px 0;
+    border-bottom: 3px solid var(--azul);
+  }
+  section td {
+    padding: 18px 24px 18px 0;
+    border-bottom: 1px solid #D9D4C7;
+  }
+  .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+  /* Barra de controle */
+  #barra {
+    position: fixed;
+    right: 16px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 14px Inter, Arial, sans-serif;
+    color: #8FA3B8;
+    z-index: 10;
+  }
+  body.nav-off #barra, body.nav-off #progresso { display: none; }
+  #nav-toggle {
+    position: fixed;
+    right: 16px;
+    bottom: 56px;
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid #2E3C50;
+    border-radius: 6px;
+    background: #1F2A3A;
+    color: #DCE6F0;
+    font-size: 16px;
+    opacity: .4;
+    transition: opacity .2s;
+  }
+  #nav-toggle:hover, #nav-toggle:focus-visible { opacity: 1; }
+  body.nav-off #nav-toggle { bottom: 12px; opacity: .15; }
+  body.nav-off #nav-toggle:hover { opacity: 1; }
+  #barra button {
+    background: #1F2A3A;
+    color: #DCE6F0;
+    border: 1px solid #2E3C50;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font: inherit;
+    cursor: pointer;
+  }
+  #progresso {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--amarelo);
+    transition: width .3s ease;
+    z-index: 10;
+  }
+  #notas {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 56px;
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(22, 32, 46, .96);
+    color: #F6F4EE;
+    border: 1px solid #2E3C50;
+    border-radius: 12px;
+    padding: 18px 22px;
+    font: 18px/1.5 Inter, Arial, sans-serif;
+    display: none;
+    z-index: 11;
+  }
+  #notas.visivel { display: block; }
+  #notas strong {
+    display: block;
+    color: var(--amarelo);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  @media print {
+    html, body { overflow: visible; background: none; }
+    #barra, #progresso, #notas { display: none !important; }
+    #palco { position: static; transform: none !important; }
+    section { position: relative; opacity: 1; visibility: visible; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<div id="palco">
+
+<!-- 1. Capa -->
+<section style="background:#16202E;color:#F6F4EE;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-size:32px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Curso de Python · Steel Saints · Encontro 1</p>
+<h1 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:120px;font-weight:700;line-height:1.05">Programação em Python</h1>
+<p style="font-size:44px;color:#BFD0E0;width:1300px;line-height:1.3">Dos blocos ao código: primeiros comandos em Python</p>
+<p class="mono" style="position:absolute;right:128px;top:128px;width:520px;text-align:right;font-size:32px;color:#F2C14E">print("Olá, turma!")</p>
+<p style="position:absolute;left:128px;bottom:96px;width:900px;font-size:24px;color:#8FA3B8">11 de novembro de 2026 · 15h30 às 17h30</p>
+<aside>Abertura do curso. A turma já programa em blocos no EV3 Classroom; este mês é a passagem para a programação em texto, que prepara o curso de robótica com Python no próximo ano.</aside>
+</section>
+
+<!-- 2. Como o curso funciona -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">O curso</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Como o curso vai funcionar</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:48px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:120px;font-weight:700;color:#3A6EA5;line-height:1">4</p>
+<p style="font-size:32px">semanas</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:48px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:120px;font-weight:700;color:#3A6EA5;line-height:1">8</p>
+<p style="font-size:32px">encontros</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:48px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:120px;font-weight:700;color:#3A6EA5;line-height:1">24h</p>
+<p style="font-size:32px">de aula</p>
+</div>
+</div>
+<p style="font-size:32px;color:#4A5568;line-height:1.5">Encontro longo: <b>13h às 17h</b> · Encontro curto: <b>15h30 às 17h30</b><br>Ambiente: <b>OnlineGDB</b>, direto no navegador do Chromebook</p>
+<p class="rodape"></p>
+<aside>Explicar a estrutura: dois encontros por semana durante um mês. Não é preciso instalar nada, porque tudo será feito no navegador. Quem tiver notebook próprio pode usar o VS Code, mas o padrão da turma é o OnlineGDB.</aside>
+</section>
+
+<!-- 3. Aonde o curso leva -->
+<section style="background:#3A6EA5;color:#F6F4EE;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:64px">
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Aonde este curso nos leva</h2>
+<div style="display:flex;align-items:center;gap:28px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#2C5684;border-radius:16px;padding:40px">
+<p style="font-size:24px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Até aqui</p>
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.2">Blocos</h3>
+<p style="font-size:28px;color:#DCE6F0;line-height:1.4">Programação do EV3 arrastando e encaixando blocos no EV3 Classroom.</p>
+</div>
+<svg width="80" height="48" viewBox="0 0 80 48" aria-hidden="true" style="flex:none"><path d="M0 14 H44 V0 L80 24 L44 48 V34 H0 Z" fill="#F2C14E"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#2C5684;border-radius:16px;padding:40px">
+<p style="font-size:24px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Este mês</p>
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.2">Python</h3>
+<p style="font-size:28px;color:#DCE6F0;line-height:1.4">A mesma lógica, agora escrita em texto no OnlineGDB.</p>
+</div>
+<svg width="80" height="48" viewBox="0 0 80 48" aria-hidden="true" style="flex:none"><path d="M0 14 H44 V0 L80 24 L44 48 V34 H0 Z" fill="#F2C14E"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#2C5684;border-radius:16px;padding:40px">
+<p style="font-size:24px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">2027</p>
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700;line-height:1.2">Python no robô</h3>
+<p style="font-size:28px;color:#DCE6F0;line-height:1.4">Motores e sensores do EV3 controlados em Python com ev3dev.</p>
+</div>
+</div>
+<aside>A turma já sabe pensar algoritmos: sequência, repetição, decisão e variáveis. O que muda agora é a forma de escrever. No ano que vem, o mesmo Python vai rodar no robô.</aside>
+</section>
+
+<!-- 4. As quatro semanas -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">O curso</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">O caminho das quatro semanas</h2>
+</div>
+<table style="font-size:32px">
+<tr><th style="width:18%">Semana</th><th style="width:30%">Tema</th><th style="width:52%">O que vamos fazer</th></tr>
+<tr><td>1</td><td>Do bloco ao texto</td><td>Variáveis, cálculos, decisões e repetições</td></tr>
+<tr><td>2</td><td>Listas e módulos</td><td>Listas, random e time</td></tr>
+<tr><td>3</td><td>Funções</td><td>Organizar o código em partes reutilizáveis</td></tr>
+<tr><td>4</td><td>Projeto</td><td>Robô Virtual em duplas e leitura de código ev3dev</td></tr>
+</table>
+<p class="rodape"></p>
+<aside>Como a turma já domina a lógica dos blocos, decisões e repetições entram logo na primeira semana. Isso abre espaço para listas, módulos e funções, que são a base dos programas com ev3dev.</aside>
+</section>
+
+<!-- 5. Roteiro de hoje -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Hoje</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Roteiro do encontro</h2>
+</div>
+<table style="font-size:32px">
+<tr><th style="width:28%">Horário</th><th style="width:72%">Atividade</th></tr>
+<tr><td>15h30 – 15h40</td><td>Apresentação do curso</td></tr>
+<tr><td>15h40 – 15h55</td><td>Dos blocos ao texto</td></tr>
+<tr><td>15h55 – 16h10</td><td>OnlineGDB, primeiro programa e erros</td></tr>
+<tr><td>16h10 – 16h35</td><td>Variáveis, input e cálculos</td></tr>
+<tr><td>16h35 – 17h15</td><td>Prática e desafio</td></tr>
+<tr><td>17h15 – 17h30</td><td>Entrega pelo ClassApp</td></tr>
+</table>
+<p class="rodape"></p>
+<aside>Mostrar o roteiro rapidamente para a turma saber o que esperar das duas horas.</aside>
+</section>
+
+<!-- 6. Mesma lógica, nova forma -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Dos blocos ao texto</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Vocês já sabem a lógica</h2>
+</div>
+<table style="font-size:30px">
+<tr><th style="width:50%">No EV3 Classroom</th><th style="width:50%">Em Python</th></tr>
+<tr><td>Bloco de mostrar texto na tela</td><td class="mono">print("Olá")</td></tr>
+<tr><td>Bloco de definir uma variável</td><td class="mono">velocidade = 50</td></tr>
+<tr><td>Bloco de esperar 1 segundo</td><td class="mono">time.sleep(1)</td></tr>
+<tr><td>Bloco de repetir 4 vezes</td><td class="mono">for i in range(4):</td></tr>
+<tr><td>Bloco de repetir para sempre</td><td class="mono">while True:</td></tr>
+<tr><td>Bloco de se / senão</td><td class="mono">if ...: / else:</td></tr>
+</table>
+<p style="font-size:28px;color:#4A5568;line-height:1.4">Hoje: as duas primeiras linhas. As outras chegam nos próximos encontros.</p>
+<p class="rodape"></p>
+<aside>Perguntar à turma qual bloco eles usariam para cada situação antes de mostrar a coluna do Python. A ideia é ancorar cada comando novo em algo que eles já usaram no robô.</aside>
+</section>
+
+<!-- 7. O encaixe vira indentação -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Dos blocos ao texto</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">O encaixe vira indentação</h2>
+</div>
+<div style="display:flex;gap:48px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column">
+<div style="background:#FFAB19;border-radius:12px 12px 0 0;padding:20px 28px">
+<p style="font-size:30px;font-weight:600;color:#16202E">repetir 4 vezes</p>
+</div>
+<div style="display:flex">
+<div style="width:40px;background:#FFAB19"></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;padding:10px 0 10px 6px">
+<div style="background:#4C97FF;border-radius:10px;padding:18px 28px"><p style="font-size:30px;font-weight:600;color:#FFFFFF">andar para frente</p></div>
+<div style="background:#4C97FF;border-radius:10px;padding:18px 28px"><p style="font-size:30px;font-weight:600;color:#FFFFFF">girar 90 graus</p></div>
+</div>
+</div>
+<div style="height:36px;background:#FFAB19;border-radius:0 0 12px 12px;width:60%"></div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#16202E;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#8FA3B8;letter-spacing:2px;text-transform:uppercase">Python</p>
+<p class="mono" style="font-size:30px;color:#F6F4EE;line-height:1.7;white-space:pre">for i in range(4):
+    print(<span style="color:#F2C14E">"Andar para frente"</span>)
+    print(<span style="color:#F2C14E">"Girar 90 graus"</span>)</p>
+</div>
+</div>
+<p style="font-size:32px;color:#4A5568;line-height:1.5">No bloco, o encaixe mostra o que fica dentro da repetição. No Python, quem faz isso são os <b>4 espaços</b> no início da linha.</p>
+<p class="rodape"></p>
+<aside>Mostrar o que o editor de blocos fazia pela turma e que agora é responsabilidade de quem escreve: nomes exatos (maiúsculas e minúsculas contam), parênteses, aspas, dois-pontos e indentação. O for será estudado no próximo encontro; aqui ele aparece só para mostrar a ideia do encaixe.</aside>
+</section>
+
+<!-- 8. Por que Python -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">A linguagem</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Por que sair dos blocos</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-top:8px solid #3A6EA5;border-radius:16px;padding:48px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700">Mais alcance</h3>
+<p style="font-size:32px;color:#4A5568;line-height:1.4">Programas grandes ficam mais fáceis de escrever, ler e corrigir do que com blocos.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-top:8px solid #3A6EA5;border-radius:16px;padding:48px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700">Versátil</h3>
+<p style="font-size:32px;color:#4A5568;line-height:1.4">É usado em robótica, inteligência artificial, jogos e ciência de dados.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-top:8px solid #F2C14E;border-radius:16px;padding:48px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700">Roda no EV3</h3>
+<p style="font-size:32px;color:#4A5568;line-height:1.4">Com o ev3dev, o robô LEGO pode ser programado em Python.</p>
+</div>
+</div>
+<p class="rodape"></p>
+<aside>Comentar que Python é uma das linguagens mais usadas no mundo e que o mesmo conhecimento servirá no curso de robótica. Slide rápido: a turma já está motivada pela robótica.</aside>
+</section>
+
+<!-- 9. OnlineGDB -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Ferramenta</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Conhecendo o OnlineGDB</h2>
+</div>
+<div style="display:flex;gap:48px">
+<ol style="flex:3;font-size:32px;line-height:1.5">
+<li>Acesse <b>onlinegdb.com</b> no navegador do Chromebook.</li>
+<li>No canto superior direito, em <b>Language</b>, escolha <b>Python 3</b>.</li>
+<li>Apague o código de exemplo e escreva o seu.</li>
+<li>Clique em <b>Run</b> para executar.</li>
+<li>Veja o resultado no console, na parte de baixo da tela.</li>
+</ol>
+<div style="flex:2;align-self:flex-start;display:flex;flex-direction:column;gap:20px;background:#16202E;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Atenção</p>
+<p style="font-size:32px;color:#F6F4EE;line-height:1.4">Sem login, o código não fica salvo. Copie para um documento antes de fechar a aba.</p>
+</div>
+</div>
+<p class="rodape"></p>
+<aside>Fazer junto com a turma, projetando a tela. Conferir se todos selecionaram Python 3, porque o padrão do site costuma ser C.</aside>
+</section>
+
+<!-- 10. Primeiro programa -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Mão no código</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">O primeiro programa</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:3;display:flex;flex-direction:column;gap:16px;background:#16202E;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#8FA3B8;letter-spacing:2px;text-transform:uppercase">Código</p>
+<p class="mono" style="font-size:32px;color:#F6F4EE;line-height:1.7"><span style="color:#8FA3B8"># meu primeiro programa</span><br>print(<span style="color:#F2C14E">"Olá, mundo!"</span>)<br>print(<span style="color:#F2C14E">"Estou aprendendo Python."</span>)</p>
+</div>
+<div style="flex:2;display:flex;flex-direction:column;gap:16px;background:#E7E3D8;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#4A5568;letter-spacing:2px;text-transform:uppercase">Console</p>
+<p class="mono" style="font-size:32px;color:#16202E;line-height:1.7">Olá, mundo!<br>Estou aprendendo Python.</p>
+</div>
+</div>
+<p style="font-size:32px;color:#4A5568;line-height:1.5"><b>print()</b> mostra uma mensagem no console. O texto vai entre aspas. Linhas que começam com <b>#</b> são comentários e o Python as ignora.</p>
+<p class="rodape"></p>
+<aside>Todos digitam e executam. Em seguida, pedir que troquem as mensagens e acrescentem uma terceira linha com o próprio nome.</aside>
+</section>
+
+<!-- 11. Erros -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Mão no código</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Errar faz parte de programar</h2>
+</div>
+<table style="font-size:32px">
+<tr><th style="width:34%">Código com erro</th><th style="width:26%">Mensagem</th><th style="width:40%">Como corrigir</th></tr>
+<tr><td class="mono">print("Olá)</td><td class="mono">SyntaxError</td><td>Fechar as aspas</td></tr>
+<tr><td class="mono">Print("Olá")</td><td class="mono">NameError</td><td>Escrever print com letra minúscula</td></tr>
+<tr><td class="mono">print "Olá"</td><td class="mono">SyntaxError</td><td>Colocar os parênteses</td></tr>
+<tr><td class="mono" style="white-space:pre">  print("Olá")</td><td class="mono">IndentationError</td><td>Tirar os espaços do início</td></tr>
+</table>
+<p style="font-size:32px;color:#4A5568;line-height:1.5">Leia a mensagem no console: ela informa o tipo de erro e a linha em que ele aconteceu.</p>
+<p class="rodape"></p>
+<aside>Provocar os erros de propósito, um de cada vez, e mostrar a mensagem no console. Nos blocos esses erros não existiam, porque um bloco errado simplesmente não encaixava. Agora a turma precisa aprender a ler a mensagem.</aside>
+</section>
+
+<!-- 12. Variáveis -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Conceito</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Variáveis guardam informações</h2>
+</div>
+<div style="display:flex;gap:48px">
+<div style="flex:1;display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;line-height:1.5">Uma variável funciona como uma caixa com etiqueta: o <b>nome</b> fica na etiqueta e o <b>valor</b> fica dentro.</p>
+<p style="font-size:32px;line-height:1.5;color:#4A5568">O sinal <b>=</b> significa “guardar”. Nomes não têm espaço nem acento: use <b>_</b> para separar palavras.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#16202E;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#8FA3B8;letter-spacing:2px;text-transform:uppercase">Código</p>
+<p class="mono" style="font-size:32px;color:#F6F4EE;line-height:1.7">nome = <span style="color:#F2C14E">"Ana"</span><br>idade = <span style="color:#F2C14E">15</span><br>velocidade_motor = <span style="color:#F2C14E">50</span><br>print(nome)<br>print(velocidade_motor)</p>
+</div>
+</div>
+<p class="rodape"></p>
+<aside>Destacar a variável velocidade_motor: no robô, variáveis guardam velocidades, distâncias e leituras de sensores. Mostrar que print(nome) sem aspas mostra o valor guardado, e print("nome") mostra a palavra nome.</aside>
+</section>
+
+<!-- 13. input -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Mão no código</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">input(): o programa faz perguntas</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:3;display:flex;flex-direction:column;gap:16px;background:#16202E;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#8FA3B8;letter-spacing:2px;text-transform:uppercase">Código</p>
+<p class="mono" style="font-size:32px;color:#F6F4EE;line-height:1.7">nome = input(<span style="color:#F2C14E">"Qual é o seu nome? "</span>)<br>print(<span style="color:#F2C14E">"Olá,"</span>, nome)</p>
+</div>
+<div style="flex:2;display:flex;flex-direction:column;gap:16px;background:#E7E3D8;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#4A5568;letter-spacing:2px;text-transform:uppercase">Console</p>
+<p class="mono" style="font-size:32px;color:#16202E;line-height:1.7">Qual é o seu nome? Ana<br>Olá, Ana</p>
+</div>
+</div>
+<p style="font-size:32px;color:#4A5568;line-height:1.5">O <b>input()</b> espera o usuário digitar e apertar Enter. O que foi digitado é guardado como texto, mesmo quando é um número.</p>
+<p class="rodape"></p>
+<aside>No OnlineGDB, o usuário digita a resposta direto no console. Mostrar que a vírgula dentro do print junta as partes com um espaço. Perguntar o que aconteceria se tentássemos somar 5 a uma idade digitada: isso leva ao próximo slide.</aside>
+</section>
+
+<!-- 14. Texto ou número -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Mão no código</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Texto ou número?</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:3;display:flex;flex-direction:column;gap:16px;background:#16202E;border-radius:16px;padding:40px 48px">
+<p style="font-size:24px;font-weight:600;color:#8FA3B8;letter-spacing:2px;text-transform:uppercase">Código</p>
+<p class="mono" style="font-size:30px;color:#F6F4EE;line-height:1.7">idade = int(input(<span style="color:#F2C14E">"Sua idade: "</span>))<br>print(<span style="color:#F2C14E">"Daqui a 10 anos:"</span>, idade + <span style="color:#F2C14E">10</span>)</p>
+</div>
+<div style="flex:2;display:flex;flex-direction:column;gap:16px;background:#E7E3D8;border-radius:16px;padding:40px 48px">
+<p style="font-size:24px;font-weight:600;color:#4A5568;letter-spacing:2px;text-transform:uppercase">Console</p>
+<p class="mono" style="font-size:30px;color:#16202E;line-height:1.7">Sua idade: 15<br>Daqui a 10 anos: 25</p>
+</div>
+</div>
+<div style="display:flex;gap:16px">
+<div style="flex:1;background:#FDFCF8;border:1px solid #E2DED3;border-radius:12px;padding:16px 20px"><p class="mono" style="font-size:30px;color:#3A6EA5;font-weight:600">+</p><p style="font-size:24px;color:#4A5568">soma</p></div>
+<div style="flex:1;background:#FDFCF8;border:1px solid #E2DED3;border-radius:12px;padding:16px 20px"><p class="mono" style="font-size:30px;color:#3A6EA5;font-weight:600">-</p><p style="font-size:24px;color:#4A5568">subtração</p></div>
+<div style="flex:1;background:#FDFCF8;border:1px solid #E2DED3;border-radius:12px;padding:16px 20px"><p class="mono" style="font-size:30px;color:#3A6EA5;font-weight:600">*</p><p style="font-size:24px;color:#4A5568">multiplicação</p></div>
+<div style="flex:1;background:#FDFCF8;border:1px solid #E2DED3;border-radius:12px;padding:16px 20px"><p class="mono" style="font-size:30px;color:#3A6EA5;font-weight:600">/</p><p style="font-size:24px;color:#4A5568">divisão</p></div>
+<div style="flex:1;background:#FDFCF8;border:1px solid #E2DED3;border-radius:12px;padding:16px 20px"><p class="mono" style="font-size:30px;color:#3A6EA5;font-weight:600">//</p><p style="font-size:24px;color:#4A5568">divisão inteira</p></div>
+<div style="flex:1;background:#FDFCF8;border:1px solid #E2DED3;border-radius:12px;padding:16px 20px"><p class="mono" style="font-size:30px;color:#3A6EA5;font-weight:600">%</p><p style="font-size:24px;color:#4A5568">resto</p></div>
+</div>
+<p style="font-size:28px;color:#4A5568;line-height:1.4"><b>int()</b> converte para número inteiro e <b>float()</b> para número decimal. No Python, a casa decimal usa ponto: <span class="mono">3.14</span>.</p>
+<p class="rodape"></p>
+<aside>Mostrar primeiro o erro: sem o int(), idade + 10 gera TypeError, porque o Python não soma texto com número. Depois corrigir com int(). Testar 7 // 2 e 7 % 2 no console para explicar a divisão inteira e o resto.</aside>
+</section>
+
+<!-- 14. Prática -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Prática</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Exercícios no OnlineGDB</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:40px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700;color:#3A6EA5">1</p>
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700">Ficha do robô</h3>
+<p style="font-size:28px;color:#4A5568;line-height:1.4">Pergunte o nome, a cor e a velocidade de um robô e mostre uma ficha com esses dados.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:40px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700;color:#3A6EA5">2</p>
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700">Idade em 2030</h3>
+<p style="font-size:28px;color:#4A5568;line-height:1.4">Pergunte o ano de nascimento do usuário e mostre a idade que ele terá em 2030.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:40px">
+<p style="font-family:'Space Grotesk', Arial, sans-serif;font-size:44px;font-weight:700;color:#3A6EA5">3</p>
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700">Distância percorrida</h3>
+<p style="font-size:28px;color:#4A5568;line-height:1.4">Pergunte o diâmetro da roda e o número de voltas e mostre a distância: voltas × 3.14 × diâmetro.</p>
+</div>
+</div>
+<p class="rodape"></p>
+<aside>Cerca de 25 minutos. Circular pela sala e ajudar com os erros mais comuns: aspas, parênteses, conversão com int() ou float() esquecida e Python 3 não selecionado. No exercício 3, o diâmetro pode ser decimal, então pede float().</aside>
+</section>
+
+<!-- 15. Desafio e entrega -->
+<section style="background:#16202E;color:#F6F4EE;padding:128px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Desafio do dia</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Quantas voltas a roda precisa dar?</h2>
+</div>
+<p style="font-size:44px;line-height:1.35;width:1550px">O usuário informa a distância que o robô deve percorrer e o diâmetro da roda, em centímetros. O programa mostra quantas voltas o motor precisa dar.</p>
+<div style="display:flex;flex-direction:column;gap:16px;background:#2A3648;border-radius:16px;padding:48px">
+<p style="font-size:24px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Entrega</p>
+<p style="font-size:32px;color:#DCE6F0;line-height:1.5">Tire um print da tela mostrando o código e o console e envie pelo <b>ClassApp</b> até o fim do encontro.</p>
+</div>
+<aside>É o caminho inverso do exercício 3: voltas = distância ÷ (3.14 × diâmetro). A roda padrão do kit EV3 tem cerca de 5,6 cm de diâmetro, então 100 cm dão cerca de 5,7 voltas. Para quem terminar antes: mostrar também quantos graus o motor precisa girar (voltas × 360). Pedir que enviem também os três exercícios.</aside>
+</section>
+
+<!-- 16. Próximo encontro -->
+<section style="background:#F6F4EE;color:#16202E;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:600;color:#3A6EA5;letter-spacing:2px;text-transform:uppercase">Próximo encontro</p>
+<h2 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:72px;font-weight:700;line-height:1.1">Decisões e repetições</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:40px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700">Decisões</h3>
+<p class="mono" style="font-size:28px;color:#3A6EA5">if · elif · else</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:40px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700">Repetições</h3>
+<p class="mono" style="font-size:28px;color:#3A6EA5">for · while</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#FDFCF8;border:1px solid #E2DED3;border-radius:16px;padding:40px">
+<h3 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:32px;font-weight:700">Laço do robô</h3>
+<p class="mono" style="font-size:28px;color:#3A6EA5">while True · break</p>
+</div>
+</div>
+<p style="font-size:32px;color:#4A5568;line-height:1.5">Os blocos de “se” e de “repetir” que vocês já usam, agora em Python, com um sensor de distância simulado.</p>
+<p class="rodape"></p>
+<aside>Encerrar retomando o que foi visto hoje: print, variáveis, input, conversão e operações. Lembrar a turma de copiar o código antes de fechar o OnlineGDB.</aside>
+</section>
+
+</div>
+
+<div id="progresso"></div>
+<div id="notas"><strong>Notas do professor</strong><span id="texto-notas"></span></div>
+<div id="barra">
+  <button id="anterior" title="Slide anterior (←)">‹</button>
+  <span id="contador">1 / 16</span>
+  <button id="proximo" title="Próximo slide (→)">›</button>
+  <button id="botao-notas" title="Notas do professor (N)">Notas</button>
+  <button id="botao-tela" title="Tela cheia (F)">Tela cheia</button>
+</div>
+<button id="nav-toggle" type="button" title="Esconder/mostrar a barra (B)" aria-label="Esconder ou mostrar a barra de navegação">▴</button>
+
+<script>
+  const palco = document.getElementById('palco');
+  const slides = Array.from(document.querySelectorAll('#palco > section'));
+  const contador = document.getElementById('contador');
+  const progresso = document.getElementById('progresso');
+  const notas = document.getElementById('notas');
+  const textoNotas = document.getElementById('texto-notas');
+  let atual = 0;
+
+  // Rodapé padrão nos slides de conteúdo
+  document.querySelectorAll('p.rodape').forEach(p => {
+    p.textContent = 'Introdução à Programação em Python · Encontro 1';
+    p.style.cssText = 'position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280';
+  });
+
+  function ajustarEscala() {
+    const escala = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    palco.style.transform = 'translate(-50%, -50%) scale(' + escala + ')';
+  }
+
+  function mostrar(indice) {
+    atual = Math.max(0, Math.min(slides.length - 1, indice));
+    slides.forEach((s, i) => s.classList.toggle('ativo', i === atual));
+    contador.textContent = (atual + 1) + ' / ' + slides.length;
+    progresso.style.width = ((atual + 1) / slides.length * 100) + '%';
+    const aside = slides[atual].querySelector('aside');
+    textoNotas.textContent = aside ? aside.textContent : '';
+    history.replaceState(null, '', '#' + (atual + 1));
+  }
+
+  // Barra de navegação: começa escondida; B ou o botão ▴/▾ alterna
+  const navToggle = document.getElementById('nav-toggle');
+  const chaveNav = 'python-encontro01-nav-on';
+  function alternarBarra() {
+    const off = document.body.classList.toggle('nav-off');
+    navToggle.textContent = off ? '▴' : '▾';
+    try { localStorage.setItem(chaveNav, off ? '' : '1'); } catch (err) {}
+  }
+  document.body.classList.add('nav-off');
+  try { if (localStorage.getItem(chaveNav)) alternarBarra(); } catch (err) {}
+  navToggle.addEventListener('click', alternarBarra);
+
+  function telaCheia() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); mostrar(atual + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); mostrar(atual - 1); }
+    else if (e.key === 'Home') mostrar(0);
+    else if (e.key === 'End') mostrar(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') telaCheia();
+    else if (e.key === 'n' || e.key === 'N') notas.classList.toggle('visivel');
+    else if (e.key === 'b' || e.key === 'B') alternarBarra();
+  });
+
+  // Clique na metade direita avança, na esquerda volta
+  palco.addEventListener('click', e => {
+    mostrar(e.clientX > window.innerWidth / 2 ? atual + 1 : atual - 1);
+  });
+
+  // Deslizar o dedo em telas sensíveis ao toque
+  let inicioX = null;
+  document.addEventListener('touchstart', e => { inicioX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (inicioX === null) return;
+    const dx = e.changedTouches[0].clientX - inicioX;
+    if (Math.abs(dx) > 50) mostrar(dx < 0 ? atual + 1 : atual - 1);
+    inicioX = null;
+  });
+
+  document.getElementById('anterior').addEventListener('click', () => mostrar(atual - 1));
+  document.getElementById('proximo').addEventListener('click', () => mostrar(atual + 1));
+  document.getElementById('botao-notas').addEventListener('click', () => notas.classList.toggle('visivel'));
+  document.getElementById('botao-tela').addEventListener('click', telaCheia);
+  window.addEventListener('resize', ajustarEscala);
+
+  ajustarEscala();
+  const inicial = parseInt(location.hash.slice(1), 10);
+  mostrar(Number.isFinite(inicial) ? inicial - 1 : 0);
+</script>
+</body>
+</html>

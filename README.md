@@ -97,3 +97,12 @@ Repositório com materiais e programações pedagógicas em HTML didáticos e in
    - **Tema:** Júri da IA (parte 2 de 2): O júri simulado sobre o uso de reconhecimento facial nas ruas e nas escolas.
    - **Foco:** Falas de abertura, perguntas cruzadas, réplicas, perguntas dos legisladores, considerações finais, deliberação, veredito com "Lei da turma" e votação individual.
    - **Recursos:** Painel do júri com a sequência de vezes, cronômetro gigante, "com a palavra" e "a seguir" (`Espaço` inicia/pausa, `↑`/`↓` trocam a vez), mapa da sala, critérios de pontuação com ficha imprimível, veredito e Lei da turma editáveis e placar de votação (salvos no navegador).
+
+## 📁 Curso de Python – Steel Saints (`Curso de Python - Steel Saints/`)
+
+Curso introdutório de um mês (8 encontros, 24 h) para uma turma que já programava em blocos no EV3 Classroom, preparando o curso de robótica com Python e ev3dev do próximo ano. Prática no OnlineGDB pelo Chromebook.
+
+1. **[encontro_01.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/Curso%20de%20Python%20-%20Steel%20Saints/encontro_01.html)**
+   - **Tema:** Dos blocos ao código: primeiros comandos em Python (encontro de 2 h).
+   - **Foco:** Correspondência entre blocos do EV3 Classroom e comandos Python, o encaixe dos blocos como indentação, OnlineGDB, `print()`, erros comuns (incluindo `IndentationError`), variáveis, `input()`, conversão com `int()`/`float()` e operadores. Exercícios ligados ao robô (ficha do robô, distância percorrida pela roda) e desafio de calcular as voltas do motor para uma distância. Entrega pelo ClassApp (print do código e do console).
+   - **Recursos:** Palco 1920x1080 com auto-escala, visual azul-marinho e creme com destaque amarelo (Space Grotesk, Inter e JetBrains Mono), blocos de código e console lado a lado, notas do professor (`N`), barra ocultável (`B`, começa escondida), tela cheia (`F`), navegação por teclado, clique e toque, e impressão com um slide por página.
