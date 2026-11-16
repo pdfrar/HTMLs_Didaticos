@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python – Encontro 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --escuro: #16202E;
+    --claro: #F6F4EE;
+    --azul: #3A6EA5;
+    --amarelo: #F2C14E;
+    --texto-suave: #4A5568;
+    --cinza: #6B7280;
+    --cartao: #FDFCF8;
+    --borda: #E2DED3;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0B1119;
+    overflow: hidden;
+    font-family: Inter, Arial, sans-serif;
+  }
+  #palco {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: center center;
+  }
+  section {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .35s ease, visibility .35s;
+    overflow: hidden;
+  }
+  section.ativo { opacity: 1; visibility: visible; }
+  section h1, section h2, section h3, section p, section ol, section ul { margin: 0; }
+  section ol { padding-left: 1.3em; }
+  section ol li { padding-left: .3em; margin-bottom: 12px; }
+  section ol li::marker { color: var(--azul); font-weight: 600; }
+  section aside { display: none; }
+
+  /* Tabelas */
+  section table { width: 100%; border-collapse: collapse; }
+  section th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--azul);
+    padding: 16px 24px 16px 0;
+    border-bottom: 3px solid var(--azul);
+  }
+  section td {
+    padding: 18px 24px 18px 0;
+    border-bottom: 1px solid #D9D4C7;
+  }
+  .mono, pre, code { font-family: 'JetBrains Mono', 'Courier New', monospace; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+
+  /* Barra de controle */
+  #barra {
+    position: fixed;
+    right: 16px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 14px Inter, Arial, sans-serif;
+    color: #8FA3B8;
+    z-index: 10;
+  }
+  body.nav-off #barra, body.nav-off #progresso { display: none; }
+  #nav-toggle {
+    position: fixed;
+    right: 16px;
+    bottom: 56px;
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid #2E3C50;
+    border-radius: 6px;
+    background: #1F2A3A;
+    color: #DCE6F0;
+    font-size: 16px;
+    opacity: .4;
+    transition: opacity .2s;
+  }
+  #nav-toggle:hover, #nav-toggle:focus-visible { opacity: 1; }
+  body.nav-off #nav-toggle { bottom: 12px; opacity: .15; }
+  body.nav-off #nav-toggle:hover { opacity: 1; }
+  #barra button {
+    background: #1F2A3A;
+    color: #DCE6F0;
+    border: 1px solid #2E3C50;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font: inherit;
+    cursor: pointer;
+  }
+  #progresso {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--amarelo);
+    transition: width .3s ease;
+    z-index: 10;
+  }
+  #notas {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 56px;
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(22, 32, 46, .96);
+    color: #F6F4EE;
+    border: 1px solid #2E3C50;
+    border-radius: 12px;
+    padding: 18px 22px;
+    font: 18px/1.5 Inter, Arial, sans-serif;
+    display: none;
+    z-index: 11;
+  }
+  #notas.visivel { display: block; }
+  #notas strong {
+    display: block;
+    color: var(--amarelo);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  /* Classes do encontro 2 (mesmo visual do encontro 1) */
+  .c { background: #F6F4EE; color: #16202E; padding: 128px 128px 160px; display: flex; flex-direction: column; gap: 48px; }
+  .e { background: #16202E; color: #F6F4EE; padding: 128px; display: flex; flex-direction: column; gap: 56px; }
+  .cab { display: flex; flex-direction: column; gap: 16px; }
+  .k { font-size: 24px; font-weight: 600; color: #3A6EA5; letter-spacing: 2px; text-transform: uppercase; }
+  .e .k, .k.am { color: #F2C14E; }
+  section h2 { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 72px; font-weight: 700; line-height: 1.1; }
+  section h3 { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 32px; font-weight: 700; }
+  .linha { display: flex; gap: 32px; }
+  .cod, .con { display: flex; flex-direction: column; gap: 16px; border-radius: 16px; padding: 40px 48px; }
+  .cod { flex: 3; background: #16202E; }
+  .con { flex: 2; background: #E7E3D8; }
+  .cod .k { color: #8FA3B8; }
+  .con .k { color: #4A5568; }
+  .cod pre, .con pre { margin: 0; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 30px; line-height: 1.6; }
+  .cod pre { color: #F6F4EE; }
+  .con pre { color: #16202E; }
+  .m pre { font-size: 27px; line-height: 1.55; }
+  .s { color: #F2C14E; }
+  .cm { color: #8FA3B8; }
+  .t { font-size: 32px; color: #4A5568; line-height: 1.5; }
+  .t b, .t .mono { color: #16202E; }
+  .card { flex: 1; display: flex; flex-direction: column; gap: 16px; background: #FDFCF8; border: 1px solid #E2DED3; border-radius: 16px; padding: 40px; }
+  .card .num { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 44px; font-weight: 700; color: #3A6EA5; }
+  .card p { font-size: 28px; color: #4A5568; line-height: 1.4; }
+  .card p.mono { color: #3A6EA5; }
+  .bloco { flex: 2; display: flex; flex-direction: column; align-self: center; }
+  .bloco .topo { background: #FFAB19; border-radius: 12px 12px 0 0; padding: 20px 28px; }
+  .bloco .meio { background: #FFAB19; padding: 14px 28px; width: 45%; }
+  .bloco .corpo { display: flex; }
+  .bloco .corpo > i { width: 40px; background: #FFAB19; }
+  .bloco .corpo > div { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 10px 0 10px 6px; }
+  .bloco .acao { background: #4C97FF; border-radius: 10px; padding: 18px 28px; color: #FFFFFF; }
+  .bloco .base { height: 36px; background: #FFAB19; border-radius: 0 0 12px 12px; width: 60%; }
+  .bloco p { font-size: 30px; font-weight: 600; color: #16202E; }
+  .bloco .acao p { color: #FFFFFF; }
+  @media print {
+    html, body { overflow: visible; background: none; }
+    #barra, #progresso, #notas { display: none !important; }
+    #palco { position: static; transform: none !important; }
+    section { position: relative; opacity: 1; visibility: visible; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<div id="palco">
+
+<!-- 1. Capa -->
+<section style="background:#16202E;color:#F6F4EE;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-size:32px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Curso de Python · Steel Saints · Encontro 2</p>
+<h1 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:120px;font-weight:700;line-height:1.05">Decisões e repetições</h1>
+<p style="font-size:44px;color:#BFD0E0;width:1300px;line-height:1.3">Os blocos de “se” e de “repetir”, agora escritos em Python</p>
+<p class="mono" style="position:absolute;right:128px;top:128px;width:620px;text-align:right;font-size:32px;color:#F2C14E">if distancia &lt; 20:</p>
+<p style="position:absolute;left:128px;bottom:96px;width:900px;font-size:24px;color:#8FA3B8">Encontro longo · 13h às 17h</p>
+<aside>Segundo encontro, de quatro horas. Fecha a primeira semana do curso: com decisões e repetições, a turma passa a escrever em Python tudo o que já fazia com os blocos de controle do EV3 Classroom.</aside>
+</section>
+
+<section class="c">
+<div class="cab"><p class="k">Revisão</p><h2>O que este programa mostra?</h2></div>
+<div class="linha">
+<div class="cod"><p class="k">Código</p>
+<pre>voltas = int(input(<span class="s">"Voltas: "</span>))
+diametro = <span class="s">5.6</span>
+distancia = voltas * <span class="s">3.14</span> * diametro
+print(<span class="s">"Distância:"</span>, distancia, <span class="s">"cm"</span>)</pre></div>
+<div class="con"><p class="k">Console</p>
+<pre>Voltas: 10
+Distância: 175.84 cm</pre></div>
+</div>
+<p class="t">No encontro 1: <b>print()</b>, variáveis, <b>input()</b>, conversão com <b>int()</b> e <b>float()</b> e operações. Hoje o programa passa a escolher o que fazer e a repetir comandos.</p>
+<p class="rodape"></p>
+<aside>Antes de mostrar o console, pedir que a turma leia o código e diga o que cada linha faz e o que aparece na tela para 10 voltas. Retomar dúvidas dos exercícios e do desafio do encontro 1 (voltas = distância ÷ (3.14 × diâmetro)). Conferir se todos estão com o OnlineGDB aberto em Python 3.</aside>
+</section>
+
+<!-- 4. Comparações -->
+<section class="c" style="gap:36px">
+<div class="cab"><p class="k">Decisões</p><h2>Toda decisão começa com uma comparação</h2></div>
+<table style="font-size:30px">
+<tr><th style="width:22%;padding:12px 24px 12px 0">Operador</th><th style="width:38%;padding:12px 24px 12px 0">Significado</th><th style="width:25%;padding:12px 24px 12px 0">Exemplo</th><th style="width:15%;padding:12px 24px 12px 0">Resultado</th></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">==</td><td style="padding:11px 24px 11px 0">igual a</td><td class="mono" style="padding:11px 24px 11px 0">5 == 5</td><td class="mono" style="padding:11px 24px 11px 0">True</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">!=</td><td style="padding:11px 24px 11px 0">diferente de</td><td class="mono" style="padding:11px 24px 11px 0">5 != 5</td><td class="mono" style="padding:11px 24px 11px 0">False</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">&gt;</td><td style="padding:11px 24px 11px 0">maior que</td><td class="mono" style="padding:11px 24px 11px 0">7 &gt; 10</td><td class="mono" style="padding:11px 24px 11px 0">False</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">&lt;</td><td style="padding:11px 24px 11px 0">menor que</td><td class="mono" style="padding:11px 24px 11px 0">7 &lt; 10</td><td class="mono" style="padding:11px 24px 11px 0">True</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">&gt;=</td><td style="padding:11px 24px 11px 0">maior ou igual a</td><td class="mono" style="padding:11px 24px 11px 0">20 &gt;= 20</td><td class="mono" style="padding:11px 24px 11px 0">True</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">&lt;=</td><td style="padding:11px 24px 11px 0">menor ou igual a</td><td class="mono" style="padding:11px 24px 11px 0">21 &lt;= 20</td><td class="mono" style="padding:11px 24px 11px 0">False</td></tr>
+</table>
+<p class="t" style="font-size:28px">O resultado de uma comparação é sempre <span class="mono">True</span> (verdadeiro) ou <span class="mono">False</span> (falso). Atenção: <span class="mono">=</span> guarda um valor; <span class="mono">==</span> compara dois valores.</p>
+<p class="rodape"></p>
+<aside>Testar no OnlineGDB com print(7 &lt; 10) e print(5 == 5) para a turma ver True e False no console. No EV3 Classroom, são os blocos verdes de operadores, com pontas em forma de hexágono. O erro mais comum do dia será escrever = no lugar de ==.</aside>
+</section>
+
+<!-- 5. if -->
+<section class="c">
+<div class="cab"><p class="k">Decisões</p><h2>if: executar somente se for verdade</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>distancia = int(input(<span class="s">"Sensor (cm): "</span>))
+if distancia &lt; <span class="s">20</span>:
+    print(<span class="s">"Obstáculo à frente"</span>)
+    print(<span class="s">"Parar motores"</span>)
+print(<span class="s">"Fim da leitura"</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Sensor (cm): 12
+Obstáculo à frente
+Parar motores
+Fim da leitura</pre></div>
+</div>
+<p class="t">A linha do <b>if</b> termina com <b>dois-pontos</b>. As linhas com <b>4 espaços</b> ficam dentro do if e só são executadas quando a condição é verdadeira. A última linha está fora e é executada sempre.</p>
+<p class="rodape"></p>
+<aside>Todos digitam e executam duas vezes: com 12 e com 80. Com 80, só aparece "Fim da leitura". Depois, pedir que tirem os 4 espaços da linha "Parar motores" e executem com 80: a mensagem passa a aparecer sempre, porque saiu do if. É a mesma ideia do encaixe dos blocos vista no encontro 1.</aside>
+</section>
+
+<!-- 6. if / else -->
+<section class="c">
+<div class="cab"><p class="k">Decisões</p><h2>else: o que fazer no caso contrário</h2></div>
+<div class="linha" style="gap:48px">
+<div class="bloco">
+<div class="topo"><p>se distância &lt; 20 então</p></div>
+<div class="corpo"><i></i><div><div class="acao"><p>parar motores</p></div></div></div>
+<div class="meio"><p>senão</p></div>
+<div class="corpo"><i></i><div><div class="acao"><p>seguir em frente</p></div></div></div>
+<div class="base"></div>
+</div>
+<div class="cod" style="flex:3"><p class="k">Python</p>
+<pre>if distancia &lt; <span class="s">20</span>:
+    print(<span class="s">"Parar motores"</span>)
+else:
+    print(<span class="s">"Seguir em frente"</span>)</pre></div>
+</div>
+<p class="t">O <b>else</b> não tem condição: ele vale para todos os casos em que a condição do if é falsa. Ele fica alinhado com o if e também termina com dois-pontos.</p>
+<p class="rodape"></p>
+<aside>Completar o programa do slide anterior com o else e testar com 12 e com 80. Reforçar que, entre if e else, sempre um dos dois blocos é executado, e nunca os dois.</aside>
+</section>
+
+<!-- 7. elif -->
+<section class="c">
+<div class="cab"><p class="k">Decisões</p><h2>elif: mais de dois caminhos</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>distancia = int(input(<span class="s">"Sensor (cm): "</span>))
+if distancia &lt; <span class="s">10</span>:
+    print(<span class="s">"Recuar"</span>)
+elif distancia &lt; <span class="s">30</span>:
+    print(<span class="s">"Desviar"</span>)
+else:
+    print(<span class="s">"Seguir em frente"</span>)</pre></div>
+<div class="con m"><p class="k">Três execuções</p>
+<pre>Sensor (cm): 5
+Recuar
+
+Sensor (cm): 22
+Desviar
+
+Sensor (cm): 80
+Seguir em frente</pre></div>
+</div>
+<p class="t">O Python testa as condições de cima para baixo e executa apenas o bloco da <b>primeira</b> que for verdadeira. As demais não são verificadas.</p>
+<p class="rodape"></p>
+<aside>elif é a abreviação de "else if" (senão, se). Perguntar: com 5 cm, a condição distancia &lt; 30 também é verdadeira; por que "Desviar" não aparece? Porque o Python para na primeira condição verdadeira. Pedir que troquem a ordem das duas condições e testem com 5, para ver o erro de lógica aparecer.</aside>
+</section>
+
+<!-- 8. and / or / not -->
+<section class="c">
+<div class="cab"><p class="k">Decisões</p><h2>and, or e not: combinar condições</h2></div>
+<div class="linha">
+<div class="cod m" style="flex:1"><p class="k">Código</p>
+<pre>bateria = <span class="s">75</span>
+distancia = <span class="s">40</span>
+botao = <span class="s">"solto"</span>
+
+if bateria &gt; <span class="s">20</span> and distancia &gt; <span class="s">30</span>:
+    print(<span class="s">"Avançar"</span>)
+
+if botao == <span class="s">"apertado"</span> or distancia &lt; <span class="s">5</span>:
+    print(<span class="s">"Parada de emergência"</span>)</pre></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;justify-content:center">
+<p class="t"><span class="mono"><b>and</b></span>: verdadeiro quando as <b>duas</b> condições são verdadeiras.</p>
+<p class="t"><span class="mono"><b>or</b></span>: verdadeiro quando <b>pelo menos uma</b> é verdadeira.</p>
+<p class="t"><span class="mono"><b>not</b></span>: inverte o resultado da condição.</p>
+<p class="t">Textos são comparados com aspas: <span class="mono">botao == "apertado"</span>.</p>
+</div>
+</div>
+<p class="rodape"></p>
+<aside>Com os valores do slide, aparece apenas "Avançar". Pedir previsões antes de executar e depois mudar os valores: bateria = 15 (nada aparece) e distancia = 3 (só "Parada de emergência"). Lembrar que a comparação de textos diferencia maiúsculas de minúsculas: "Apertado" é diferente de "apertado".</aside>
+</section>
+
+<!-- 9. Prática 1 -->
+<section class="c">
+<div class="cab"><p class="k">Prática 1</p><h2>Exercícios de decisão</h2></div>
+<div class="linha">
+<div class="card"><p class="num">1</p><h3>Par ou ímpar</h3><p>Pergunte um número inteiro e mostre se ele é par ou ímpar. Use o resto da divisão por 2.</p></div>
+<div class="card"><p class="num">2</p><h3>Nível da bateria</h3><p>Pergunte o nível da bateria, de 0 a 100. Com 80 ou mais, mostre “Bateria cheia”; de 30 a 79, “Bateria normal”; abaixo de 30, “Recarregar”.</p></div>
+<div class="card"><p class="num">3</p><h3>Sensor de cor</h3><p>Pergunte a cor lida pelo sensor. Verde: “Avançar”. Amarelo: “Reduzir a velocidade”. Vermelho: “Parar”. Outra cor: “Cor desconhecida”.</p></div>
+</div>
+<p class="rodape"></p>
+<aside>Cerca de 40 minutos. No exercício 1, a condição é numero % 2 == 0. No exercício 2, basta if nivel >= 80, elif nivel >= 30 e else, sem precisar de and. No exercício 3, a comparação é entre textos e exige aspas; quem terminar antes pode aceitar também a resposta em maiúsculas usando or. Erros mais comuns: esquecer os dois-pontos, usar = no lugar de == e desalinhar a indentação.</aside>
+</section>
+
+<!-- 10. Intervalo -->
+<section style="background:#3A6EA5;color:#F6F4EE;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<h2 style="font-size:120px">Intervalo</h2>
+<p style="font-size:44px;color:#DCE6F0">Retorno às 15h, com as repetições.</p>
+<aside>Antes de sair, pedir que todos copiem os três exercícios para um documento, porque o OnlineGDB sem login não guarda o código.</aside>
+</section>
+
+<!-- 11. for -->
+<section class="c">
+<div class="cab"><p class="k">Repetições</p><h2>for: repetir um número certo de vezes</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>for i in range(<span class="s">4</span>):
+    print(<span class="s">"Lado"</span>, i + <span class="s">1</span>)
+    print(<span class="s">"Andar e girar 90 graus"</span>)
+print(<span class="s">"Quadrado completo"</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Lado 1
+Andar e girar 90 graus
+Lado 2
+Andar e girar 90 graus
+Lado 3
+Andar e girar 90 graus
+Lado 4
+Andar e girar 90 graus
+Quadrado completo</pre></div>
+</div>
+<p class="t">É o bloco “repetir 4 vezes”. A variável <b>i</b> conta as repetições e começa em <b>0</b>: nas quatro voltas, vale 0, 1, 2 e 3.</p>
+<p class="rodape"></p>
+<aside>É o mesmo exemplo do encaixe mostrado no encontro 1. Pedir que troquem print("Lado", i + 1) por print("Lado", i) para ver a contagem começar em zero. O nome i é um costume; qualquer nome de variável serve.</aside>
+</section>
+
+<!-- 12. range -->
+<section class="c">
+<div class="cab"><p class="k">Repetições</p><h2>range(): de onde até onde contar</h2></div>
+<table style="font-size:32px">
+<tr><th style="width:30%">Comando</th><th style="width:30%">Valores de i</th><th style="width:40%">Leitura</th></tr>
+<tr><td class="mono">range(5)</td><td class="mono">0 1 2 3 4</td><td>de 0 até antes de 5</td></tr>
+<tr><td class="mono">range(1, 6)</td><td class="mono">1 2 3 4 5</td><td>de 1 até antes de 6</td></tr>
+<tr><td class="mono">range(0, 10, 2)</td><td class="mono">0 2 4 6 8</td><td>de 0 até antes de 10, de 2 em 2</td></tr>
+<tr><td class="mono">range(5, 0, -1)</td><td class="mono">5 4 3 2 1</td><td>de 5 até antes de 0, voltando de 1 em 1</td></tr>
+</table>
+<p class="t">O último número do <b>range()</b> nunca entra na contagem.</p>
+<p class="rodape"></p>
+<aside>Testar cada linha com for i in range(...): print(i). Perguntar à turma como contar de 10 até 100 de 10 em 10: range(10, 101, 10). A contagem regressiva da última linha será usada na Prática 2.</aside>
+</section>
+
+<!-- 13. Acumulador -->
+<section class="c">
+<div class="cab"><p class="k">Repetições</p><h2>Somar dentro da repetição</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>total = <span class="s">0</span>
+for i in range(<span class="s">3</span>):
+    leitura = int(input(<span class="s">"Leitura: "</span>))
+    total = total + leitura
+print(<span class="s">"Média:"</span>, total / <span class="s">3</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Leitura: 20
+Leitura: 25
+Leitura: 30
+Média: 25.0</pre></div>
+</div>
+<p class="t">A variável <b>total</b> começa em 0, antes da repetição, e recebe uma nova leitura a cada volta. Um sensor costuma ser lido várias vezes e usa-se a média das leituras.</p>
+<p class="rodape"></p>
+<aside>Fazer o acompanhamento no quadro: total vale 0, depois 20, 45 e 75. Perguntar o que acontece se a linha total = 0 for colocada dentro do for: o total é zerado a cada volta e a média sai errada (10.0). A divisão com / sempre resulta em número decimal, por isso aparece 25.0.</aside>
+</section>
+
+<!-- 14. while -->
+<section class="c">
+<div class="cab"><p class="k">Repetições</p><h2>while: repetir enquanto for verdade</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>bateria = <span class="s">100</span>
+while bateria &gt; <span class="s">20</span>:
+    print(<span class="s">"Bateria:"</span>, bateria)
+    bateria = bateria - <span class="s">30</span>
+print(<span class="s">"Recarregar"</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Bateria: 100
+Bateria: 70
+Bateria: 40
+Recarregar</pre></div>
+</div>
+<p class="t">Antes de cada volta, o Python testa a condição. Quando ela fica falsa, a repetição termina. Se nada dentro do while mudar a condição, o programa nunca para: use o botão <b>Stop</b> do OnlineGDB.</p>
+<p class="rodape"></p>
+<aside>Acompanhar os valores no quadro: 100, 70, 40 e 10; com 10 a condição é falsa e o programa sai da repetição. Depois, provocar o laço infinito de propósito: comentar a linha bateria = bateria - 30, executar e parar com o Stop. No EV3 Classroom, o equivalente é o bloco "repetir até", com a condição invertida.</aside>
+</section>
+
+<!-- 15. for x while -->
+<section class="c" style="gap:56px">
+<div class="cab"><p class="k">Repetições</p><h2>Qual repetição usar?</h2></div>
+<div class="linha">
+<div class="card" style="padding:48px;border-top:8px solid #3A6EA5"><h3 style="font-size:44px">for</h3><p style="font-size:32px">Quando o número de repetições é conhecido antes de começar.</p><p class="mono">Andar os 4 lados de um quadrado.</p></div>
+<div class="card" style="padding:48px;border-top:8px solid #F2C14E"><h3 style="font-size:44px">while</h3><p style="font-size:32px">Quando a repetição depende de uma condição e não se sabe quantas voltas serão necessárias.</p><p class="mono">Andar até encontrar um obstáculo.</p></div>
+</div>
+<p class="rodape"></p>
+<aside>Pedir outros exemplos do robô para cada caso. Com for: piscar a luz 3 vezes, dar 5 voltas na pista. Com while: seguir a linha enquanto o sensor vê preto, esperar até o botão ser apertado.</aside>
+</section>
+
+<!-- 16. while True / break -->
+<section class="c" style="gap:36px">
+<div class="cab"><p class="k">O laço do robô</p><h2>while True e break</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>while True:
+    distancia = int(input(<span class="s">"Sensor (cm): "</span>))
+    if distancia &lt; <span class="s">20</span>:
+        print(<span class="s">"Obstáculo: parar motores"</span>)
+        break
+    print(<span class="s">"Seguir em frente"</span>)
+print(<span class="s">"Programa encerrado"</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Sensor (cm): 80
+Seguir em frente
+Sensor (cm): 45
+Seguir em frente
+Sensor (cm): 12
+Obstáculo: parar motores
+Programa encerrado</pre></div>
+</div>
+<p class="t" style="font-size:28px"><b>while True</b> é o bloco “repetir para sempre”. O <b>break</b> interrompe a repetição na hora. Programas de robô têm esta forma: ler o sensor, decidir, agir e repetir.</p>
+<p class="rodape"></p>
+<aside>Este é o programa mais importante do encontro: reúne input, conversão, if, repetição e indentação em dois níveis. Digitar junto com a turma, com calma, chamando atenção para os 8 espaços dentro do if. Aqui o input faz o papel do sensor de distância; no curso com ev3dev, essa linha será trocada pela leitura do sensor real e os print, pelos comandos dos motores.</aside>
+</section>
+
+<!-- 17. Erros -->
+<section class="c">
+<div class="cab"><p class="k">Mão no código</p><h2>Erros comuns de hoje</h2></div>
+<table style="font-size:30px">
+<tr><th style="width:34%">Código com erro</th><th style="width:26%">Mensagem</th><th style="width:40%">Como corrigir</th></tr>
+<tr><td class="mono">if distancia &lt; 20</td><td class="mono">SyntaxError</td><td>Colocar os dois-pontos no fim da linha</td></tr>
+<tr><td class="mono">if distancia = 20:</td><td class="mono">SyntaxError</td><td>Usar == para comparar</td></tr>
+<tr><td class="mono" style="white-space:pre">if distancia &lt; 20:
+print("Parar")</td><td class="mono">IndentationError</td><td>Colocar 4 espaços na linha de dentro</td></tr>
+<tr><td class="mono" style="white-space:pre">while bateria &gt; 20:
+    print(bateria)</td><td>Nenhuma: o programa não para</td><td>Mudar o valor da variável dentro do while</td></tr>
+</table>
+<p class="rodape"></p>
+<aside>Os três primeiros são erros de escrita, que o Python aponta com a linha. O último é um erro de lógica: não há mensagem, e é o programador que precisa perceber. Reforçar a leitura da mensagem de erro antes de pedir ajuda.</aside>
+</section>
+
+<!-- 18. Prática 2 -->
+<section class="c">
+<div class="cab"><p class="k">Prática 2</p><h2>Exercícios de repetição</h2></div>
+<div class="linha">
+<div class="card"><p class="num">1</p><h3>Tabuada</h3><p>Pergunte um número e mostre a tabuada dele, de 1 a 10, no formato “7 x 3 = 21”.</p></div>
+<div class="card"><p class="num">2</p><h3>Contagem regressiva</h3><p>Mostre a contagem de 10 até 1 e, no fim, a mensagem “Motores ligados”.</p></div>
+<div class="card"><p class="num">3</p><h3>Senha do robô</h3><p>Peça a senha repetidamente. Quando a senha correta for digitada, mostre “Acesso liberado” e encerre.</p></div>
+</div>
+<p class="rodape"></p>
+<aside>Cerca de 25 minutos. Exercício 1: for i in range(1, 11) e print(numero, "x", i, "=", numero * i). Exercício 2: range(10, 0, -1). Exercício 3: while True com input e break quando a senha for igual à escolhida; quem terminar antes pode limitar a 3 tentativas com um contador.</aside>
+</section>
+
+<!-- 19. Desafio -->
+<section class="e" style="gap:44px">
+<div class="cab"><p class="k">Desafio do dia</p><h2>Robô em patrulha</h2></div>
+<p style="font-size:38px;line-height:1.4;width:1600px">O programa lê o sensor de distância repetidamente. Com <b>30 cm ou mais</b>, mostra “Seguir em frente”. De <b>10 a 29 cm</b>, mostra “Desviar”. Com <b>menos de 10 cm</b>, mostra “Parada de emergência” e encerra. No fim, informa quantas leituras foram feitas e quantos desvios aconteceram.</p>
+<div style="display:flex;flex-direction:column;gap:16px;background:#2A3648;border-radius:16px;padding:40px 48px">
+<p class="k">Entrega</p>
+<p style="font-size:32px;color:#DCE6F0;line-height:1.5">Tire um print da tela mostrando o código e o console, com pelo menos quatro leituras, e envie pelo <b>ClassApp</b> até o fim do encontro.</p>
+</div>
+<aside>O desafio junta tudo o que foi visto hoje: while True, if/elif/else, break e contadores. São necessárias duas variáveis criadas antes do while, leituras = 0 e desvios = 0, somadas dentro da repetição. Os dois print finais ficam fora do while, sem indentação. Dica para quem travar: partir do programa do slide "while True e break". Pedir que enviem também os exercícios das duas práticas.</aside>
+</section>
+
+<!-- 20. Próximo encontro -->
+<section class="c">
+<div class="cab"><p class="k">Próximo encontro</p><h2>Listas e módulos</h2></div>
+<div class="linha">
+<div class="card"><h3>Listas</h3><p class="mono">leituras = [20, 25, 30]</p></div>
+<div class="card"><h3>Sorteios</h3><p class="mono">import random</p></div>
+<div class="card"><h3>Tempo</h3><p class="mono">import time</p></div>
+</div>
+<p class="t">Com listas, várias leituras ficam guardadas em uma única variável. Com os módulos, o sensor simulado passa a gerar valores sozinho e o programa aprende a esperar.</p>
+<p class="rodape"></p>
+<aside>Encerrar retomando o dia: comparações, if, elif, else, and/or/not, for, range, while e break. Lembrar a turma de copiar o código antes de fechar o OnlineGDB.</aside>
+</section>
+
+</div>
+
+<div id="progresso"></div>
+<div id="notas"><strong>Notas do professor</strong><span id="texto-notas"></span></div>
+<div id="barra">
+  <button id="anterior" title="Slide anterior (←)">‹</button>
+  <span id="contador">1 / 20</span>
+  <button id="proximo" title="Próximo slide (→)">›</button>
+  <button id="botao-notas" title="Notas do professor (N)">Notas</button>
+  <button id="botao-tela" title="Tela cheia (F)">Tela cheia</button>
+</div>
+<button id="nav-toggle" type="button" title="Esconder/mostrar a barra (B)" aria-label="Esconder ou mostrar a barra de navegação">▴</button>
+
+<script>
+  const palco = document.getElementById('palco');
+  const slides = Array.from(document.querySelectorAll('#palco > section'));
+  const contador = document.getElementById('contador');
+  const progresso = document.getElementById('progresso');
+  const notas = document.getElementById('notas');
+  const textoNotas = document.getElementById('texto-notas');
+  let atual = 0;
+
+  // Rodapé padrão nos slides de conteúdo
+  document.querySelectorAll('p.rodape').forEach(p => {
+    p.textContent = 'Introdução à Programação em Python · Encontro 2';
+    p.style.cssText = 'position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280';
+  });
+
+  function ajustarEscala() {
+    const escala = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    palco.style.transform = 'translate(-50%, -50%) scale(' + escala + ')';
+  }
+
+  function mostrar(indice) {
+    atual = Math.max(0, Math.min(slides.length - 1, indice));
+    slides.forEach((s, i) => s.classList.toggle('ativo', i === atual));
+    contador.textContent = (atual + 1) + ' / ' + slides.length;
+    progresso.style.width = ((atual + 1) / slides.length * 100) + '%';
+    const aside = slides[atual].querySelector('aside');
+    textoNotas.textContent = aside ? aside.textContent : '';
+    history.replaceState(null, '', '#' + (atual + 1));
+  }
+
+  // Barra de navegação: começa escondida; B ou o botão ▴/▾ alterna
+  const navToggle = document.getElementById('nav-toggle');
+  const chaveNav = 'python-encontro02-nav-on';
+  function alternarBarra() {
+    const off = document.body.classList.toggle('nav-off');
+    navToggle.textContent = off ? '▴' : '▾';
+    try { localStorage.setItem(chaveNav, off ? '' : '1'); } catch (err) {}
+  }
+  document.body.classList.add('nav-off');
+  try { if (localStorage.getItem(chaveNav)) alternarBarra(); } catch (err) {}
+  navToggle.addEventListener('click', alternarBarra);
+
+  function telaCheia() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); mostrar(atual + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); mostrar(atual - 1); }
+    else if (e.key === 'Home') mostrar(0);
+    else if (e.key === 'End') mostrar(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') telaCheia();
+    else if (e.key === 'n' || e.key === 'N') notas.classList.toggle('visivel');
+    else if (e.key === 'b' || e.key === 'B') alternarBarra();
+  });
+
+  // Clique na metade direita avança, na esquerda volta
+  palco.addEventListener('click', e => {
+    mostrar(e.clientX > window.innerWidth / 2 ? atual + 1 : atual - 1);
+  });
+
+  // Deslizar o dedo em telas sensíveis ao toque
+  let inicioX = null;
+  document.addEventListener('touchstart', e => { inicioX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (inicioX === null) return;
+    const dx = e.changedTouches[0].clientX - inicioX;
+    if (Math.abs(dx) > 50) mostrar(dx < 0 ? atual + 1 : atual - 1);
+    inicioX = null;
+  });
+
+  document.getElementById('anterior').addEventListener('click', () => mostrar(atual - 1));
+  document.getElementById('proximo').addEventListener('click', () => mostrar(atual + 1));
+  document.getElementById('botao-notas').addEventListener('click', () => notas.classList.toggle('visivel'));
+  document.getElementById('botao-tela').addEventListener('click', telaCheia);
+  window.addEventListener('resize', ajustarEscala);
+
+  ajustarEscala();
+  const inicial = parseInt(location.hash.slice(1), 10);
+  mostrar(Number.isFinite(inicial) ? inicial - 1 : 0);
+</script>
+</body>
+</html>
