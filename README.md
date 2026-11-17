@@ -98,6 +98,11 @@ Repositório com materiais e programações pedagógicas em HTML didáticos e in
    - **Foco:** Falas de abertura, perguntas cruzadas, réplicas, perguntas dos legisladores, considerações finais, deliberação, veredito com "Lei da turma" e votação individual.
    - **Recursos:** Painel do júri com a sequência de vezes, cronômetro gigante, "com a palavra" e "a seguir" (`Espaço` inicia/pausa, `↑`/`↓` trocam a vez), mapa da sala, critérios de pontuação com ficha imprimível, veredito e Lei da turma editáveis e placar de votação (salvos no navegador).
 
+3. **[criptografia.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/9%20ano/criptografia.html)**
+   - **Tema:** Criptografia: como guardar e enviar segredos (BNCC Computação EF09CO05). Aula de 90 minutos, sem material impresso.
+   - **Foco:** Texto claro, cifra, chave e texto cifrado; cifra de César e desafio de decifrar; força bruta e análise de frequência (Al-Kindi); cifra de Vigenère; máquina Enigma; chave pública, https e criptografia de ponta a ponta (transmissão); resumo (hash) de senhas e celular cifrado (armazenamento). Atividade em duplas no caderno ("Troca de mensagens secretas"): cifrar uma frase com César, trocar com outra dupla, quebrar a mensagem recebida, cifrar PATOS com Vigenère (chave SOL) e responder sobre usos atuais. Entrega da folha do caderno.
+   - **Recursos:** Mesmo visual de papel das aulas do 4º ao 8º ano (fundo #F3EFE6, títulos em Georgia), fotos da Enigma do Wikimedia Commons com crédito, revelação passo a passo, cronômetro da atividade de 25 min (`T`/`R`), notas do professor com roteiro de tempos e gabarito (`N`) e barra ocultável (`B`). Interativos: cifra de César com chave ajustável, força bruta com controle deslizante, gráfico de frequência das letras, tabela de Vigenère ao vivo e gerador de resumo SHA-256.
+
 ## 📁 Curso de Python – Steel Saints (`Curso de Python - Steel Saints/`)
 
 Curso introdutório de um mês (8 encontros, 24 h) para uma turma que já programava em blocos no EV3 Classroom, preparando o curso de robótica com Python e ev3dev do próximo ano. Prática no OnlineGDB pelo Chromebook.
