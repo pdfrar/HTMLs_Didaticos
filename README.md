@@ -121,3 +121,13 @@ Curso introdutório de um mês (8 encontros, 24 h) para uma turma que já progra
    - **Tema:** Dos blocos ao código: primeiros comandos em Python (encontro de 2 h).
    - **Foco:** Correspondência entre blocos do EV3 Classroom e comandos Python, o encaixe dos blocos como indentação, OnlineGDB, `print()`, erros comuns (incluindo `IndentationError`), variáveis, `input()`, conversão com `int()`/`float()` e operadores. Exercícios ligados ao robô (ficha do robô, distância percorrida pela roda) e desafio de calcular as voltas do motor para uma distância. Entrega pelo ClassApp (print do código e do console).
    - **Recursos:** Palco 1920x1080 com auto-escala, visual azul-marinho e creme com destaque amarelo (Space Grotesk, Inter e JetBrains Mono), blocos de código e console lado a lado, notas do professor (`N`), barra ocultável (`B`, começa escondida), tela cheia (`F`), navegação por teclado, clique e toque, e impressão com um slide por página.
+
+2. **[encontro_02.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/Curso%20de%20Python%20-%20Steel%20Saints/encontro_02.html)**
+   - **Tema:** Decisões e repetições (encontro de 4 h).
+   - **Foco:** Operadores de comparação, `if`/`elif`/`else`, `and`/`or`/`not`, `for` com `range()`, acumulador, `while`, `while True` com `break` (o laço do robô) e erros comuns. Duas práticas e desafio "Robô em patrulha" com contadores. Entrega pelo ClassApp.
+   - **Recursos:** Mesmo visual do encontro 1, com blocos do EV3 Classroom desenhados ao lado do código equivalente e slide de intervalo.
+
+3. **[encontro_03.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/Curso%20de%20Python%20-%20Steel%20Saints/encontro_03.html)**
+   - **Tema:** Listas e módulos (encontro de 2 h).
+   - **Foco:** Criar listas, índices, alterar/`append()`/`pop()`, `len`/`sum`/`max`/`min`/`sorted`/`index`/`in`, `for` sobre a lista, lista montada com `append()` e rota do robô como lista de textos; `import`, `random` (`randint`, `choice`) e `time.sleep()`, com a ponte para os imports do ev3dev. Programa de sensor simulado, prática e desafio "Varredura do sensor". Entrega pelo ClassApp.
+   - **Recursos:** Mesmo visual dos encontros anteriores, com a lista desenhada em caixas numeradas pelos índices.

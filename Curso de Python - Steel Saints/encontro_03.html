@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python – Encontro 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  :root {
+    --escuro: #16202E;
+    --claro: #F6F4EE;
+    --azul: #3A6EA5;
+    --amarelo: #F2C14E;
+    --texto-suave: #4A5568;
+    --cinza: #6B7280;
+    --cartao: #FDFCF8;
+    --borda: #E2DED3;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0B1119;
+    overflow: hidden;
+    font-family: Inter, Arial, sans-serif;
+  }
+  #palco {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;
+    height: 1080px;
+    transform-origin: center center;
+  }
+  section {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .35s ease, visibility .35s;
+    overflow: hidden;
+  }
+  section.ativo { opacity: 1; visibility: visible; }
+  section h1, section h2, section h3, section p, section ol, section ul { margin: 0; }
+  section ol { padding-left: 1.3em; }
+  section ol li { padding-left: .3em; margin-bottom: 12px; }
+  section ol li::marker { color: var(--azul); font-weight: 600; }
+  section aside { display: none; }
+
+  /* Tabelas */
+  section table { width: 100%; border-collapse: collapse; }
+  section th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--azul);
+    padding: 16px 24px 16px 0;
+    border-bottom: 3px solid var(--azul);
+  }
+  section td {
+    padding: 18px 24px 18px 0;
+    border-bottom: 1px solid #D9D4C7;
+  }
+  .mono, pre, code { font-family: 'JetBrains Mono', 'Courier New', monospace; font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+
+  /* Barra de controle */
+  #barra {
+    position: fixed;
+    right: 16px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: 14px Inter, Arial, sans-serif;
+    color: #8FA3B8;
+    z-index: 10;
+  }
+  body.nav-off #barra, body.nav-off #progresso { display: none; }
+  #nav-toggle {
+    position: fixed;
+    right: 16px;
+    bottom: 56px;
+    z-index: 20;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    border: 1px solid #2E3C50;
+    border-radius: 6px;
+    background: #1F2A3A;
+    color: #DCE6F0;
+    font-size: 16px;
+    opacity: .4;
+    transition: opacity .2s;
+  }
+  #nav-toggle:hover, #nav-toggle:focus-visible { opacity: 1; }
+  body.nav-off #nav-toggle { bottom: 12px; opacity: .15; }
+  body.nav-off #nav-toggle:hover { opacity: 1; }
+  #barra button {
+    background: #1F2A3A;
+    color: #DCE6F0;
+    border: 1px solid #2E3C50;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font: inherit;
+    cursor: pointer;
+  }
+  #progresso {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 4px;
+    background: var(--amarelo);
+    transition: width .3s ease;
+    z-index: 10;
+  }
+  #notas {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 56px;
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(22, 32, 46, .96);
+    color: #F6F4EE;
+    border: 1px solid #2E3C50;
+    border-radius: 12px;
+    padding: 18px 22px;
+    font: 18px/1.5 Inter, Arial, sans-serif;
+    display: none;
+    z-index: 11;
+  }
+  #notas.visivel { display: block; }
+  #notas strong {
+    display: block;
+    color: var(--amarelo);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  /* Classes do curso (mesmo visual dos encontros 1 e 2) */
+  .c { background: #F6F4EE; color: #16202E; padding: 128px 128px 160px; display: flex; flex-direction: column; gap: 48px; }
+  .e { background: #16202E; color: #F6F4EE; padding: 128px; display: flex; flex-direction: column; gap: 56px; }
+  .cab { display: flex; flex-direction: column; gap: 16px; }
+  .k { font-size: 24px; font-weight: 600; color: #3A6EA5; letter-spacing: 2px; text-transform: uppercase; }
+  .e .k, .k.am { color: #F2C14E; }
+  section h2 { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 72px; font-weight: 700; line-height: 1.1; }
+  section h3 { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 32px; font-weight: 700; }
+  .linha { display: flex; gap: 32px; }
+  .cod, .con { display: flex; flex-direction: column; gap: 16px; border-radius: 16px; padding: 40px 48px; }
+  .cod { flex: 3; background: #16202E; }
+  .con { flex: 2; background: #E7E3D8; }
+  .cod .k { color: #8FA3B8; }
+  .con .k { color: #4A5568; }
+  .cod pre, .con pre { margin: 0; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 30px; line-height: 1.6; }
+  .cod pre { color: #F6F4EE; }
+  .con pre { color: #16202E; }
+  .m pre { font-size: 27px; line-height: 1.55; }
+  .s { color: #F2C14E; }
+  .cm { color: #8FA3B8; }
+  .t { font-size: 32px; color: #4A5568; line-height: 1.5; }
+  .t b, .t .mono { color: #16202E; }
+  .card { flex: 1; display: flex; flex-direction: column; gap: 16px; background: #FDFCF8; border: 1px solid #E2DED3; border-radius: 16px; padding: 40px; }
+  .card .num { font-family: 'Space Grotesk', Arial, sans-serif; font-size: 44px; font-weight: 700; color: #3A6EA5; }
+  .card p { font-size: 28px; color: #4A5568; line-height: 1.4; }
+  .card p.mono { color: #3A6EA5; }
+  .bloco { flex: 2; display: flex; flex-direction: column; align-self: center; }
+  .bloco .topo { background: #FFAB19; border-radius: 12px 12px 0 0; padding: 20px 28px; }
+  .bloco .meio { background: #FFAB19; padding: 14px 28px; width: 45%; }
+  .bloco .corpo { display: flex; }
+  .bloco .corpo > i { width: 40px; background: #FFAB19; }
+  .bloco .corpo > div { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 10px 0 10px 6px; }
+  .bloco .acao { background: #4C97FF; border-radius: 10px; padding: 18px 28px; color: #FFFFFF; }
+  .bloco .base { height: 36px; background: #FFAB19; border-radius: 0 0 12px 12px; width: 60%; }
+  .bloco p { font-size: 30px; font-weight: 600; color: #16202E; }
+  .bloco .acao p { color: #FFFFFF; }
+  .lista { display: flex; }
+  .lista .item { width: 240px; display: flex; flex-direction: column; border: 3px solid #16202E; margin-left: -3px; }
+  .lista .item:first-child { margin-left: 0; }
+  .lista .v { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 56px; text-align: center; padding: 24px 0; background: #FDFCF8; }
+  .lista .i { font-size: 24px; font-weight: 600; text-align: center; padding: 10px 0; color: #F6F4EE; background: #3A6EA5; }
+  @media print {
+    html, body { overflow: visible; background: none; }
+    #barra, #progresso, #notas { display: none !important; }
+    #palco { position: static; transform: none !important; }
+    section { position: relative; opacity: 1; visibility: visible; page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<div id="palco">
+
+<!-- 1. Capa -->
+<section style="background:#16202E;color:#F6F4EE;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<p style="font-size:32px;font-weight:600;color:#F2C14E;letter-spacing:2px;text-transform:uppercase">Curso de Python · Steel Saints · Encontro 3</p>
+<h1 style="font-family:'Space Grotesk', Arial, sans-serif;font-size:120px;font-weight:700;line-height:1.05">Listas e módulos</h1>
+<p style="font-size:44px;color:#BFD0E0;width:1300px;line-height:1.3">Várias leituras em uma só variável e um sensor simulado</p>
+<p class="mono" style="position:absolute;right:128px;top:128px;width:700px;text-align:right;font-size:32px;color:#F2C14E">leituras = [20, 25, 30]</p>
+<p style="position:absolute;left:128px;bottom:96px;width:900px;font-size:24px;color:#8FA3B8">Encontro curto · 15h30 às 17h30</p>
+<aside>Terceiro encontro, de duas horas, abrindo a segunda semana. Sugestão de tempos: 15h30 revisão; 15h40 listas; 16h15 Prática 1; 16h35 módulos random e time; 16h55 desafio; 17h20 entrega pelo ClassApp.</aside>
+</section>
+
+<!-- 2. Revisão -->
+<section class="c">
+<div class="cab"><p class="k">Revisão</p><h2>O que este programa mostra?</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>total = <span class="s">0</span>
+while True:
+    d = int(input(<span class="s">"Sensor (cm): "</span>))
+    total = total + <span class="s">1</span>
+    if d &lt; <span class="s">10</span>:
+        break
+print(<span class="s">"Leituras:"</span>, total)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Sensor (cm): 40
+Sensor (cm): 25
+Sensor (cm): 6
+Leituras: 3</pre></div>
+</div>
+<p class="t">O programa contou as leituras, mas não guardou nenhuma: a variável <b>d</b> só lembra o último valor digitado. Hoje as leituras passam a ficar guardadas em uma <b>lista</b>.</p>
+<p class="rodape"></p>
+<aside>Pedir que a turma leia o código e preveja o console antes de mostrá-lo. Retomar o desafio "Robô em patrulha" do encontro 2 e as dúvidas dos exercícios. Perguntar: depois que o programa termina, é possível saber qual foi a primeira leitura? Não, porque d foi substituída a cada volta. Essa é a motivação das listas.</aside>
+</section>
+
+<!-- 3. Listas -->
+<section class="c">
+<div class="cab"><p class="k">Listas</p><h2>Uma variável, vários valores</h2></div>
+<div class="linha">
+<div class="cod" style="flex:1"><p class="k">Sem lista</p>
+<pre>leitura1 = <span class="s">20</span>
+leitura2 = <span class="s">25</span>
+leitura3 = <span class="s">30</span>
+leitura4 = <span class="s">18</span></pre></div>
+<div class="cod" style="flex:1.4"><p class="k">Com lista</p>
+<pre>leituras = [<span class="s">20</span>, <span class="s">25</span>, <span class="s">30</span>, <span class="s">18</span>]
+print(leituras)
+print(len(leituras))</pre></div>
+<div class="con" style="flex:1"><p class="k">Console</p>
+<pre>[20, 25, 30, 18]
+4</pre></div>
+</div>
+<p class="t">A lista é escrita entre <b>colchetes</b>, com os valores separados por <b>vírgulas</b>. O comando <b>len()</b> informa quantos itens ela tem. Com 100 leituras, a versão sem lista precisaria de 100 variáveis.</p>
+<p class="rodape"></p>
+<aside>No EV3 Classroom existe o bloco de listas (variável do tipo lista), mas a turma provavelmente usou pouco. Destacar que o nome da lista costuma ficar no plural: leituras, cores, comandos. Uma lista vazia é escrita como [].</aside>
+</section>
+
+<!-- 4. Índices -->
+<section class="c" style="gap:44px">
+<div class="cab"><p class="k">Listas</p><h2>Cada item tem uma posição</h2></div>
+<div class="lista">
+<div class="item"><p class="v">20</p><p class="i">índice 0</p></div>
+<div class="item"><p class="v">25</p><p class="i">índice 1</p></div>
+<div class="item"><p class="v">30</p><p class="i">índice 2</p></div>
+<div class="item"><p class="v">18</p><p class="i">índice 3</p></div>
+</div>
+<div class="cod m"><p class="k">Código</p>
+<pre>print(leituras[<span class="s">0</span>])    <span class="cm"># 20</span>
+print(leituras[<span class="s">2</span>])    <span class="cm"># 30</span>
+print(leituras[<span class="s">-1</span>])   <span class="cm"># 18, o último item</span></pre></div>
+<p class="t">A posição, chamada <b>índice</b>, começa em <b>0</b>, como no <b>range()</b>. Com 4 itens, os índices vão de 0 a 3.</p>
+<p class="rodape"></p>
+<aside>O símbolo # inicia um comentário: o Python ignora tudo o que vem depois dele na linha. Pedir que a turma teste print(leituras[4]) e leia o erro IndexError: list index out of range. Perguntar como pegar o penúltimo item: leituras[-2].</aside>
+</section>
+
+<!-- 5. Modificar -->
+<section class="c">
+<div class="cab"><p class="k">Listas</p><h2>Alterar, acrescentar e remover</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>leituras = [<span class="s">20</span>, <span class="s">25</span>, <span class="s">30</span>]
+leituras[<span class="s">1</span>] = <span class="s">27</span>
+leituras.append(<span class="s">12</span>)
+print(leituras)
+leituras.pop()
+print(leituras)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>[20, 27, 30, 12]
+[20, 27, 30]</pre></div>
+</div>
+<p class="t"><span class="mono"><b>leituras[1] = 27</b></span> troca o valor da posição 1. <span class="mono"><b>append()</b></span> acrescenta um item no fim da lista. <span class="mono"><b>pop()</b></span> remove o último item.</p>
+<p class="rodape"></p>
+<aside>O append() é o comando mais usado hoje: é com ele que as leituras do sensor serão guardadas uma a uma. Chamar atenção para o ponto entre o nome da lista e o comando (leituras.append). Quem quiser pode testar também leituras.remove(30), que remove o item pelo valor.</aside>
+</section>
+
+<!-- 6. Funções prontas -->
+<section class="c" style="gap:36px">
+<div class="cab"><p class="k">Listas</p><h2>Resumir uma lista</h2></div>
+<p class="t mono" style="color:#16202E">leituras = [32, 18, 45, 9, 27]</p>
+<table style="font-size:30px">
+<tr><th style="width:36%;padding:12px 24px 12px 0">Comando</th><th style="width:30%;padding:12px 24px 12px 0">Resultado</th><th style="width:34%;padding:12px 24px 12px 0">O que faz</th></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">len(leituras)</td><td class="mono" style="padding:11px 24px 11px 0">5</td><td style="padding:11px 24px 11px 0">quantidade de itens</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">sum(leituras)</td><td class="mono" style="padding:11px 24px 11px 0">131</td><td style="padding:11px 24px 11px 0">soma dos itens</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">max(leituras)</td><td class="mono" style="padding:11px 24px 11px 0">45</td><td style="padding:11px 24px 11px 0">maior valor</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">min(leituras)</td><td class="mono" style="padding:11px 24px 11px 0">9</td><td style="padding:11px 24px 11px 0">menor valor</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">sorted(leituras)</td><td class="mono" style="padding:11px 24px 11px 0">[9, 18, 27, 32, 45]</td><td style="padding:11px 24px 11px 0">cópia em ordem</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">leituras.index(45)</td><td class="mono" style="padding:11px 24px 11px 0">2</td><td style="padding:11px 24px 11px 0">posição de um valor</td></tr>
+<tr><td class="mono" style="padding:11px 24px 11px 0">18 in leituras</td><td class="mono" style="padding:11px 24px 11px 0">True</td><td style="padding:11px 24px 11px 0">verifica se o valor está na lista</td></tr>
+</table>
+<p class="rodape"></p>
+<aside>Testar cada linha dentro de um print(). Perguntar como calcular a média: sum(leituras) / len(leituras), que dá 26.2. Comparar com o encontro 2, em que a soma foi feita com um acumulador dentro do for: com a lista, sum() faz isso em uma linha. O index() será necessário no desafio.</aside>
+</section>
+
+<!-- 7. for com lista -->
+<section class="c">
+<div class="cab"><p class="k">Listas</p><h2>for: percorrer os itens da lista</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>leituras = [<span class="s">32</span>, <span class="s">18</span>, <span class="s">45</span>, <span class="s">9</span>, <span class="s">27</span>]
+for d in leituras:
+    if d &lt; <span class="s">20</span>:
+        print(d, <span class="s">"cm: obstáculo"</span>)
+    else:
+        print(d, <span class="s">"cm: livre"</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>32 cm: livre
+18 cm: obstáculo
+45 cm: livre
+9 cm: obstáculo
+27 cm: livre</pre></div>
+</div>
+<p class="t">No lugar do <b>range()</b>, o for recebe a lista. A cada volta, a variável <b>d</b> assume o próximo item, do primeiro ao último.</p>
+<p class="rodape"></p>
+<aside>Comparar com for i in range(5): lá, i recebia 0, 1, 2, 3 e 4; aqui, d recebe os próprios valores da lista. Pedir que acrescentem um contador de obstáculos antes do for (obstaculos = 0) e mostrem o total no fim. Esse é o exercício 2 da prática.</aside>
+</section>
+
+<!-- 8. Montar a lista -->
+<section class="c">
+<div class="cab"><p class="k">Listas</p><h2>Guardar as leituras uma a uma</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>leituras = []
+for i in range(<span class="s">4</span>):
+    d = int(input(<span class="s">"Leitura: "</span>))
+    leituras.append(d)
+print(leituras)
+print(<span class="s">"Média:"</span>, sum(leituras) / len(leituras))</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>Leitura: 20
+Leitura: 25
+Leitura: 30
+Leitura: 17
+[20, 25, 30, 17]
+Média: 23.0</pre></div>
+</div>
+<p class="t">A lista começa <b>vazia</b>, antes da repetição, e recebe um item a cada volta com <b>append()</b>. Ao final, todas as leituras continuam disponíveis para o programa.</p>
+<p class="rodape"></p>
+<aside>É o mesmo programa da média do encontro 2, agora com lista. Perguntar o que acontece se leituras = [] for colocada dentro do for: a lista é esvaziada a cada volta e só a última leitura sobra. É o mesmo erro do total = 0 dentro da repetição.</aside>
+</section>
+
+<!-- 9. Lista de textos -->
+<section class="c">
+<div class="cab"><p class="k">Listas</p><h2>Uma lista de comandos: a rota do robô</h2></div>
+<div class="linha">
+<div class="cod m" style="flex:3"><p class="k">Código</p>
+<pre>rota = [<span class="s">"frente"</span>, <span class="s">"direita"</span>, <span class="s">"frente"</span>, <span class="s">"esquerda"</span>]
+for comando in rota:
+    if comando == <span class="s">"frente"</span>:
+        print(<span class="s">"Andar 20 cm"</span>)
+    elif comando == <span class="s">"direita"</span>:
+        print(<span class="s">"Girar 90 graus à direita"</span>)
+    else:
+        print(<span class="s">"Girar 90 graus à esquerda"</span>)</pre></div>
+<div class="con m" style="flex:2"><p class="k">Console</p>
+<pre>Andar 20 cm
+Girar 90 graus à direita
+Andar 20 cm
+Girar 90 graus à esquerda</pre></div>
+</div>
+<p class="t">Listas também guardam textos. Para mudar o percurso, basta alterar a lista.</p>
+<p class="rodape"></p>
+<aside>Pedir que a turma desenhe no caderno o percurso descrito pela lista e depois crie a própria rota, por exemplo um quadrado. Comentar que separar os dados (a rota) das instruções (o for) é uma forma comum de organizar programas de robô.</aside>
+</section>
+
+<!-- 10. Prática 1 -->
+<section class="c">
+<div class="cab"><p class="k">Prática 1</p><h2>Exercícios com listas</h2></div>
+<div class="linha">
+<div class="card"><p class="num">1</p><h3>Resumo das leituras</h3><p>Crie a lista <span class="mono">[32, 18, 45, 9, 27]</span> e mostre a maior leitura, a menor e a média.</p></div>
+<div class="card"><p class="num">2</p><h3>Contar obstáculos</h3><p>Percorra a mesma lista com for e mostre quantas leituras ficaram abaixo de 20 cm.</p></div>
+<div class="card"><p class="num">3</p><h3>Rota digitada</h3><p>Peça 4 comandos ao usuário e guarde-os em uma lista. No fim, mostre a rota completa e quantas vezes aparece “frente”.</p></div>
+</div>
+<p class="rodape"></p>
+<aside>Cerca de 20 minutos. Exercício 1: max(), min() e sum()/len(); média 26.2. Exercício 2: contador começando em 0 antes do for, resposta 2. Exercício 3: lista vazia, for com range(4), input e append; para contar "frente", usar um contador dentro de um for sobre a lista. Quem terminar antes pode usar rota.count("frente"). Lembrar de copiar o código para um documento.</aside>
+</section>
+
+<!-- 11. Módulos -->
+<section class="c">
+<div class="cab"><p class="k">Módulos</p><h2>import: trazer comandos prontos</h2></div>
+<div class="linha">
+<div class="cod" style="flex:1"><p class="k">Hoje, no OnlineGDB</p>
+<pre>import random
+import time</pre></div>
+<div class="cod" style="flex:1.6"><p class="k">Em 2027, no robô com ev3dev</p>
+<pre>from ev3dev2.motor import LargeMotor
+from ev3dev2.sensor.lego import UltrasonicSensor</pre></div>
+</div>
+<p class="t">Um <b>módulo</b> é um conjunto de comandos já escritos, guardado em outro arquivo. O <b>import</b> fica no início do programa e libera esses comandos. O <b>random</b> faz sorteios; o <b>time</b> controla o tempo.</p>
+<p class="t">Os motores e sensores do EV3 também chegam ao Python por meio de módulos.</p>
+<p class="rodape"></p>
+<aside>Equivale às extensões do EV3 Classroom, que acrescentam novas categorias de blocos. O Python já vem com centenas de módulos. Não é preciso explicar o from ... import agora: o objetivo é a turma reconhecer a forma quando encontrar código ev3dev na semana 4.</aside>
+</section>
+
+<!-- 12. random -->
+<section class="c">
+<div class="cab"><p class="k">Módulos</p><h2>random: sortear valores</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>import random
+
+distancia = random.randint(<span class="s">5</span>, <span class="s">100</span>)
+print(<span class="s">"Sensor:"</span>, distancia, <span class="s">"cm"</span>)
+
+cores = [<span class="s">"verde"</span>, <span class="s">"amarelo"</span>, <span class="s">"vermelho"</span>]
+cor = random.choice(cores)
+print(<span class="s">"Cor:"</span>, cor)</pre></div>
+<div class="con m"><p class="k">Uma execução</p>
+<pre>Sensor: 63 cm
+Cor: amarelo</pre></div>
+</div>
+<p class="t"><span class="mono"><b>random.randint(5, 100)</b></span> sorteia um inteiro de 5 a 100, incluindo os dois extremos. <span class="mono"><b>random.choice()</b></span> sorteia um item da lista. Cada execução mostra valores diferentes.</p>
+<p class="rodape"></p>
+<aside>Executar três ou quatro vezes para a turma ver os valores mudarem. Destacar a diferença: no randint o último número entra no sorteio; no range ele não entra. Com o random, o programa simula o sensor sem que ninguém precise digitar as leituras.</aside>
+</section>
+
+<!-- 13. time -->
+<section class="c">
+<div class="cab"><p class="k">Módulos</p><h2>time: fazer o programa esperar</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre>import time
+
+for i in range(<span class="s">3</span>, <span class="s">0</span>, <span class="s">-1</span>):
+    print(i)
+    time.sleep(<span class="s">1</span>)
+print(<span class="s">"Partida!"</span>)</pre></div>
+<div class="con m"><p class="k">Console</p>
+<pre>3
+2
+1
+Partida!</pre></div>
+</div>
+<p class="t"><span class="mono"><b>time.sleep(1)</b></span> pausa o programa por 1 segundo, como o bloco “esperar 1 segundos”. O valor pode ser decimal: <span class="mono">time.sleep(0.5)</span> espera meio segundo.</p>
+<p class="rodape"></p>
+<aside>A diferença só aparece ao executar: os números surgem um por segundo. No robô, a espera é usada entre leituras do sensor e para manter um motor ligado por um tempo. Comentar que o OnlineGDB às vezes mostra a saída de uma vez em conexões lentas.</aside>
+</section>
+
+<!-- 14. Sensor simulado -->
+<section class="c" style="gap:36px">
+<div class="cab"><p class="k">Juntando tudo</p><h2>Um sensor simulado</h2></div>
+<div class="linha">
+<div class="cod m"><p class="k">Código</p>
+<pre style="font-size:24px;line-height:1.45">import random
+import time
+
+leituras = []
+while True:
+    d = random.randint(<span class="s">5</span>, <span class="s">100</span>)
+    leituras.append(d)
+    print(<span class="s">"Sensor:"</span>, d, <span class="s">"cm"</span>)
+    if d &lt; <span class="s">15</span>:
+        print(<span class="s">"Obstáculo: parar motores"</span>)
+        break
+    time.sleep(<span class="s">0.5</span>)
+print(<span class="s">"Leituras:"</span>, len(leituras))
+print(<span class="s">"Menor:"</span>, min(leituras))</pre></div>
+<div class="con m"><p class="k">Uma execução</p>
+<pre style="font-size:24px;line-height:1.45">Sensor: 72 cm
+Sensor: 41 cm
+Sensor: 88 cm
+Sensor: 9 cm
+Obstáculo: parar motores
+Leituras: 4
+Menor: 9</pre></div>
+</div>
+<p class="rodape"></p>
+<aside>É o laço do robô do encontro 2 com três mudanças: o random no lugar do input, o sleep entre as leituras e a lista que guarda o histórico. Digitar junto com a turma. No ev3dev, a linha do random será trocada pela leitura do sensor ultrassônico real.</aside>
+</section>
+
+<!-- 15. Erros -->
+<section class="c">
+<div class="cab"><p class="k">Mão no código</p><h2>Erros comuns de hoje</h2></div>
+<table style="font-size:30px">
+<tr><th style="width:34%">Código com erro</th><th style="width:26%">Mensagem</th><th style="width:40%">Como corrigir</th></tr>
+<tr><td class="mono">leituras[4]</td><td class="mono">IndexError</td><td>Em uma lista de 4 itens, os índices vão de 0 a 3</td></tr>
+<tr><td class="mono">[20 25 30]</td><td class="mono">SyntaxError</td><td>Separar os itens com vírgulas</td></tr>
+<tr><td class="mono">random.randint(1, 6)</td><td class="mono">NameError</td><td>Escrever import random no início do programa</td></tr>
+<tr><td class="mono">random.Randint(1, 6)</td><td class="mono">AttributeError</td><td>Escrever o nome exato do comando, em minúsculas</td></tr>
+</table>
+<p class="rodape"></p>
+<aside>O NameError aparece quando o import foi esquecido ou escrito depois do comando que usa o módulo. Provocar cada erro de propósito e ler a mensagem com a turma, como nos encontros anteriores.</aside>
+</section>
+
+<!-- 16. Desafio -->
+<section class="e" style="gap:44px">
+<div class="cab"><p class="k">Desafio do dia</p><h2>Varredura do sensor</h2></div>
+<p style="font-size:38px;line-height:1.4;width:1600px">O robô gira no lugar e faz <b>8 leituras</b> do sensor de distância, uma a cada meio segundo. Simule as leituras com <b>random</b>, entre 5 e 150 cm, e guarde-as em uma lista. No fim, mostre a lista, a maior distância e em qual leitura ela apareceu, que indica a direção mais livre, e quantas leituras ficaram abaixo de 20 cm.</p>
+<div style="display:flex;flex-direction:column;gap:16px;background:#2A3648;border-radius:16px;padding:40px 48px">
+<p class="k">Entrega</p>
+<p style="font-size:32px;color:#DCE6F0;line-height:1.5">Tire um print da tela mostrando o código e o console e envie pelo <b>ClassApp</b> até o fim do encontro.</p>
+</div>
+<aside>Cerca de 25 minutos. Estrutura esperada: lista vazia; for i in range(8) com randint(5, 150), append e time.sleep(0.5); depois do for, max(leituras), leituras.index(max(leituras)) + 1 para a leitura de número 1 a 8, e um contador de obstáculos em outro for sobre a lista. Para quem terminar antes: mostrar também a média e a lista em ordem com sorted(). Pedir que enviem também os exercícios da Prática 1.</aside>
+</section>
+
+<!-- 17. Próximo encontro -->
+<section class="c">
+<div class="cab"><p class="k">Próximo encontro</p><h2>Listas e módulos em um programa maior</h2></div>
+<div class="linha">
+<div class="card"><h3>Fatias de lista</h3><p class="mono">leituras[0:3]</p></div>
+<div class="card"><h3>Textos</h3><p class="mono">cor.lower()</p></div>
+<div class="card"><h3>Projeto</h3><p>Simulador de pista com sensores sorteados</p></div>
+</div>
+<p class="t">No encontro longo, as listas e os módulos de hoje se juntam às decisões e repetições em um programa completo de robô simulado.</p>
+<p class="rodape"></p>
+<aside>Encerrar retomando o dia: criar listas, índices, append, len, sum, max, min, for sobre a lista, import, random e time. Lembrar a turma de copiar o código antes de fechar o OnlineGDB.</aside>
+</section>
+
+</div>
+
+<div id="progresso"></div>
+<div id="notas"><strong>Notas do professor</strong><span id="texto-notas"></span></div>
+<div id="barra">
+  <button id="anterior" title="Slide anterior (←)">‹</button>
+  <span id="contador">1 / 17</span>
+  <button id="proximo" title="Próximo slide (→)">›</button>
+  <button id="botao-notas" title="Notas do professor (N)">Notas</button>
+  <button id="botao-tela" title="Tela cheia (F)">Tela cheia</button>
+</div>
+<button id="nav-toggle" type="button" title="Esconder/mostrar a barra (B)" aria-label="Esconder ou mostrar a barra de navegação">▴</button>
+
+<script>
+  const palco = document.getElementById('palco');
+  const slides = Array.from(document.querySelectorAll('#palco > section'));
+  const contador = document.getElementById('contador');
+  const progresso = document.getElementById('progresso');
+  const notas = document.getElementById('notas');
+  const textoNotas = document.getElementById('texto-notas');
+  let atual = 0;
+
+  // Rodapé padrão nos slides de conteúdo
+  document.querySelectorAll('p.rodape').forEach(p => {
+    p.textContent = 'Introdução à Programação em Python · Encontro 3';
+    p.style.cssText = 'position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6B7280';
+  });
+
+  function ajustarEscala() {
+    const escala = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    palco.style.transform = 'translate(-50%, -50%) scale(' + escala + ')';
+  }
+
+  function mostrar(indice) {
+    atual = Math.max(0, Math.min(slides.length - 1, indice));
+    slides.forEach((s, i) => s.classList.toggle('ativo', i === atual));
+    contador.textContent = (atual + 1) + ' / ' + slides.length;
+    progresso.style.width = ((atual + 1) / slides.length * 100) + '%';
+    const aside = slides[atual].querySelector('aside');
+    textoNotas.textContent = aside ? aside.textContent : '';
+    history.replaceState(null, '', '#' + (atual + 1));
+  }
+
+  // Barra de navegação: começa escondida; B ou o botão ▴/▾ alterna
+  const navToggle = document.getElementById('nav-toggle');
+  const chaveNav = 'python-encontro03-nav-on';
+  function alternarBarra() {
+    const off = document.body.classList.toggle('nav-off');
+    navToggle.textContent = off ? '▴' : '▾';
+    try { localStorage.setItem(chaveNav, off ? '' : '1'); } catch (err) {}
+  }
+  document.body.classList.add('nav-off');
+  try { if (localStorage.getItem(chaveNav)) alternarBarra(); } catch (err) {}
+  navToggle.addEventListener('click', alternarBarra);
+
+  function telaCheia() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); mostrar(atual + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); mostrar(atual - 1); }
+    else if (e.key === 'Home') mostrar(0);
+    else if (e.key === 'End') mostrar(slides.length - 1);
+    else if (e.key === 'f' || e.key === 'F') telaCheia();
+    else if (e.key === 'n' || e.key === 'N') notas.classList.toggle('visivel');
+    else if (e.key === 'b' || e.key === 'B') alternarBarra();
+  });
+
+  // Clique na metade direita avança, na esquerda volta
+  palco.addEventListener('click', e => {
+    mostrar(e.clientX > window.innerWidth / 2 ? atual + 1 : atual - 1);
+  });
+
+  // Deslizar o dedo em telas sensíveis ao toque
+  let inicioX = null;
+  document.addEventListener('touchstart', e => { inicioX = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    if (inicioX === null) return;
+    const dx = e.changedTouches[0].clientX - inicioX;
+    if (Math.abs(dx) > 50) mostrar(dx < 0 ? atual + 1 : atual - 1);
+    inicioX = null;
+  });
+
+  document.getElementById('anterior').addEventListener('click', () => mostrar(atual - 1));
+  document.getElementById('proximo').addEventListener('click', () => mostrar(atual + 1));
+  document.getElementById('botao-notas').addEventListener('click', () => notas.classList.toggle('visivel'));
+  document.getElementById('botao-tela').addEventListener('click', telaCheia);
+  window.addEventListener('resize', ajustarEscala);
+
+  ajustarEscala();
+  const inicial = parseInt(location.hash.slice(1), 10);
+  mostrar(Number.isFinite(inicial) ? inicial - 1 : 0);
+</script>
+</body>
+</html>
