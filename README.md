@@ -62,6 +62,11 @@ Repositório com materiais e programações pedagógicas em HTML didáticos e in
    - **Foco:** Divisão de trabalho, dependências e caminho crítico, custo de coordenar e juntar as partes, núcleos, placas de vídeo e centros de dados, e concorrência por recurso compartilhado. Experimento em sala: somar 24 números sozinho e em quatro. Atividade em trios: planejar a preparação de uma apresentação com 3 pessoas e achar o tempo mínimo. Entrega da folha.
    - **Recursos:** Mesmo visual de papel da aula de cultura digital (fundo #F3EFE6, títulos em Georgia), foto do Wikimedia Commons com crédito, revelação passo a passo, cronômetro da atividade (`T`/`R`), notas do professor com gabarito (`N`) e barra ocultável (`B`). Interativos: cronograma (Gantt) que recalcula o tempo para 1 a 6 pessoas e experimento da soma com sorteio e cronômetro.
 
+2. **[termos_de_uso.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/8%20ano/termos_de_uso.html)**
+   - **Tema:** "Li e concordo": o que dizem os termos de uso (BNCC Computação EF08CO09).
+   - **Foco:** Termos de uso como contrato, a pesquisa do NameDrop (Obar e Oeldorf-Hirsch), tempo de leitura dos termos, estrutura comum dos termos e leitura de trechos reais do TikTok e do WhatsApp (idade mínima, licença sobre o conteúdo, agenda de contatos e alterações), com CDC, Marco Civil, LGPD e ECA Digital. Atividade em grupos ("Traduzir uma cláusula"): seis trechos reais do TikTok e do YouTube para reescrever em linguagem simples e avaliar. Entrega da folha do grupo.
+   - **Recursos:** Mesmo visual de papel da aula de cultura digital (fundo #F3EFE6, títulos em Georgia), foto do Wikimedia Commons com crédito, revelação passo a passo, cronômetro da atividade (`T`/`R`), notas do professor com pontos esperados (`N`) e barra ocultável (`B`). Interativos: cadastro no aplicativo fictício "Rolê Patos" com cláusulas escondidas reveladas após o aceite, calculadora do tempo de leitura dos termos, glossário clicável da cláusula de licença e seletor de trechos da atividade.
+
 ## 📁 3ª Série do Ensino Médio (`3 série/`)
 
 1. **[ia_na_profissao.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/3%20série/ia_na_profissao.html)**
