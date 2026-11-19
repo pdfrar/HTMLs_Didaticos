@@ -50,6 +50,11 @@ Repositório com materiais e programações pedagógicas em HTML didáticos e in
    - **Foco:** O registro do "bug" do Mark II (1947), erro de escrita x erro de lógica, teste de mesa, casos de teste com valores no limite e passos da depuração, com algoritmos em português estruturado. Atividade em duplas ("Caça aos erros"): quatro algoritmos com erro; indicar linha, tipo, correção e um teste. Entrega da folha.
    - **Recursos:** Mesmo visual de papel da aula de cultura digital (fundo #F3EFE6, títulos em Georgia), foto do Wikimedia Commons com crédito, revelação passo a passo, cronômetro da atividade (`T`/`R`), notas do professor com gabarito (`N`) e barra ocultável (`B`). Interativos: robô em grade com dois erros encadeados e linhas editáveis, teste de mesa passo a passo e testador de notas.
 
+2. **[grafos.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/7%20ano/grafos.html)**
+   - **Tema:** Grafos: pontos e ligações, primeira aula sobre o tema (BNCC Computação EF07CO04).
+   - **Foco:** Vértices e arestas a partir do caminho pela cidade, grafos em redes sociais, mapas, internet, linhas de ônibus e árvores genealógicas, e três propriedades: grau (soma dos graus = dobro das arestas), caminho e comprimento (menos arestas x menor tempo) e grafo conexo e ponte. Atividade individual ou em duplas: analisar um grafo de amizades (vértices, arestas, graus, menor caminho e pontes) e desenhar um grafo com lugares de Patos. Entrega da folha.
+   - **Recursos:** Mesmo visual de papel da aula de cultura digital (fundo #F3EFE6, títulos em Georgia), foto de Patos do Wikimedia Commons com crédito, revelação passo a passo, cronômetro da atividade (`T`/`R`), notas do professor com gabarito (`N`) e barra ocultável (`B`). Interativos sobre um bairro fictício: grafo montado em etapas, clique para ver o grau, menor caminho e caminho mais rápido com tempo a pé, e ruas interditáveis que mostram as pontes.
+
 ## 📁 8º Ano (`8 ano/`)
 
 1. **[paralelismo.html](file:///c:/Users/pedro/OneDrive/Área%20de%20Trabalho/Pedro/2026/Trabalho/Programações%20Pedagógicas/HTMLs%20Didáticos/8%20ano/paralelismo.html)**
